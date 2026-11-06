@@ -263,6 +263,25 @@ async function updateAuthUI() {
   }
 
   const session = data.session;
+
+  signUpButton.classList.toggle('hidden', !!session);
+  signInButton.classList.toggle('hidden', !!session);
+  signOutButton.classList.toggle('hidden', !session);
+
+  authMessage.textContent = session
+    ? 'Conectado: ' + session.user.email
+    : 'Você ainda não entrou.';
+
+  await loadLeads();
+}
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    authMessage.textContent = 'Erro ao verificar acesso.';
+    return;
+  }
+
+  const session = data.session;
   signUpButton.classList.toggle('hidden', !!session);
   signInButton.classList.toggle('hidden', !!session);
   signOutButton.classList.toggle('hidden', !session);
