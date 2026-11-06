@@ -179,6 +179,88 @@ document.getElementById('saveLead').addEventListener('click',()=>{
   const list=getLeads();list.unshift({name,need:document.getElementById('leadNeed').value.trim(),status:document.getElementById('leadStatus').value});
   localStorage.setItem('jarvis_leads',JSON.stringify(list));document.getElementById('leadName').value='';document.getElementById('leadNeed').value='';renderLeads();
 });
+
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authMessage = document.getElementById('authMessage');
+const signUpButton = document.getElementById('signUp');
+const signInButton = document.getElementById('signIn');
+const signOutButton = document.getElementById('signOut');
+
+async function updateAuthUI() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    authMessage.textContent = 'Erro ao verificar acesso.';
+    return;
+  }
+
+  const session = data.session;
+  signUpButton.classList.toggle('hidden', !!session);
+  signInButton.classList.toggle('hidden', !!session);
+  signOutButton.classList.toggle('hidden', !session);
+
+  authMessage.textContent = session
+    ? 'Conectado: ' + session.user.email
+    : 'Você ainda não entrou.';
+}
+
+signUpButton.addEventListener('click', async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  if (!email || password.length < 6) {
+    authMessage.textContent = 'Informe um e-mail e uma senha com pelo menos 6 caracteres.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
+
+  authMessage.textContent = data.session
+    ? 'Conta criada com sucesso!'
+    : 'Conta criada. Confira seu e-mail para confirmar o cadastro.';
+  
+  updateAuthUI();
+});
+
+signInButton.addEventListener('click', async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
+
+  await updateAuthUI();
+});
+
+signOutButton.addEventListener('click', async () => {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
+
+  await updateAuthUI();
+});
+
+window.addEventListener('load', updateAuthUI);
+
 renderLeads();
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
