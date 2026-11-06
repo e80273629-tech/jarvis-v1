@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08111f">
+  <meta name="description" content="J.A.R.V.I.S. V1 — central pessoal de criação e operações.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>J.A.R.V.I.S. V1</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07101d;--panel:#101d30;--panel2:#14243a;--line:#263b55;--cyan:#62d9f5;--muted:#9fb2c8;--white:#f3f8ff}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#142b45 0,transparent 36%),var(--bg);color:var(--white);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+    .wrap{max-width:1050px;margin:auto;padding:22px 16px 48px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:12px}.orb{width:42px;height:42px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;color:var(--cyan);box-shadow:0 0 24px #62d9f533;font-weight:800}
+    h1{font-size:20px;letter-spacing:.14em;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:3px}.status{font-size:12px;color:#9ce7c2;border:1px solid #285c4a;padding:7px 10px;border-radius:99px}
+    .hero{padding:24px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,#12263d,#0b1728);margin-bottom:16px}
+    .eyebrow{color:var(--cyan);font-size:11px;letter-spacing:.18em;text-transform:uppercase}.hero h2{font-size:clamp(24px,5vw,38px);margin:10px 0}.hero p{color:var(--muted);max-width:650px;line-height:1.6;margin:0}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.tile,.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:17px}
+    .tile{min-height:125px;text-align:left;color:var(--white);cursor:pointer}.tile:hover{border-color:var(--cyan);background:var(--panel2)}.tile .ico{font-size:24px}.tile strong{display:block;margin:9px 0 4px}.tile small{color:var(--muted);line-height:1.4}
+    .panel{margin-top:14px}.panel h3{margin:0 0 12px;font-size:18px}.muted{color:var(--muted);line-height:1.55}
+    label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}input,textarea,select{width:100%;background:#091525;color:var(--white);border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit}textarea{min-height:76px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{background:var(--cyan);color:#06111d;border:0;border-radius:11px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:14px}.btn.secondary{background:#1b3049;color:var(--white);border:1px solid var(--line)}.btn:disabled{opacity:.5}
+    .preview{width:100%;max-width:420px;border:1px solid var(--line);border-radius:14px;background:#fff;display:block;margin:14px auto 0}.hidden{display:none!important}
+    .notice{border-left:3px solid var(--cyan);padding:10px 12px;background:#0b1b2c;color:var(--muted);font-size:13px;border-radius:0 10px 10px 0;margin-top:12px}
+    footer{color:#7188a2;font-size:12px;text-align:center;margin-top:24px}
+    @media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wrap{padding-top:32px}}
+    @media(max-width:430px){.row{grid-template-columns:1fr}.hero{padding:19px}.top{align-items:flex-start}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="orb">J</div><div><h1>J.A.R.V.I.S.</h1><div class="sub">CENTRAL DE OPERAÇÕES · V1</div></div></div>
+    <div class="status">● Sistema local ativo</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Assistente operacional</div>
+    <h2>Boa noite. Qual é a missão?</h2>
+    <p>Uma central inicial para organizar tarefas e produzir materiais de divulgação. Esta versão funciona sem chave de API e não acessa outros aplicativos do celular.</p>
+  </section>
+
+  <section class="grid" aria-label="Módulos">
+    <button class="tile" data-target="art"><span class="ico">🎨</span><strong>Estúdio de imagens</strong><small>Montar e exportar uma arte promocional em PNG.</small></button>
+    <button class="tile" data-target="video"><span class="ico">🎬</span><strong>Estúdio de vídeos</strong><small>Preparar roteiro e plano de cenas.</small></button>
+    <button class="tile" data-target="clients"><span class="ico">🧭</span><strong>Central comercial</strong><small>Organizar oportunidades e mensagens.</small></button>
+    <button class="tile" data-target="phone"><span class="ico">📱</span><strong>Automação Android</strong><small>Planejar automações seguras e assistidas.</small></button>
+  </section>
+
+  <section id="art" class="panel hidden">
+    <h3>Estúdio de imagens · Arte promocional</h3>
+    <p class="muted">Preencha os dados verdadeiros do negócio. A arte é desenhada no próprio aparelho, sem consumir créditos de IA.</p>
+    <div class="row">
+      <div><label for="biz">Nome do negócio</label><input id="biz" value="Doceria Exemplo"></div>
+      <div><label for="product">Produto em destaque</label><input id="product" value="Bolo de chocolate"></div>
+    </div>
+    <label for="headline">Chamada principal</label><input id="headline" value="Um carinho em forma de doce">
+    <label for="details">Detalhes / oferta</label><input id="details" value="Feito com carinho • Consulte os sabores">
+    <div class="row">
+      <div><label for="price">Preço (opcional)</label><input id="price" placeholder="Ex.: R$ 25,00"></div>
+      <div><label for="contact">Contato (opcional)</label><input id="contact" placeholder="WhatsApp ou Instagram"></div>
+    </div>
+    <label for="palette">Paleta</label>
+    <select id="palette"><option value="berry">Framboesa e creme</option><option value="cocoa">Cacau e dourado</option><option value="pink">Rosa delicado</option></select>
+    <button class="btn" id="makeArt">Gerar arte</button>
+    <button class="btn secondary" id="downloadArt" disabled>Baixar PNG</button>
+    <canvas id="artCanvas" class="preview" width="1080" height="1350" aria-label="Prévia da arte"></canvas>
+    <div class="notice">Demonstração: não use nome, preço, telefone ou oferta fictícios como se fossem informações reais de um cliente. Confirme tudo antes de entregar.</div>
+  </section>
+
+  <section id="video" class="panel hidden">
+    <h3>Estúdio de vídeos</h3>
+    <p class="muted">Organizador inicial de roteiro. A geração/renderização de vídeo ainda não está conectada.</p>
+    <label for="videoTopic">Tema do vídeo</label><input id="videoTopic" placeholder="Ex.: lançamento de um sabor novo">
+    <label for="videoAudience">Público</label><input id="videoAudience" placeholder="Ex.: clientes da doceria">
+    <button class="btn" id="makeScript">Montar estrutura de roteiro</button>
+    <textarea id="scriptOut" placeholder="O roteiro aparecerá aqui." readonly></textarea>
+  </section>
+
+  <section id="clients" class="panel hidden">
+    <h3>Central comercial</h3>
+    <p class="muted">Registre leads encontrados em fontes públicas e acompanhe o status. Esta versão não busca contatos nem envia mensagens automaticamente.</p>
+    <label for="leadName">Nome do negócio</label><input id="leadName" placeholder="Nome da empresa">
+    <label for="leadNeed">Possível necessidade</label><input id="leadNeed" placeholder="Ex.: artes para divulgar produtos">
+    <label for="leadStatus">Status</label><select id="leadStatus"><option>Para analisar</option><option>Contato autorizado</option><option>Mensagem enviada manualmente</option><option>Não interessado</option></select>
+    <button class="btn" id="saveLead">Salvar oportunidade neste aparelho</button>
+    <div id="leadList" class="muted"></div>
+  </section>
+
+  <section id="phone" class="panel hidden">
+    <h3>Automação Android</h3>
+    <p class="muted">O navegador não pode controlar livremente outros aplicativos. Acesso ao celular exigirá ferramentas Android específicas, permissões explícitas e testes.</p>
+    <div class="notice">Nesta versão, o módulo serve como painel de planejamento. Não lê mensagens, não toca em outros aplicativos e não envia nada.</div>
+    <p class="muted">Próxima integração a avaliar: automações locais por rotinas Android, com confirmação antes de ações externas.</p>
+  </section>
+
+  <footer>J.A.R.V.I.S. V1 · Protótipo local · Nenhuma conta externa conectada</footer>
+</div>
+<script>
+const panels = [...document.querySelectorAll('.panel')];
+document.querySelectorAll('.tile').forEach(b => b.addEventListener('click', () => {
+  panels.forEach(p => p.classList.add('hidden'));
+  document.getElementById(b.dataset.target).classList.remove('hidden');
+  document.getElementById(b.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});
+}));
+const canvas = document.getElementById('artCanvas'), ctx = canvas.getContext('2d');
+function wrapText(text, x, y, maxWidth, lineHeight, maxLines=3) {
+  const words = text.split(/\s+/); let line='', lines=0;
+  for (const word of words) {
+    const test = line ? line+' '+word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line,x,y); line=word; y+=lineHeight; lines++;
+      if(lines>=maxLines) return;
+    } else line=test;
+  }
+  if(line) ctx.fillText(line,x,y);
+}
+function makeArt(){
+  const palettes={berry:['#5c1838','#a82d58','#fff0df','#ffd0a6'],cocoa:['#2c1a17','#714332','#fff0d2','#d7ae67'],pink:['#782e56','#d86c9b','#fff1f6','#f8c4d9']};
+  const [dark,accent,cream,light]=palettes[document.getElementById('palette').value];
+  const biz=document.getElementById('biz').value.trim()||'Doceria';
+  const product=document.getElementById('product').value.trim()||'Nosso destaque';
+  const headline=document.getElementById('headline').value.trim()||'Uma delícia espera por você';
+  const details=document.getElementById('details').value.trim();
+  const price=document.getElementById('price').value.trim();
+  const contact=document.getElementById('contact').value.trim();
+  const g=ctx.createLinearGradient(0,0,1080,1350);g.addColorStop(0,dark);g.addColorStop(1,accent);
+  ctx.fillStyle=g;ctx.fillRect(0,0,1080,1350);
+  ctx.fillStyle=cream;ctx.beginPath();ctx.arc(540,500,350,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=light;ctx.beginPath();ctx.arc(540,500,300,0,Math.PI*2);ctx.fill();
+  // decorative cake illustration built from simple vector shapes
+  ctx.fillStyle='#6b392b';ctx.beginPath();ctx.ellipse(540,610,235,75,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#9b5a43';ctx.fillRect(305,455,470,155);
+  ctx.fillStyle='#f5d9c5';ctx.beginPath();ctx.ellipse(540,455,235,75,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#7a243c';ctx.beginPath();ctx.ellipse(540,455,235,75,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e7a0ad';ctx.beginPath();ctx.ellipse(540,438,235,70,0,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<7;i++){ctx.fillStyle=i%2?'#fff0df':'#b72e50';ctx.beginPath();ctx.arc(365+i*58,420+(i%2)*24,18,0,Math.PI*2);ctx.fill();}
+  ctx.textAlign='center';ctx.fillStyle=cream;ctx.font='700 34px system-ui';ctx.fillText(biz.toUpperCase().slice(0,38),540,105);
+  ctx.fillStyle=dark;ctx.font='800 68px system-ui';wrapText(headline,540,850,900,82,2);
+  ctx.fillStyle=cream;ctx.font='600 42px system-ui';ctx.fillText(product.slice(0,45),540,1040);
+  if(details){ctx.font='32px system-ui';ctx.fillText(details.slice(0,58),540,1100);}
+  if(price){ctx.font='800 54px system-ui';ctx.fillText(price.slice(0,24),540,1190);}
+  if(contact){ctx.font='28px system-ui';ctx.fillText(contact.slice(0,48),540,1270);}
+  ctx.textAlign='start';
+  document.getElementById('downloadArt').disabled=false;
+}
+document.getElementById('makeArt').addEventListener('click',makeArt);
+document.getElementById('downloadArt').addEventListener('click',()=>{
+  const a=document.createElement('a');a.download='jarvis-arte-promocional.png';a.href=canvas.toDataURL('image/png');a.click();
+});
+makeArt();
+document.getElementById('makeScript').addEventListener('click',()=>{
+  const topic=document.getElementById('videoTopic').value.trim()||'apresentação de produto';
+  const audience=document.getElementById('videoAudience').value.trim()||'clientes';
+  document.getElementById('scriptOut').value=`ROTEIRO — ${topic.toUpperCase()}\nPúblico: ${audience}\n\n1. ABERTURA (0–3s): Comece com uma imagem atraente do produto.\n2. APRESENTAÇÃO (3–10s): Mostre o produto e destaque uma característica confirmada.\n3. CONVITE (10–15s): Convide o público a conhecer ou consultar o negócio.\n\nCONFIRMAR ANTES DE PUBLICAR: preço, disponibilidade, ingredientes e condições da oferta.`;
+});
+function getLeads(){try{return JSON.parse(localStorage.getItem('jarvis_leads')||'[]')}catch{return []}}
+function renderLeads(){const list=getLeads();document.getElementById('leadList').innerHTML=list.length?'<hr>'+list.map(x=>`<p><b>${escapeHtml(x.name)}</b><br>${escapeHtml(x.need)} · ${escapeHtml(x.status)}</p>`).join(''):'<p>Nenhuma oportunidade salva ainda.</p>'}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+document.getElementById('saveLead').addEventListener('click',()=>{
+  const name=document.getElementById('leadName').value.trim();if(!name){alert('Informe o nome do negócio.');return}
+  const list=getLeads();list.unshift({name,need:document.getElementById('leadNeed').value.trim(),status:document.getElementById('leadStatus').value});
+  localStorage.setItem('jarvis_leads',JSON.stringify(list));document.getElementById('leadName').value='';document.getElementById('leadNeed').value='';renderLeads();
+});
+renderLeads();
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>

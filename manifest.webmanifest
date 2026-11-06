@@ -1,0 +1,9 @@
+{
+  "name": "J.A.R.V.I.S. V1",
+  "short_name": "J.A.R.V.I.S.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07101d",
+  "theme_color": "#08111f",
+  "description": "Central pessoal de criação e operações"
+}
