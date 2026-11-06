@@ -8,663 +8,215 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <title>J.A.R.V.I.S. V1</title>
-
   <style>
-    :root {
-      color-scheme: dark;
-      --bg:#07101d;
-      --panel:#101d30;
-      --panel2:#14243a;
-      --line:#263b55;
-      --cyan:#62d9f5;
-      --muted:#9fb2c8;
-      --white:#f3f8ff;
-    }
-
-    * { box-sizing:border-box; }
-
-    body {
-      margin:0;
-      background:radial-gradient(circle at 80% 0,#142b45 0,transparent 36%),var(--bg);
-      color:var(--white);
-      font:15px system-ui,-apple-system,Segoe UI,sans-serif;
-    }
-
-    .wrap {
-      max-width:1050px;
-      margin:auto;
-      padding:22px 16px 48px;
-    }
-
-    .top {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:22px;
-    }
-
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .orb {
-      width:42px;
-      height:42px;
-      border:1px solid var(--cyan);
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      color:var(--cyan);
-      box-shadow:0 0 24px #62d9f533;
-      font-weight:800;
-    }
-
-    h1 {
-      font-size:20px;
-      letter-spacing:.14em;
-      margin:0;
-    }
-
-    .sub {
-      color:var(--muted);
-      font-size:12px;
-      margin-top:3px;
-    }
-
-    .status {
-      font-size:12px;
-      color:#9ce7c2;
-      border:1px solid #285c4a;
-      padding:7px 10px;
-      border-radius:99px;
-    }
-
-    .hero {
-      padding:24px;
-      border:1px solid var(--line);
-      border-radius:22px;
-      background:linear-gradient(135deg,#12263d,#0b1728);
-      margin-bottom:16px;
-    }
-
-    .eyebrow {
-      color:var(--cyan);
-      font-size:11px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-    }
-
-    .hero h2 {
-      font-size:clamp(24px,5vw,38px);
-      margin:10px 0;
-    }
-
-    .hero p {
-      color:var(--muted);
-      max-width:650px;
-      line-height:1.6;
-      margin:0;
-    }
-
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-    }
-
-    .tile,.panel {
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:17px;
-    }
-
-    .tile {
-      min-height:125px;
-      text-align:left;
-      color:var(--white);
-      cursor:pointer;
-    }
-
-    .tile:hover {
-      border-color:var(--cyan);
-      background:var(--panel2);
-    }
-
-    .tile .ico { font-size:24px; }
-
-    .tile strong {
-      display:block;
-      margin:9px 0 4px;
-    }
-
-    .tile small {
-      color:var(--muted);
-      line-height:1.4;
-    }
-
-    .panel { margin-top:14px; }
-
-    .panel h3 {
-      margin:0 0 12px;
-      font-size:18px;
-    }
-
-    .muted {
-      color:var(--muted);
-      line-height:1.55;
-    }
-
-    label {
-      display:block;
-      color:var(--muted);
-      font-size:13px;
-      margin:12px 0 6px;
-    }
-
-    input,textarea,select {
-      width:100%;
-      background:#091525;
-      color:var(--white);
-      border:1px solid var(--line);
-      border-radius:11px;
-      padding:12px;
-      font:inherit;
-    }
-
-    textarea {
-      min-height:76px;
-      resize:vertical;
-    }
-
-    .row {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .btn {
-      background:var(--cyan);
-      color:#06111d;
-      border:0;
-      border-radius:11px;
-      padding:12px 16px;
-      font-weight:750;
-      cursor:pointer;
-      margin:6px 5px 0 0;
-    }
-
-    .btn.secondary {
-      background:#1b3049;
-      color:var(--white);
-      border:1px solid var(--line);
-    }
-
-    .btn.danger {
-      background:#632b38;
-      color:#fff;
-      border:1px solid #9d4356;
-    }
-
-    .btn:disabled { opacity:.5; }
-
-    .preview {
-      width:100%;
-      max-width:420px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:#fff;
-      display:block;
-      margin:14px auto 0;
-    }
-
-    .hidden { display:none!important; }
-
-    .notice {
-      border-left:3px solid var(--cyan);
-      padding:10px 12px;
-      background:#0b1b2c;
-      color:var(--muted);
-      font-size:13px;
-      border-radius:0 10px 10px 0;
-      margin-top:12px;
-    }
-
-    .opportunity {
-      background:#14243a;
-      border:1px solid #263b55;
-      border-radius:13px;
-      padding:14px;
-      margin:12px 0;
-    }
-
-    .opportunity strong {
-      font-size:16px;
-      overflow-wrap:anywhere;
-    }
-
-    .opportunity p {
-      overflow-wrap:anywhere;
-    }
-
-    .opportunity-actions {
-      display:flex;
-      flex-wrap:wrap;
-      gap:5px;
-      margin-top:10px;
-    }
-
-    .detail-box {
-      background:#091525;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:14px;
-      margin-top:12px;
-    }
-
-    footer {
-      color:#7188a2;
-      font-size:12px;
-      text-align:center;
-      margin-top:24px;
-    }
-
-    @media(min-width:700px) {
-      .grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
-      .wrap { padding-top:32px; }
-    }
-
-    @media(max-width:430px) {
-      .row { grid-template-columns:1fr; }
-      .hero { padding:19px; }
-      .top { align-items:flex-start; }
-    }
+    :root{color-scheme:dark;--bg:#07101d;--panel:#101d30;--panel2:#14243a;--line:#263b55;--cyan:#62d9f5;--muted:#9fb2c8;--white:#f3f8ff}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at 80% 0,#142b45 0,transparent 36%),var(--bg);color:var(--white);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+    .wrap{max-width:1050px;margin:auto;padding:22px 16px 48px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .orb{width:42px;height:42px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;color:var(--cyan);box-shadow:0 0 24px #62d9f533;font-weight:800}
+    h1{font-size:20px;letter-spacing:.14em;margin:0}
+    .sub{color:var(--muted);font-size:12px;margin-top:3px}
+    .status{font-size:12px;color:#9ce7c2;border:1px solid #285c4a;padding:7px 10px;border-radius:99px}
+    .hero{padding:24px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,#12263d,#0b1728);margin-bottom:16px}
+    .eyebrow{color:var(--cyan);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+    .hero h2{font-size:clamp(24px,5vw,38px);margin:10px 0}
+    .hero p{color:var(--muted);max-width:650px;line-height:1.6;margin:0}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .tile,.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:17px}
+    .tile{min-height:125px;text-align:left;color:var(--white);cursor:pointer}
+    .tile:hover{border-color:var(--cyan);background:var(--panel2)}
+    .tile .ico{font-size:24px}.tile strong{display:block;margin:9px 0 4px}
+    .tile small{color:var(--muted);line-height:1.4}
+    .panel{margin-top:14px}.panel h3{margin:0 0 12px;font-size:18px}
+    .muted{color:var(--muted);line-height:1.55}
+    label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}
+    input,textarea,select{width:100%;background:#091525;color:var(--white);border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit}
+    textarea{min-height:76px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .btn{background:var(--cyan);color:#06111d;border:0;border-radius:11px;padding:12px 16px;font-weight:750;cursor:pointer;margin:6px 5px 0 0}
+    .btn.secondary{background:#1b3049;color:var(--white);border:1px solid var(--line)}
+    .btn.danger{background:#632b38;color:#fff;border:1px solid #9d4356}
+    .btn:disabled{opacity:.5;cursor:wait}
+    .preview{width:100%;max-width:420px;border:1px solid var(--line);border-radius:14px;background:#fff;display:block;margin:14px auto 0}
+    .hidden{display:none!important}
+    .notice{border-left:3px solid var(--cyan);padding:10px 12px;background:#0b1b2c;color:var(--muted);font-size:13px;border-radius:0 10px 10px 0;margin-top:12px}
+    .record{background:#14243a;border:1px solid #263b55;border-radius:13px;padding:14px;margin:12px 0;overflow-wrap:anywhere}
+    .record strong{font-size:16px}.record p{margin:7px 0}
+    .actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+    .crm-nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+    .crm-nav button{flex:1;min-width:130px}
+    .crm-section{border-top:1px solid var(--line);padding-top:18px;margin-top:18px}
+    .crm-section h4{margin:0 0 8px;font-size:16px}
+    .count{display:inline-block;color:var(--cyan);background:#0b2638;border:1px solid #24516a;padding:3px 9px;border-radius:20px;font-size:12px;margin-left:5px}
+    footer{color:#7188a2;font-size:12px;text-align:center;margin-top:24px}
+    @media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wrap{padding-top:32px}}
+    @media(max-width:430px){.row{grid-template-columns:1fr}.hero{padding:19px}.top{align-items:flex-start}}
   </style>
 </head>
-
 <body>
 <div class="wrap">
-
   <header class="top">
-    <div class="brand">
-      <div class="orb">J</div>
-      <div>
-        <h1>J.A.R.V.I.S.</h1>
-        <div class="sub">CENTRAL DE OPERAÇÕES · V1</div>
-      </div>
-    </div>
+    <div class="brand"><div class="orb">J</div><div><h1>J.A.R.V.I.S.</h1><div class="sub">CENTRAL DE OPERAÇÕES · V1</div></div></div>
     <div class="status">● Sistema ativo</div>
   </header>
 
   <section class="hero">
     <div class="eyebrow">Assistente operacional</div>
     <h2>Boa noite. Qual é a missão?</h2>
-    <p>
-      Uma central para organizar tarefas, oportunidades comerciais
-      e produzir materiais de divulgação. Alguns recursos ainda
-      dependem de integrações externas.
-    </p>
+    <p>Uma central para organizar oportunidades comerciais, clientes e materiais de divulgação. Alguns recursos ainda dependem de integrações externas.</p>
   </section>
 
   <section class="grid" aria-label="Módulos">
-    <button class="tile" data-target="art">
-      <span class="ico">🎨</span>
-      <strong>Estúdio de imagens</strong>
-      <small>Montar e exportar uma arte promocional em PNG.</small>
-    </button>
-
-    <button class="tile" data-target="video">
-      <span class="ico">🎬</span>
-      <strong>Estúdio de vídeos</strong>
-      <small>Preparar roteiro e plano de cenas.</small>
-    </button>
-
-    <button class="tile" data-target="clients">
-      <span class="ico">🧭</span>
-      <strong>Central comercial</strong>
-      <small>Organizar e administrar oportunidades.</small>
-    </button>
-
-    <button class="tile" data-target="phone">
-      <span class="ico">📱</span>
-      <strong>Automação Android</strong>
-      <small>Planejar automações seguras e assistidas.</small>
-    </button>
+    <button class="tile" data-target="art"><span class="ico">🎨</span><strong>Estúdio de imagens</strong><small>Montar e exportar uma arte promocional em PNG.</small></button>
+    <button class="tile" data-target="video"><span class="ico">🎬</span><strong>Estúdio de vídeos</strong><small>Preparar roteiro e plano de cenas.</small></button>
+    <button class="tile" data-target="clients"><span class="ico">🧭</span><strong>Central comercial</strong><small>Administrar oportunidades e clientes.</small></button>
+    <button class="tile" data-target="phone"><span class="ico">📱</span><strong>Automação Android</strong><small>Planejar automações seguras e assistidas.</small></button>
   </section>
-
-  <!-- ESTÚDIO DE IMAGENS -->
 
   <section id="art" class="panel hidden">
     <h3>Estúdio de imagens · Arte promocional</h3>
-
-    <p class="muted">
-      Crie uma arte promocional básica diretamente no aparelho,
-      sem consumir créditos de IA.
-    </p>
-
+    <p class="muted">Crie uma arte promocional básica diretamente no aparelho, sem consumir créditos de IA.</p>
     <div class="row">
-      <div>
-        <label for="biz">Nome do negócio</label>
-        <input id="biz" value="Doceria Exemplo">
-      </div>
-
-      <div>
-        <label for="product">Produto em destaque</label>
-        <input id="product" value="Bolo de chocolate">
-      </div>
+      <div><label for="biz">Nome do negócio</label><input id="biz" value="Doceria Exemplo"></div>
+      <div><label for="product">Produto em destaque</label><input id="product" value="Bolo de chocolate"></div>
     </div>
-
-    <label for="headline">Chamada principal</label>
-    <input id="headline" value="Um carinho em forma de doce">
-
-    <label for="details">Detalhes / oferta</label>
-    <input id="details" value="Feito com carinho • Consulte os sabores">
-
+    <label for="headline">Chamada principal</label><input id="headline" value="Um carinho em forma de doce">
+    <label for="details">Detalhes / oferta</label><input id="details" value="Feito com carinho • Consulte os sabores">
     <div class="row">
-      <div>
-        <label for="price">Preço (opcional)</label>
-        <input id="price" placeholder="Ex.: R$ 25,00">
-      </div>
-
-      <div>
-        <label for="contact">Contato (opcional)</label>
-        <input id="contact" placeholder="WhatsApp ou Instagram">
-      </div>
+      <div><label for="price">Preço (opcional)</label><input id="price" placeholder="Ex.: R$ 25,00"></div>
+      <div><label for="contact">Contato (opcional)</label><input id="contact" placeholder="WhatsApp ou Instagram"></div>
     </div>
-
     <label for="palette">Paleta</label>
-    <select id="palette">
-      <option value="berry">Framboesa e creme</option>
-      <option value="cocoa">Cacau e dourado</option>
-      <option value="pink">Rosa delicado</option>
-    </select>
-
-    <button class="btn" id="makeArt">Gerar arte</button>
-    <button class="btn secondary" id="downloadArt" disabled>Baixar PNG</button>
-
-    <canvas
-      id="artCanvas"
-      class="preview"
-      width="1080"
-      height="1350"
-      aria-label="Prévia da arte">
-    </canvas>
-
-    <div class="notice">
-      Esta ferramenta cria uma ilustração simples. Não é geração de
-      imagem por inteligência artificial.
-    </div>
+    <select id="palette"><option value="berry">Framboesa e creme</option><option value="cocoa">Cacau e dourado</option><option value="pink">Rosa delicado</option></select>
+    <button class="btn" id="makeArt">Gerar arte</button><button class="btn secondary" id="downloadArt" disabled>Baixar PNG</button>
+    <canvas id="artCanvas" class="preview" width="1080" height="1350" aria-label="Prévia da arte"></canvas>
+    <div class="notice">Esta ferramenta cria uma ilustração simples. Não é geração de imagem por inteligência artificial.</div>
   </section>
-
-  <!-- ESTÚDIO DE VÍDEOS -->
 
   <section id="video" class="panel hidden">
     <h3>Estúdio de vídeos</h3>
-
-    <p class="muted">
-      Organizador inicial de roteiro. A geração e renderização
-      de vídeos ainda não estão conectadas.
-    </p>
-
-    <label for="videoTopic">Tema do vídeo</label>
-    <input id="videoTopic" placeholder="Ex.: lançamento de um sabor novo">
-
-    <label for="videoAudience">Público</label>
-    <input id="videoAudience" placeholder="Ex.: clientes da doceria">
-
+    <p class="muted">Organizador inicial de roteiro. A geração e renderização de vídeos ainda não estão conectadas.</p>
+    <label for="videoTopic">Tema do vídeo</label><input id="videoTopic" placeholder="Ex.: lançamento de um sabor novo">
+    <label for="videoAudience">Público</label><input id="videoAudience" placeholder="Ex.: clientes da doceria">
     <button class="btn" id="makeScript">Montar estrutura de roteiro</button>
-
-    <textarea
-      id="scriptOut"
-      placeholder="O roteiro aparecerá aqui."
-      readonly>
-    </textarea>
+    <textarea id="scriptOut" placeholder="O roteiro aparecerá aqui." readonly></textarea>
   </section>
-
-  <!-- CENTRAL COMERCIAL -->
 
   <section id="clients" class="panel hidden">
-
-    <div class="notice">
-      <strong>ACESSO AO J.A.R.V.I.S.</strong>
-      <p>Entre na sua conta para acessar suas oportunidades salvas na nuvem.</p>
-    </div>
-
-    <label for="authEmail">E-mail</label>
-    <input id="authEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
-
-    <label for="authPassword">Senha</label>
-    <input id="authPassword" type="password" placeholder="Sua senha" autocomplete="current-password">
-
-    <button class="btn" id="signUp">Criar conta</button>
-    <button class="btn secondary" id="signIn">Entrar</button>
-    <button class="btn secondary hidden" id="signOut">Sair da conta</button>
-
+    <div class="notice"><strong>ACESSO AO J.A.R.V.I.S.</strong><p>Entre na sua conta para acessar seus dados comerciais na nuvem.</p></div>
+    <label for="authEmail">E-mail</label><input id="authEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
+    <label for="authPassword">Senha</label><input id="authPassword" type="password" placeholder="Sua senha" autocomplete="current-password">
+    <button class="btn" id="signUp">Criar conta</button><button class="btn secondary" id="signIn">Entrar</button><button class="btn secondary hidden" id="signOut">Sair da conta</button>
     <p id="authMessage" class="muted">Você ainda não entrou.</p>
 
-    <h3>Central comercial</h3>
+    <div id="crmArea" class="hidden">
+      <h3>Central comercial</h3>
+      <p class="muted">Gerencie oportunidades e clientes em áreas separadas. Seus registros ficam associados à sua conta.</p>
+      <nav class="crm-nav"><button class="btn" id="showLeads">Oportunidades</button><button class="btn secondary" id="showCustomers">Clientes</button></nav>
 
-    <p class="muted">
-      Registre oportunidades e acompanhe seu andamento.
-      Os registros ficam associados à sua conta.
-    </p>
+      <div id="leadsSection" class="crm-section">
+        <h4>Nova oportunidade</h4>
+        <label for="leadName">Nome do negócio</label><input id="leadName" placeholder="Nome da empresa">
+        <label for="leadNeed">Possível necessidade</label><input id="leadNeed" placeholder="Ex.: artes para divulgar produtos">
+        <label for="leadStatus">Status</label>
+        <select id="leadStatus"><option>Para analisar</option><option>Contato autorizado</option><option>Mensagem enviada manualmente</option><option>Não interessado</option></select>
+        <button class="btn" id="saveLead">Salvar oportunidade na nuvem</button>
+        <h4 style="margin-top:24px">Oportunidades cadastradas <span class="count" id="leadCount">0</span></h4>
+        <div id="leadList" class="muted">Entre na sua conta para visualizar.</div>
+      </div>
 
-    <label for="leadName">Nome do negócio</label>
-    <input id="leadName" placeholder="Nome da empresa">
-
-    <label for="leadNeed">Possível necessidade</label>
-    <input id="leadNeed" placeholder="Ex.: artes para divulgar produtos">
-
-    <label for="leadStatus">Status</label>
-    <select id="leadStatus">
-      <option>Para analisar</option>
-      <option>Contato autorizado</option>
-      <option>Mensagem enviada manualmente</option>
-      <option>Não interessado</option>
-    </select>
-
-    <button class="btn" id="saveLead">Salvar oportunidade na nuvem</button>
-
-    <div id="leadList" class="muted">
-      Entre na sua conta para visualizar suas oportunidades.
+      <div id="customersSection" class="crm-section hidden">
+        <h4>Novo cliente</h4>
+        <label for="customerName">Nome do cliente ou negócio *</label><input id="customerName" placeholder="Nome completo ou empresa">
+        <div class="row">
+          <div><label for="customerPhone">Telefone / WhatsApp</label><input id="customerPhone" type="tel" placeholder="(00) 00000-0000"></div>
+          <div><label for="customerEmail">E-mail</label><input id="customerEmail" type="email" placeholder="cliente@email.com"></div>
+        </div>
+        <label for="customerNotes">Observações</label><textarea id="customerNotes" placeholder="Informações importantes sobre o cliente"></textarea>
+        <button class="btn" id="saveCustomer">Cadastrar cliente</button>
+        <h4 style="margin-top:24px">Clientes cadastrados <span class="count" id="customerCount">0</span></h4>
+        <div id="customerList" class="muted">Entre na sua conta para visualizar.</div>
+      </div>
     </div>
-
   </section>
-
-  <!-- AUTOMAÇÃO ANDROID -->
 
   <section id="phone" class="panel hidden">
     <h3>Automação Android</h3>
-
-    <p class="muted">
-      O navegador não pode controlar livremente outros aplicativos.
-      Acesso ao celular exigirá ferramentas Android específicas,
-      permissões explícitas e testes.
-    </p>
-
-    <div class="notice">
-      Nesta versão, o módulo serve como painel de planejamento.
-      Não lê mensagens, não toca em outros aplicativos e não envia nada.
-    </div>
-
-    <p class="muted">
-      Próxima integração a avaliar: automações locais por rotinas Android,
-      com confirmação antes de ações externas.
-    </p>
+    <p class="muted">O navegador não pode controlar livremente outros aplicativos. Acesso ao celular exigirá ferramentas Android específicas, permissões explícitas e testes.</p>
+    <div class="notice">Nesta versão, o módulo serve como painel de planejamento. Não lê mensagens, não toca em outros aplicativos e não envia nada.</div>
+    <p class="muted">Próxima integração a avaliar: automações locais por rotinas Android, com confirmação antes de ações externas.</p>
   </section>
 
-  <footer>
-    J.A.R.V.I.S. V1 · Central pessoal · Supabase
-  </footer>
-
+  <footer>J.A.R.V.I.S. V1 · Central pessoal · Supabase</footer>
 </div>
 
 <script>
-/* NAVEGAÇÃO DOS MÓDULOS */
-
-const panels = [...document.querySelectorAll('.panel')];
-
-document.querySelectorAll('.tile').forEach(button => {
-  button.addEventListener('click', () => {
-    panels.forEach(panel => panel.classList.add('hidden'));
-
-    const target = document.getElementById(button.dataset.target);
+/* NAVEGAÇÃO */
+const panels=[...document.querySelectorAll('.panel')];
+document.querySelectorAll('.tile').forEach(button=>{
+  button.addEventListener('click',()=>{
+    panels.forEach(panel=>panel.classList.add('hidden'));
+    const target=document.getElementById(button.dataset.target);
     target.classList.remove('hidden');
-
-    target.scrollIntoView({
-      behavior:'smooth',
-      block:'start'
-    });
+    target.scrollIntoView({behavior:'smooth',block:'start'});
   });
 });
 
 /* ESTÚDIO DE IMAGENS */
-
-const canvas = document.getElementById('artCanvas');
-const ctx = canvas.getContext('2d');
-
-function wrapText(text, x, y, maxWidth, lineHeight, maxLines=3) {
-  const words = text.split(/\s+/);
-  let line = '';
-  let lines = 0;
-
-  for (const word of words) {
-    const test = line ? line + ' ' + word : word;
-
-    if (ctx.measureText(test).width > maxWidth && line) {
-      ctx.fillText(line, x, y);
-      line = word;
-      y += lineHeight;
-      lines++;
-
-      if (lines >= maxLines) return;
-    } else {
-      line = test;
-    }
+const canvas=document.getElementById('artCanvas');
+const ctx=canvas.getContext('2d');
+function wrapText(text,x,y,maxWidth,lineHeight,maxLines=3){
+  const words=text.split(/\s+/);let line='';let lines=0;
+  for(const word of words){
+    const test=line?line+' '+word:word;
+    if(ctx.measureText(test).width>maxWidth&&line){
+      ctx.fillText(line,x,y);line=word;y+=lineHeight;lines++;
+      if(lines>=maxLines)return;
+    }else line=test;
   }
-
-  if (line) ctx.fillText(line, x, y);
+  if(line)ctx.fillText(line,x,y);
 }
-
-function makeArt() {
-  const palettes = {
-    berry:['#5c1838','#a82d58','#fff0df','#ffd0a6'],
-    cocoa:['#2c1a17','#714332','#fff0d2','#d7ae67'],
-    pink:['#782e56','#d86c9b','#fff1f6','#f8c4d9']
-  };
-
-  const [dark,accent,cream,light] =
-    palettes[document.getElementById('palette').value];
-
-  const biz = document.getElementById('biz').value.trim() || 'Doceria';
-  const product = document.getElementById('product').value.trim() || 'Nosso destaque';
-  const headline = document.getElementById('headline').value.trim() || 'Uma delícia espera por você';
-  const details = document.getElementById('details').value.trim();
-  const price = document.getElementById('price').value.trim();
-  const contact = document.getElementById('contact').value.trim();
-
-  const gradient = ctx.createLinearGradient(0,0,1080,1350);
-  gradient.addColorStop(0,dark);
-  gradient.addColorStop(1,accent);
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0,0,1080,1350);
-
-  ctx.fillStyle = cream;
-  ctx.beginPath();
-  ctx.arc(540,500,350,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.fillStyle = light;
-  ctx.beginPath();
-  ctx.arc(540,500,300,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.fillStyle = '#6b392b';
-  ctx.beginPath();
-  ctx.ellipse(540,610,235,75,0,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.fillStyle = '#9b5a43';
-  ctx.fillRect(305,455,470,155);
-
-  ctx.fillStyle = '#f5d9c5';
-  ctx.beginPath();
-  ctx.ellipse(540,455,235,75,0,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.fillStyle = '#7a243c';
-  ctx.beginPath();
-  ctx.ellipse(540,455,235,75,0,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.fillStyle = '#e7a0ad';
-  ctx.beginPath();
-  ctx.ellipse(540,438,235,70,0,0,Math.PI*2);
-  ctx.fill();
-
-  for (let i=0; i<7; i++) {
-    ctx.fillStyle = i%2 ? '#fff0df' : '#b72e50';
-    ctx.beginPath();
-    ctx.arc(365+i*58,420+(i%2)*24,18,0,Math.PI*2);
-    ctx.fill();
-  }
-
-  ctx.textAlign = 'center';
-  ctx.fillStyle = cream;
-  ctx.font = '700 34px system-ui';
-  ctx.fillText(biz.toUpperCase().slice(0,38),540,105);
-
-  ctx.fillStyle = dark;
-  ctx.font = '800 68px system-ui';
-  wrapText(headline,540,850,900,82,2);
-
-  ctx.fillStyle = cream;
-  ctx.font = '600 42px system-ui';
-  ctx.fillText(product.slice(0,45),540,1040);
-
-  if (details) {
-    ctx.font = '32px system-ui';
-    ctx.fillText(details.slice(0,58),540,1100);
-  }
-
-  if (price) {
-    ctx.font = '800 54px system-ui';
-    ctx.fillText(price.slice(0,24),540,1190);
-  }
-
-  if (contact) {
-    ctx.font = '28px system-ui';
-    ctx.fillText(contact.slice(0,48),540,1270);
-  }
-
-  ctx.textAlign = 'start';
-
-  document.getElementById('downloadArt').disabled = false;
+function makeArt(){
+  const palettes={berry:['#5c1838','#a82d58','#fff0df','#ffd0a6'],cocoa:['#2c1a17','#714332','#fff0d2','#d7ae67'],pink:['#782e56','#d86c9b','#fff1f6','#f8c4d9']};
+  const [dark,accent,cream,light]=palettes[document.getElementById('palette').value];
+  const biz=document.getElementById('biz').value.trim()||'Doceria';
+  const product=document.getElementById('product').value.trim()||'Nosso destaque';
+  const headline=document.getElementById('headline').value.trim()||'Uma delícia espera por você';
+  const details=document.getElementById('details').value.trim();
+  const price=document.getElementById('price').value.trim();
+  const contact=document.getElementById('contact').value.trim();
+  const gradient=ctx.createLinearGradient(0,0,1080,1350);
+  gradient.addColorStop(0,dark);gradient.addColorStop(1,accent);
+  ctx.fillStyle=gradient;ctx.fillRect(0,0,1080,1350);
+  ctx.fillStyle=cream;ctx.beginPath();ctx.arc(540,500,350,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=light;ctx.beginPath();ctx.arc(540,500,300,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#6b392b';ctx.beginPath();ctx.ellipse(540,610,235,75,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#9b5a43';ctx.fillRect(305,455,470,155);
+  ctx.fillStyle='#f5d9c5';ctx.beginPath();ctx.ellipse(540,455,235,75,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#7a243c';ctx.beginPath();ctx.ellipse(540,455,235,75,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e7a0ad';ctx.beginPath();ctx.ellipse(540,438,235,70,0,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<7;i++){ctx.fillStyle=i%2?'#fff0df':'#b72e50';ctx.beginPath();ctx.arc(365+i*58,420+(i%2)*24,18,0,Math.PI*2);ctx.fill();}
+  ctx.textAlign='center';ctx.fillStyle=cream;ctx.font='700 34px system-ui';ctx.fillText(biz.toUpperCase().slice(0,38),540,105);
+  ctx.fillStyle=dark;ctx.font='800 68px system-ui';wrapText(headline,540,850,900,82,2);
+  ctx.fillStyle=cream;ctx.font='600 42px system-ui';ctx.fillText(product.slice(0,45),540,1040);
+  if(details){ctx.font='32px system-ui';ctx.fillText(details.slice(0,58),540,1100);}
+  if(price){ctx.font='800 54px system-ui';ctx.fillText(price.slice(0,24),540,1190);}
+  if(contact){ctx.font='28px system-ui';ctx.fillText(contact.slice(0,48),540,1270);}
+  ctx.textAlign='start';document.getElementById('downloadArt').disabled=false;
 }
-
 document.getElementById('makeArt').addEventListener('click',makeArt);
-
-document.getElementById('downloadArt').addEventListener('click',() => {
-  const a = document.createElement('a');
-  a.download = 'jarvis-arte-promocional.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
+document.getElementById('downloadArt').addEventListener('click',()=>{
+  const a=document.createElement('a');a.download='jarvis-arte-promocional.png';a.href=canvas.toDataURL('image/png');a.click();
 });
-
 makeArt();
 
 /* ESTÚDIO DE VÍDEOS */
-
-document.getElementById('makeScript').addEventListener('click',() => {
-  const topic = document.getElementById('videoTopic').value.trim() || 'apresentação de produto';
-  const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
-
-  document.getElementById('scriptOut').value =
-`ROTEIRO — ${topic.toUpperCase()}
+document.getElementById('makeScript').addEventListener('click',()=>{
+  const topic=document.getElementById('videoTopic').value.trim()||'apresentação de produto';
+  const audience=document.getElementById('videoAudience').value.trim()||'clientes';
+  document.getElementById('scriptOut').value=`ROTEIRO — ${topic.toUpperCase()}
 Público: ${audience}
 
 1. ABERTURA (0–3s): Comece com uma imagem atraente do produto.
@@ -674,371 +226,247 @@ Público: ${audience}
 CONFIRMAR ANTES DE PUBLICAR: preço, disponibilidade, ingredientes e condições da oferta.`;
 });
 
-/* SEGURANÇA DE TEXTO */
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, character => ({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[character]));
+/* UTILITÁRIOS */
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 }
+async function getCurrentUser(){
+  const {data,error}=await supabaseClient.auth.getUser();
+  if(error||!data.user)return null;
+  return data.user;
+}
+const validStatuses=['Para analisar','Contato autorizado','Mensagem enviada manualmente','Não interessado'];
+const leadList=document.getElementById('leadList');
+const customerList=document.getElementById('customerList');
+let currentLeads=[];
+let currentCustomers=[];
 
-/* CENTRAL COMERCIAL */
+function showCRMSection(section){
+  const leads=section==='leads';
+  document.getElementById('leadsSection').classList.toggle('hidden',!leads);
+  document.getElementById('customersSection').classList.toggle('hidden',leads);
+  document.getElementById('showLeads').classList.toggle('secondary',!leads);
+  document.getElementById('showCustomers').classList.toggle('secondary',leads);
+}
+document.getElementById('showLeads').addEventListener('click',()=>showCRMSection('leads'));
+document.getElementById('showCustomers').addEventListener('click',()=>showCRMSection('customers'));
 
-const validStatuses = [
-  'Para analisar',
-  'Contato autorizado',
-  'Mensagem enviada manualmente',
-  'Não interessado'
-];
-
-async function loadLeads() {
-  const leadList = document.getElementById('leadList');
-
-  const { data: { user }, error: userError } =
-    await supabaseClient.auth.getUser();
-
-  if (userError || !user) {
-    leadList.innerHTML =
-      '<p>Entre na sua conta para visualizar suas oportunidades.</p>';
-    return;
-  }
-
-  leadList.innerHTML = '<p>Carregando oportunidades...</p>';
-
-  const { data, error } = await supabaseClient
-    .from('opportunities')
-    .select('id, company_name, possible_needs, status, created_at')
-    .order('created_at', { ascending:false });
-
-  if (error) {
-    leadList.textContent =
-      'Erro ao carregar oportunidades: ' + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    leadList.innerHTML =
-      '<p>Nenhuma oportunidade salva ainda.</p>';
-    return;
-  }
-
-  leadList.innerHTML = '<hr>' + data.map(opportunity => `
-    <div class="opportunity">
-      <strong>${escapeHtml(opportunity.company_name)}</strong>
-      <p>${escapeHtml(opportunity.possible_needs || 'Sem descrição')}</p>
-      <p>Status: ${escapeHtml(opportunity.status || 'Novo')}</p>
-
-      <div class="opportunity-actions">
-        <button class="btn secondary"
-          data-action="open"
-          data-id="${escapeHtml(opportunity.id)}">
-          Abrir
-        </button>
-
-        <button class="btn"
-          data-action="edit"
-          data-id="${escapeHtml(opportunity.id)}">
-          Editar
-        </button>
-
-        <button class="btn danger"
-          data-action="delete"
-          data-id="${escapeHtml(opportunity.id)}">
-          Excluir
-        </button>
+/* OPORTUNIDADES: LISTAR, ABRIR, EDITAR, EXCLUIR E CONVERTER */
+async function loadLeads(){
+  const user=await getCurrentUser();
+  if(!user){leadList.textContent='Entre na sua conta para visualizar suas oportunidades.';document.getElementById('leadCount').textContent='0';return;}
+  leadList.textContent='Carregando oportunidades...';
+  const {data,error}=await supabaseClient.from('opportunities')
+    .select('id,company_name,possible_needs,status,created_at')
+    .order('created_at',{ascending:false});
+  if(error){leadList.textContent='Erro ao carregar oportunidades: '+error.message;return;}
+  currentLeads=data||[];
+  document.getElementById('leadCount').textContent=currentLeads.length;
+  if(!currentLeads.length){leadList.innerHTML='<p>Nenhuma oportunidade cadastrada ainda.</p>';return;}
+  leadList.innerHTML=currentLeads.map(item=>`
+    <div class="record">
+      <strong>${escapeHtml(item.company_name)}</strong>
+      <p>${escapeHtml(item.possible_needs||'Sem descrição')}</p>
+      <p>Status: ${escapeHtml(item.status||'Novo')}</p>
+      <div class="actions">
+        <button class="btn secondary" data-action="open-lead" data-id="${escapeHtml(item.id)}">Abrir</button>
+        <button class="btn" data-action="edit-lead" data-id="${escapeHtml(item.id)}">Editar</button>
+        <button class="btn secondary" data-action="convert-lead" data-id="${escapeHtml(item.id)}">Virar cliente</button>
+        <button class="btn danger" data-action="delete-lead" data-id="${escapeHtml(item.id)}">Excluir</button>
       </div>
-    </div>
-  `).join('');
-
-  leadList.querySelectorAll('button[data-action]').forEach(button => {
-    button.addEventListener('click', async () => {
-      const id = button.dataset.id;
-      const action = button.dataset.action;
-
-      const opportunity = data.find(item => item.id === id);
-
-      if (!opportunity) return;
-
-      if (action === 'open') {
-        alert(
-          'DETALHES DA OPORTUNIDADE\n\n' +
-          'Negócio: ' + opportunity.company_name + '\n' +
-          'Necessidade: ' + (opportunity.possible_needs || 'Não informada') + '\n' +
-          'Status: ' + (opportunity.status || 'Não informado') + '\n' +
-          'Criada em: ' +
-          new Date(opportunity.created_at).toLocaleString('pt-BR')
-        );
-      }
-
-      if (action === 'edit') {
-        const name = prompt(
-          'Nome do negócio:',
-          opportunity.company_name
-        );
-
-        if (name === null) return;
-
-        if (!name.trim()) {
-          alert('O nome do negócio não pode ficar vazio.');
-          return;
-        }
-
-        const need = prompt(
-          'Possível necessidade:',
-          opportunity.possible_needs || ''
-        );
-
-        if (need === null) return;
-
-        const status = prompt(
-          'Digite exatamente um dos status abaixo:\n\n' +
-          validStatuses.join('\n'),
-          opportunity.status || 'Para analisar'
-        );
-
-        if (status === null) return;
-
-        if (!validStatuses.includes(status)) {
-          alert('Status inválido. Nenhuma alteração foi feita.');
-          return;
-        }
-
-        const { data: { user }, error: userError } =
-          await supabaseClient.auth.getUser();
-
-        if (userError || !user) {
-          alert('Entre na sua conta novamente.');
-          return;
-        }
-
-        const { data: updated, error } = await supabaseClient
-          .from('opportunities')
-          .update({
-            company_name:name.trim(),
-            possible_needs:need.trim(),
-            status:status
-          })
-          .eq('id',id)
-          .eq('user_id',user.id)
-          .select('id');
-
-        if (error || !updated || updated.length === 0) {
-          alert(
-            'Não foi possível atualizar a oportunidade. ' +
-            (error?.message || 'Verifique seu acesso.')
-          );
-          return;
-        }
-
-        alert('Oportunidade atualizada com sucesso!');
-        await loadLeads();
-      }
-
-      if (action === 'delete') {
-        const confirmed = confirm(
-          'Tem certeza que deseja excluir "' +
-          opportunity.company_name +
-          '"?\n\nEssa ação não poderá ser desfeita.'
-        );
-
-        if (!confirmed) return;
-
-        const { data: { user }, error: userError } =
-          await supabaseClient.auth.getUser();
-
-        if (userError || !user) {
-          alert('Entre na sua conta novamente.');
-          return;
-        }
-
-        const { data: deleted, error } = await supabaseClient
-          .from('opportunities')
-          .delete()
-          .eq('id',id)
-          .eq('user_id',user.id)
-          .select('id');
-
-        if (error || !deleted || deleted.length === 0) {
-          alert(
-            'Não foi possível excluir a oportunidade. ' +
-            (error?.message || 'Verifique seu acesso.')
-          );
-          return;
-        }
-
-        alert('Oportunidade excluída com sucesso.');
-        await loadLeads();
-      }
-    });
-  });
+    </div>`).join('');
+  leadList.querySelectorAll('button[data-action]').forEach(button=>button.addEventListener('click',()=>handleLeadAction(button)));
+}
+async function handleLeadAction(button){
+  const lead=currentLeads.find(item=>item.id===button.dataset.id);
+  if(!lead)return;
+  const action=button.dataset.action;
+  if(action==='open-lead'){
+    alert('DETALHES DA OPORTUNIDADE\n\nNegócio: '+lead.company_name+'\nNecessidade: '+(lead.possible_needs||'Não informada')+'\nStatus: '+(lead.status||'Não informado')+'\nCriada em: '+new Date(lead.created_at).toLocaleString('pt-BR'));
+    return;
+  }
+  const user=await getCurrentUser();
+  if(!user){alert('Entre na sua conta novamente.');return;}
+  if(action==='edit-lead'){
+    const name=prompt('Nome do negócio:',lead.company_name);if(name===null)return;
+    if(!name.trim()){alert('O nome não pode ficar vazio.');return;}
+    const need=prompt('Possível necessidade:',lead.possible_needs||'');if(need===null)return;
+    const status=prompt('Digite exatamente um dos status abaixo:\n\n'+validStatuses.join('\n'),lead.status||'Para analisar');
+    if(status===null)return;
+    if(!validStatuses.includes(status)){alert('Status inválido. Nenhuma alteração foi feita.');return;}
+    const {data,error}=await supabaseClient.from('opportunities').update({company_name:name.trim(),possible_needs:need.trim(),status}).eq('id',lead.id).eq('user_id',user.id).select('id');
+    if(error||!data?.length){alert('Não foi possível atualizar: '+(error?.message||'Verifique seu acesso.'));return;}
+    alert('Oportunidade atualizada!');await loadLeads();return;
+  }
+  if(action==='delete-lead'){
+    if(!confirm('Excluir a oportunidade "'+lead.company_name+'"? Esta ação não poderá ser desfeita.'))return;
+    const {data,error}=await supabaseClient.from('opportunities').delete().eq('id',lead.id).eq('user_id',user.id).select('id');
+    if(error||!data?.length){alert('Não foi possível excluir: '+(error?.message||'Verifique seu acesso.'));return;}
+    alert('Oportunidade excluída.');await loadLeads();return;
+  }
+  if(action==='convert-lead'){
+    if(!confirm('Cadastrar "'+lead.company_name+'" como cliente? A oportunidade será mantida na lista.'))return;
+    button.disabled=true;
+    const {error}=await supabaseClient.from('customers').insert({user_id:user.id,name:lead.company_name,notes:lead.possible_needs||''});
+    button.disabled=false;
+    if(error){alert('Não foi possível cadastrar o cliente: '+error.message);return;}
+    alert('Cliente cadastrado! A oportunidade original foi mantida.');
+    await loadCustomers();showCRMSection('customers');
+  }
 }
 
-/* SALVAR NOVA OPORTUNIDADE */
-
-document.getElementById('saveLead').addEventListener('click', async () => {
-  const name = document.getElementById('leadName').value.trim();
-
-  if (!name) {
-    alert('Informe o nome do negócio.');
-    return;
-  }
-
-  const { data: { user }, error: userError } =
-    await supabaseClient.auth.getUser();
-
-  if (userError || !user) {
-    alert('Entre na sua conta primeiro.');
-    return;
-  }
-
-  const saveButton = document.getElementById('saveLead');
-  saveButton.disabled = true;
-  saveButton.textContent = 'Salvando...';
-
-  const { error } = await supabaseClient
-    .from('opportunities')
-    .insert({
-      user_id:user.id,
-      company_name:name,
-      possible_needs:document.getElementById('leadNeed').value.trim(),
-      status:document.getElementById('leadStatus').value
-    });
-
-  saveButton.disabled = false;
-  saveButton.textContent = 'Salvar oportunidade na nuvem';
-
-  if (error) {
-    alert('Erro ao salvar: ' + error.message);
-    return;
-  }
-
-  document.getElementById('leadName').value = '';
-  document.getElementById('leadNeed').value = '';
-
-  alert('Oportunidade salva com sucesso!');
-  await loadLeads();
+/* SALVAR OPORTUNIDADE */
+document.getElementById('saveLead').addEventListener('click',async()=>{
+  const name=document.getElementById('leadName').value.trim();
+  if(!name){alert('Informe o nome do negócio.');return;}
+  const user=await getCurrentUser();if(!user){alert('Entre na sua conta primeiro.');return;}
+  const button=document.getElementById('saveLead');button.disabled=true;button.textContent='Salvando...';
+  const {error}=await supabaseClient.from('opportunities').insert({
+    user_id:user.id,company_name:name,
+    possible_needs:document.getElementById('leadNeed').value.trim(),
+    status:document.getElementById('leadStatus').value
+  });
+  button.disabled=false;button.textContent='Salvar oportunidade na nuvem';
+  if(error){alert('Erro ao salvar: '+error.message);return;}
+  document.getElementById('leadName').value='';document.getElementById('leadNeed').value='';
+  alert('Oportunidade salva com sucesso!');await loadLeads();
 });
 
-/* AUTENTICAÇÃO */
-
-const authEmail = document.getElementById('authEmail');
-const authPassword = document.getElementById('authPassword');
-const authMessage = document.getElementById('authMessage');
-
-const signUpButton = document.getElementById('signUp');
-const signInButton = document.getElementById('signIn');
-const signOutButton = document.getElementById('signOut');
-
-async function updateAuthUI() {
-  const { data, error } = await supabaseClient.auth.getSession();
-
-  if (error) {
-    authMessage.textContent = 'Erro ao verificar acesso: ' + error.message;
+/* CLIENTES: CADASTRAR E LISTAR */
+async function loadCustomers(){
+  const user=await getCurrentUser();
+  if(!user){customerList.textContent='Entre na sua conta para visualizar seus clientes.';document.getElementById('customerCount').textContent='0';return;}
+  customerList.textContent='Carregando clientes...';
+  const {data,error}=await supabaseClient.from('customers')
+    .select('id,name,phone,email,notes,created_at')
+    .order('created_at',{ascending:false});
+  if(error){customerList.textContent='Erro ao carregar clientes: '+error.message;return;}
+  currentCustomers=data||[];
+  document.getElementById('customerCount').textContent=currentCustomers.length;
+  if(!currentCustomers.length){customerList.innerHTML='<p>Nenhum cliente cadastrado ainda.</p>';return;}
+  customerList.innerHTML=currentCustomers.map(customer=>`
+    <div class="record">
+      <strong>${escapeHtml(customer.name)}</strong>
+      <p>Telefone: ${escapeHtml(customer.phone||'Não informado')}</p>
+      <p>E-mail: ${escapeHtml(customer.email||'Não informado')}</p>
+      <p>Observações: ${escapeHtml(customer.notes||'Nenhuma')}</p>
+      <div class="actions">
+        <button class="btn secondary" data-action="open-customer" data-id="${escapeHtml(customer.id)}">Abrir</button>
+        <button class="btn" data-action="edit-customer" data-id="${escapeHtml(customer.id)}">Editar</button>
+        <button class="btn danger" data-action="delete-customer" data-id="${escapeHtml(customer.id)}">Excluir</button>
+      </div>
+    </div>`).join('');
+  customerList.querySelectorAll('button[data-action]').forEach(button=>button.addEventListener('click',()=>handleCustomerAction(button)));
+}
+document.getElementById('saveCustomer').addEventListener('click',async()=>{
+  const name=document.getElementById('customerName').value.trim();
+  if(!name){alert('Informe o nome do cliente.');return;}
+  const user=await getCurrentUser();if(!user){alert('Entre na sua conta primeiro.');return;}
+  const button=document.getElementById('saveCustomer');button.disabled=true;button.textContent='Cadastrando...';
+  const {error}=await supabaseClient.from('customers').insert({
+    user_id:user.id,name,
+    phone:document.getElementById('customerPhone').value.trim(),
+    email:document.getElementById('customerEmail').value.trim(),
+    notes:document.getElementById('customerNotes').value.trim()
+  });
+  button.disabled=false;button.textContent='Cadastrar cliente';
+  if(error){alert('Erro ao cadastrar cliente: '+error.message);return;}
+  document.getElementById('customerName').value='';
+  document.getElementById('customerPhone').value='';
+  document.getElementById('customerEmail').value='';
+  document.getElementById('customerNotes').value='';
+  alert('Cliente cadastrado com sucesso!');await loadCustomers();
+});
+async function handleCustomerAction(button){
+  const customer=currentCustomers.find(item=>item.id===button.dataset.id);
+  if(!customer)return;
+  const action=button.dataset.action;
+  if(action==='open-customer'){
+    alert('DADOS DO CLIENTE\n\nNome: '+customer.name+'\nTelefone: '+(customer.phone||'Não informado')+'\nE-mail: '+(customer.email||'Não informado')+'\nObservações: '+(customer.notes||'Nenhuma')+'\nCadastrado em: '+new Date(customer.created_at).toLocaleString('pt-BR'));
     return;
   }
+  const user=await getCurrentUser();if(!user){alert('Entre na sua conta novamente.');return;}
+  if(action==='edit-customer'){
+    const name=prompt('Nome do cliente:',customer.name);if(name===null)return;
+    if(!name.trim()){alert('O nome não pode ficar vazio.');return;}
+    const phone=prompt('Telefone / WhatsApp:',customer.phone||'');if(phone===null)return;
+    const email=prompt('E-mail:',customer.email||'');if(email===null)return;
+    const notes=prompt('Observações:',customer.notes||'');if(notes===null)return;
+    const {data,error}=await supabaseClient.from('customers').update({
+      name:name.trim(),phone:phone.trim(),email:email.trim(),notes:notes.trim()
+    }).eq('id',customer.id).eq('user_id',user.id).select('id');
+    if(error||!data?.length){alert('Não foi possível atualizar: '+(error?.message||'Verifique seu acesso.'));return;}
+    alert('Cliente atualizado com sucesso!');await loadCustomers();return;
+  }
+  if(action==='delete-customer'){
+    if(!confirm('Excluir o cliente "'+customer.name+'"? Esta ação não poderá ser desfeita.'))return;
+    const {data,error}=await supabaseClient.from('customers').delete().eq('id',customer.id).eq('user_id',user.id).select('id');
+    if(error||!data?.length){alert('Não foi possível excluir: '+(error?.message||'Verifique seu acesso.'));return;}
+    alert('Cliente excluído.');await loadCustomers();
+  }
+}
 
-  const session = data.session;
+/* AUTENTICAÇÃO */
+const authEmail=document.getElementById('authEmail');
+const authPassword=document.getElementById('authPassword');
+const authMessage=document.getElementById('authMessage');
+const signUpButton=document.getElementById('signUp');
+const signInButton=document.getElementById('signIn');
+const signOutButton=document.getElementById('signOut');
 
+async function updateAuthUI(){
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error){authMessage.textContent='Erro ao verificar acesso: '+error.message;return;}
+  const session=data.session;
   signUpButton.classList.toggle('hidden',!!session);
   signInButton.classList.toggle('hidden',!!session);
   signOutButton.classList.toggle('hidden',!session);
-
   authEmail.classList.toggle('hidden',!!session);
   authPassword.classList.toggle('hidden',!!session);
-
-  authMessage.textContent = session
-    ? 'Conectado: ' + session.user.email
-    : 'Você ainda não entrou.';
-
-  await loadLeads();
+  document.getElementById('crmArea').classList.toggle('hidden',!session);
+  authMessage.textContent=session?'Conectado: '+session.user.email:'Você ainda não entrou.';
+  if(session){await loadLeads();await loadCustomers();}
+  else{
+    currentLeads=[];currentCustomers=[];
+    leadList.textContent='Entre na sua conta para visualizar suas oportunidades.';
+    customerList.textContent='Entre na sua conta para visualizar seus clientes.';
+    document.getElementById('leadCount').textContent='0';
+    document.getElementById('customerCount').textContent='0';
+  }
 }
-
-signUpButton.addEventListener('click', async () => {
-  const email = authEmail.value.trim();
-  const password = authPassword.value;
-
-  if (!email || password.length < 6) {
-    authMessage.textContent =
-      'Informe um e-mail e uma senha com pelo menos 6 caracteres.';
-    return;
-  }
-
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password
-  });
-
-  if (error) {
-    authMessage.textContent = error.message;
-    return;
-  }
-
-  authMessage.textContent = data.session
-    ? 'Conta criada com sucesso!'
-    : 'Conta criada. Confira seu e-mail para confirmar o cadastro.';
-
+signUpButton.addEventListener('click',async()=>{
+  const email=authEmail.value.trim();const password=authPassword.value;
+  if(!email||password.length<6){authMessage.textContent='Informe um e-mail e uma senha com pelo menos 6 caracteres.';return;}
+  const {data,error}=await supabaseClient.auth.signUp({email,password});
+  if(error){authMessage.textContent=error.message;return;}
+  authMessage.textContent=data.session?'Conta criada com sucesso!':'Conta criada. Confira seu e-mail para confirmar o cadastro.';
   await updateAuthUI();
 });
-
-signInButton.addEventListener('click', async () => {
-  const email = authEmail.value.trim();
-  const password = authPassword.value;
-
-  if (!email || !password) {
-    authMessage.textContent = 'Informe seu e-mail e sua senha.';
-    return;
-  }
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    authMessage.textContent = error.message;
-    return;
-  }
-
+signInButton.addEventListener('click',async()=>{
+  const email=authEmail.value.trim();const password=authPassword.value;
+  if(!email||!password){authMessage.textContent='Informe seu e-mail e sua senha.';return;}
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){authMessage.textContent=error.message;return;}
   await updateAuthUI();
 });
-
-signOutButton.addEventListener('click', async () => {
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    authMessage.textContent = error.message;
-    return;
-  }
-
+signOutButton.addEventListener('click',async()=>{
+  const {error}=await supabaseClient.auth.signOut();
+  if(error){authMessage.textContent=error.message;return;}
   await updateAuthUI();
 });
 
 /* INICIALIZAÇÃO */
-
-window.addEventListener('load', async () => {
+window.addEventListener('load',async()=>{
   await updateAuthUI();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-const SUPABASE_URL = "https://zvtsudyxldndqofmxucd.supabase.co";
-const SUPABASE_KEY = "sb_publishable_GsXcsiBXxBgEbAXuTKQhWA_MCocigFX";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const SUPABASE_URL="https://zvtsudyxldndqofmxucd.supabase.co";
+const SUPABASE_KEY="sb_publishable_GsXcsiBXxBgEbAXuTKQhWA_MCocigFX";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 </script>
-
 </body>
 </html>
