@@ -171,14 +171,81 @@ document.getElementById('makeScript').addEventListener('click',()=>{
   const audience=document.getElementById('videoAudience').value.trim()||'clientes';
   document.getElementById('scriptOut').value=`ROTEIRO — ${topic.toUpperCase()}\nPúblico: ${audience}\n\n1. ABERTURA (0–3s): Comece com uma imagem atraente do produto.\n2. APRESENTAÇÃO (3–10s): Mostre o produto e destaque uma característica confirmada.\n3. CONVITE (10–15s): Convide o público a conhecer ou consultar o negócio.\n\nCONFIRMAR ANTES DE PUBLICAR: preço, disponibilidade, ingredientes e condições da oferta.`;
 });
-function getLeads(){try{return JSON.parse(localStorage.getItem('jarvis_leads')||'[]')}catch{return []}}
-function renderLeads(){const list=getLeads();document.getElementById('leadList').innerHTML=list.length?'<hr>'+list.map(x=>`<p><b>${escapeHtml(x.name)}</b><br>${escapeHtml(x.need)} · ${escapeHtml(x.status)}</p>`).join(''):'<p>Nenhuma oportunidade salva ainda.</p>'}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-document.getElementById('saveLead').addEventListener('click',()=>{
-  const name=document.getElementById('leadName').value.trim();if(!name){alert('Informe o nome do negócio.');return}
-  const list=getLeads();list.unshift({name,need:document.getElementById('leadNeed').value.trim(),status:document.getElementById('leadStatus').value});
-  localStorage.setItem('jarvis_leads',JSON.stringify(list));document.getElementById('leadName').value='';document.getElementById('leadNeed').value='';renderLeads();
+
+async function loadLeads() {
+  const leadList = document.getElementById('leadList');
+
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    leadList.innerHTML = '<p>Entre na sua conta para visualizar suas oportunidades.</p>';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('opportunities')
+    .select('id, company_name, possible_needs, status, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    leadList.textContent = 'Erro ao carregar oportunidades: ' + error.message;
+    return;
+  }
+
+  leadList.innerHTML = data.length
+    ? '<hr>' + data.map(x =>
+        `<p><b>${escapeHtml(x.company_name)}</b><br>${escapeHtml(x.possible_needs || '')} · ${escapeHtml(x.status || '')}</p>`
+      ).join('')
+    : '<p>Nenhuma oportunidade salva ainda.</p>';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+document.getElementById('saveLead').addEventListener('click', async () => {
+  const name = document.getElementById('leadName').value.trim();
+
+  if (!name) {
+    alert('Informe o nome do negócio.');
+    return;
+  }
+
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    alert('Entre na sua conta primeiro.');
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('opportunities')
+    .insert({
+      user_id: user.id,
+      company_name: name,
+      possible_needs: document.getElementById('leadNeed').value.trim(),
+      status: document.getElementById('leadStatus').value
+    });
+
+  if (error) {
+    alert('Erro ao salvar: ' + error.message);
+    return;
+  }
+
+  document.getElementById('leadName').value = '';
+  document.getElementById('leadNeed').value = '';
+
+  await loadLeads();
 });
+
 
 const authEmail = document.getElementById('authEmail');
 const authPassword = document.getElementById('authPassword');
@@ -260,8 +327,21 @@ signOutButton.addEventListener('click', async () => {
 });
 
 window.addEventListener('load', updateAuthUI);
+window.addEventListener('load', loadLeads);
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://zvtsudyxldndqofmxucd.supabase.co";
+const SUPABASE_KEY = "sb_publishable_GsXcsiBXxBgEbAXuTKQhWA_MCocigFX";
 
-renderLeads();
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+</script>
+</body>
+</html>
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
