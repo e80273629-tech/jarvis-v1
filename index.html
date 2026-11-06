@@ -79,6 +79,22 @@
   </section>
 
   <section id="clients" class="panel hidden">
+<div class="notice">
+  <strong>ACESSO AO J.A.R.V.I.S.</strong>
+  <p>Entre na sua conta ou crie uma nova para acessar suas oportunidades.</p>
+</div>
+
+<label for="authEmail">E-mail</label>
+<input id="authEmail" type="email" placeholder="Seu e-mail">
+
+<label for="authPassword">Senha</label>
+<input id="authPassword" type="password" placeholder="Sua senha">
+
+<button class="btn" id="signUp">Criar conta</button>
+<button class="btn secondary" id="signIn">Entrar</button>
+<button class="btn secondary hidden" id="signOut">Sair</button>
+
+<p id="authMessage" class="muted">Você ainda não entrou.</p>
     <h3>Central comercial</h3>
     <p class="muted">Registre leads encontrados em fontes públicas e acompanhe o status. Esta versão não busca contatos nem envia mensagens automaticamente.</p>
     <label for="leadName">Nome do negócio</label><input id="leadName" placeholder="Nome da empresa">
