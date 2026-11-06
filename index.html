@@ -179,7 +179,8 @@ async function loadLeads() {
     await supabaseClient.auth.getUser();
 
   if (userError || !user) {
-    leadList.innerHTML = '<p>Entre na sua conta para visualizar suas oportunidades.</p>';
+    leadList.innerHTML =
+      '<p>Entre na sua conta para visualizar suas oportunidades.</p>';
     return;
   }
 
@@ -189,7 +190,8 @@ async function loadLeads() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    leadList.textContent = 'Erro ao carregar oportunidades: ' + error.message;
+    leadList.textContent =
+      'Erro ao carregar oportunidades: ' + error.message;
     return;
   }
 
