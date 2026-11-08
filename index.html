@@ -224,7 +224,51 @@ Professional food photography.`;
 
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+// Camada escura para facilitar a leitura
+const gradient = ctx.createLinearGradient(0, canvas.height * 0.55, 0, canvas.height);
+gradient.addColorStop(0, 'rgba(0,0,0,0)');
+gradient.addColorStop(1, 'rgba(0,0,0,0.85)');
+ctx.fillStyle = gradient;
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// Textos em português
+const biz = document.getElementById('biz').value.trim();
+const product = document.getElementById('product').value.trim();
+const headline = document.getElementById('headline').value.trim();
+const details = document.getElementById('details').value.trim();
+const price = document.getElementById('price').value.trim();
+const contact = document.getElementById('contact').value.trim();
+
+ctx.textAlign = 'center';
+ctx.fillStyle = '#ffffff';
+ctx.shadowColor = 'rgba(0,0,0,0.7)';
+ctx.shadowBlur = 8;
+
+let y = canvas.height * 0.68;
+
+ctx.font = 'bold 52px Arial';
+ctx.fillText(headline || product, canvas.width / 2, y);
+
+y += 65;
+ctx.font = '28px Arial';
+wrapText(details, canvas.width / 2, y, canvas.width - 80, 38, 3);
+
+if (price) {
+  y += 120;
+  ctx.font = 'bold 46px Arial';
+  ctx.fillStyle = '#ffd166';
+  ctx.fillText(price, canvas.width / 2, y);
+}
+
+if (contact) {
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '26px Arial';
+  ctx.fillText(contact, canvas.width / 2, canvas.height - 35);
+}
+
+ctx.shadowBlur = 0;
       downloadButton.disabled = false;
       button.disabled = false;
       button.textContent = 'Gerar arte';
