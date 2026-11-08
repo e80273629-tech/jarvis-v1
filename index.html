@@ -178,39 +178,77 @@ function wrapText(text,x,y,maxWidth,lineHeight,maxLines=3){
   }
   if(line)ctx.fillText(line,x,y);
 }
-function makeArt(){
-  const palettes={berry:['#5c1838','#a82d58','#fff0df','#ffd0a6'],cocoa:['#2c1a17','#714332','#fff0d2','#d7ae67'],pink:['#782e56','#d86c9b','#fff1f6','#f8c4d9']};
-  const [dark,accent,cream,light]=palettes[document.getElementById('palette').value];
-  const biz=document.getElementById('biz').value.trim()||'Doceria';
-  const product=document.getElementById('product').value.trim()||'Nosso destaque';
-  const headline=document.getElementById('headline').value.trim()||'Uma delícia espera por você';
-  const details=document.getElementById('details').value.trim();
-  const price=document.getElementById('price').value.trim();
-  const contact=document.getElementById('contact').value.trim();
-  const gradient=ctx.createLinearGradient(0,0,1080,1350);
-  gradient.addColorStop(0,dark);gradient.addColorStop(1,accent);
-  ctx.fillStyle=gradient;ctx.fillRect(0,0,1080,1350);
-  ctx.fillStyle=cream;ctx.beginPath();ctx.arc(540,500,350,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=light;ctx.beginPath();ctx.arc(540,500,300,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#6b392b';ctx.beginPath();ctx.ellipse(540,610,235,75,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#9b5a43';ctx.fillRect(305,455,470,155);
-  ctx.fillStyle='#f5d9c5';ctx.beginPath();ctx.ellipse(540,455,235,75,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#7a243c';ctx.beginPath();ctx.ellipse(540,455,235,75,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#e7a0ad';ctx.beginPath();ctx.ellipse(540,438,235,70,0,0,Math.PI*2);ctx.fill();
-  for(let i=0;i<7;i++){ctx.fillStyle=i%2?'#fff0df':'#b72e50';ctx.beginPath();ctx.arc(365+i*58,420+(i%2)*24,18,0,Math.PI*2);ctx.fill();}
-  ctx.textAlign='center';ctx.fillStyle=cream;ctx.font='700 34px system-ui';ctx.fillText(biz.toUpperCase().slice(0,38),540,105);
-  ctx.fillStyle=dark;ctx.font='800 68px system-ui';wrapText(headline,540,850,900,82,2);
-  ctx.fillStyle=cream;ctx.font='600 42px system-ui';ctx.fillText(product.slice(0,45),540,1040);
-  if(details){ctx.font='32px system-ui';ctx.fillText(details.slice(0,58),540,1100);}
-  if(price){ctx.font='800 54px system-ui';ctx.fillText(price.slice(0,24),540,1190);}
-  if(contact){ctx.font='28px system-ui';ctx.fillText(contact.slice(0,48),540,1270);}
-  ctx.textAlign='start';document.getElementById('downloadArt').disabled=false;
+async function makeArt(){
+  const button = document.getElementById('makeArt');
+  const downloadButton = document.getElementById('downloadArt');
+
+  const biz = document.getElementById('biz').value.trim();
+  const product = document.getElementById('product').value.trim();
+  const headline = document.getElementById('headline').value.trim();
+  const details = document.getElementById('details').value.trim();
+  const price = document.getElementById('price').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+  const palette = document.getElementById('palette').value;
+
+  const prompt = `Crie uma arte publicitária profissional, bonita e chamativa para uma pequena empresa.
+Empresa: ${biz}.
+Produto: ${product}.
+Título principal: ${headline}.
+Detalhes: ${details}.
+Preço: ${price}.
+Contato: ${contact}.
+Estilo visual: ${palette}.
+Composição profissional, cores harmoniosas, iluminação bonita e formato quadrado.
+Não invente textos, letras ou preços.`;
+
+  button.disabled = true;
+  button.textContent = 'Gerando imagem...';
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke(
+      'gerar-imagem-ia',
+      { body: { prompt } }
+    );
+
+    if (error) throw error;
+    if (!data || !data.image) {
+      throw new Error('A função não retornou a imagem.');
+    }
+
+    const img = new Image();
+
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      downloadButton.disabled = false;
+      button.disabled = false;
+      button.textContent = 'Gerar arte';
+    };
+
+    img.onerror = () => {
+      alert('A imagem foi recebida, mas não foi possível exibi-la.');
+      button.disabled = false;
+      button.textContent = 'Gerar arte';
+    };
+
+    img.src = data.image;
+
+  } catch (error) {
+    console.error(error);
+    alert('Erro ao gerar imagem: ' + (error.message || 'Tente novamente.'));
+    button.disabled = false;
+    button.textContent = 'Gerar arte';
+  }
 }
-document.getElementById('makeArt').addEventListener('click',makeArt);
-document.getElementById('downloadArt').addEventListener('click',()=>{
-  const a=document.createElement('a');a.download='jarvis-arte-promocional.png';a.href=canvas.toDataURL('image/png');a.click();
+
+document.getElementById('makeArt').addEventListener('click', makeArt);
+
+document.getElementById('downloadArt').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.download = 'jarvis-arte-ia.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
 });
-makeArt();
 
 /* ESTÚDIO DE VÍDEOS */
 document.getElementById('makeScript').addEventListener('click',()=>{
