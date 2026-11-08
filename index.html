@@ -188,7 +188,17 @@ async function makeArt(){
   const details = document.getElementById('details').value.trim();
   const price = document.getElementById('price').value.trim();
   const contact = document.getElementById('contact').value.trim();
-  const palette = document.getElementById('palette').value;
+  const selectedPalette = document.getElementById('palette').value;
+
+const paletteColors = {
+  'Framboesa e creme': 'deep pink, soft ivory and warm cream',
+  'Chocolate': 'dark brown, caramel and beige',
+  'Rosa': 'soft pink, white and light rose',
+  'Azul': 'navy blue, sky blue and white',
+  'Verde': 'forest green, mint and cream'
+};
+
+const palette = paletteColors[selectedPalette] || 'elegant neutral colors';
 
 const prompt = `Create a professional, photorealistic commercial product photograph.
 
