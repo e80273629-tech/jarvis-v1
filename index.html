@@ -190,25 +190,24 @@ async function makeArt(){
   const contact = document.getElementById('contact').value.trim();
   const palette = document.getElementById('palette').value;
 
-const prompt = `Create a premium commercial food advertising photograph.
-Main subject: ${product}, shown as a realistic, delicious and appetizing product.
-Business: ${biz}.
-Advertising headline: ${headline}.
-Offer and details: ${details}.
-Price: ${price}.
-Contact: ${contact}.
+const prompt = `Create a premium, photorealistic commercial product photograph.
+Main subject: ${product}.
+Business type: ${biz}.
 
-VISUAL REQUIREMENTS:
-Create a professional advertising poster, not a simple illustration.
-Show the actual product large and clearly in the foreground.
-Use realistic food photography, natural textures, professional studio lighting and beautiful composition.
-Use a background and decorative elements that match the selected color palette: ${palette}.
-Make the product the main visual focus.
-Leave clean, uncluttered space for advertising text.
-No dogs, no animals, no unrelated objects.
-No cartoon style, no generic food plate.
-No fake logos or invented prices.
-High-end restaurant advertising quality.`;
+Show only the actual food product, large and clearly visible.
+Make it look delicious, realistic and professionally photographed.
+Use beautiful studio lighting, natural textures and an attractive composition.
+Use colors inspired by this palette: ${palette}.
+Create a clean advertising background with some empty space around the product.
+
+IMPORTANT:
+This is a photograph background only.
+Do not include any text, letters, words, numbers, labels, logos, menus or watermarks.
+Do not write ingredients.
+Do not include typography or signs.
+No unrelated objects.
+No cartoon style.
+Professional food photography.`;
 
   try {
     const { data, error } = await supabaseClient.functions.invoke(
