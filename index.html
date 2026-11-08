@@ -263,50 +263,28 @@ async function makeArt() {
   // Corrigido: a variável palette agora é definida antes de ser usada no prompt.
   const palette = paletteColors[selectedPalette] || 'elegant neutral colors';
 
-  const prompt = `Create a professional, photorealistic commercial product photograph.
+  const prompt = `Create a professional, realistic commercial product image.
 
-EXACT PRODUCT REQUEST:
-"${product}"
+MAIN PRODUCT: ${product}
+BUSINESS CATEGORY: ${biz}
 
-BUSINESS CATEGORY:
-"${biz || 'General business'}"
-
-PRODUCT FIDELITY:
-The exact item described in EXACT PRODUCT REQUEST must be the single main subject.
-Depict that item faithfully. Preserve its real-world shape, materials, colors, proportions and defining details.
-Do not substitute it with another object, food, model, toy or unrelated item.
-Do not add objects that are not normally part of the requested product.
-If the request is a model, miniature, maquette or architectural model, show that requested model itself, not food or a different object.
-If the request is food, show only ingredients and toppings that naturally belong to the named food, in their normal realistic colors.
-Do not assume that every product is food.
+IMPORTANT:
+Show exactly the product described above.
+Preserve its requested colors, shape, material, texture and details.
+Never recolor the product to match the selected palette.
+The product must remain visually accurate and recognizable.
 
 COLOR PALETTE:
 ${palette}
 
-STRICT COLOR SEPARATION:
-The requested product MUST keep its exact natural and original colors.
-Product colors have absolute priority over the selected palette.
-The selected palette must NEVER affect the product's color, material, texture or appearance.
-Apply the selected palette ONLY to the background and environmental lighting.
-If the product is a brown teddy bear, it MUST remain brown.
-If the product is white, it MUST remain white.
-If the product is black, it MUST remain black.
-Never tint, recolor, dye, paint or stylize the product using palette colors.
+Apply palette colors ONLY to the background and studio lighting, never to the product.
 
 COMPOSITION:
-Show one clear, large, recognizable main subject.
-Use professional commercial studio photography, realistic texture, natural shadows and balanced lighting.
-Keep the background simple, clean and uncluttered.
-Only include accessories if explicitly requested.
+One large, centered main subject.
+Professional studio photography, realistic materials, natural shadows, clean background.
+No unrequested fruit, food, flowers, ingredients, people, hands, extra objects, text, logos or watermarks.
 
-DO NOT INCLUDE:
-Unrequested food, fruit, berries, flowers, ingredients, props, people, hands, extra products, text, letters, numbers, logos, labels or watermarks.
-
-FINAL REQUIREMENT:
-The ONLY main subject must be exactly: "${product}".
-Preserve its real-world identity, original colors, shape, materials and details.
-Never change the product to match the selected palette.
-Product accuracy is more important than artistic decoration.`;
+Product accuracy is the highest priority.`;
 
   // Evita que uma imagem anterior pareça ser o resultado de uma nova tentativa.
   artReady = false;
