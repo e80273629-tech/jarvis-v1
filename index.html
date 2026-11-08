@@ -196,41 +196,57 @@ const paletteColors = {
   'pink': 'soft pink, white and delicate rose'
 };
 
-const palette = paletteColors[selectedPalette] || 'elegant neutral colors';
+const prompt = `Create a premium, professional commercial product photograph.
 
-const prompt = `Create a professional, photorealistic commercial product photograph.
+PRODUCT TO DISPLAY:
+${product}
 
-MAIN SUBJECT: ${product}
-
-The main subject must be exactly the product named above.
-If the product is a hot dog, show a hot dog.
-If the product is a cake, show a cake.
-Never replace the product with fruits, colors, ingredients or decorative objects.
-
-BUSINESS TYPE: ${biz}
-
-VISUAL STYLE:
-Professional commercial photography, realistic textures, beautiful lighting and attractive composition.
+BUSINESS CATEGORY:
+${biz}
 
 COLOR PALETTE:
 ${palette}
 
-IMPORTANT:
-The selected palette must affect ONLY the background, studio lighting and abstract graphic accents.
-Keep the product and every ingredient in their natural, realistic colors.
-Never recolor, replace or invent ingredients to match the palette.
-Preserve the authentic recipe and traditional toppings of the requested product.
-For a hot dog, use a real sausage inside a bread bun; mustard must look like mustard and ketchup must look like ketchup. Never replace them with berries, chocolate, cocoa or fruit.
-The palette must NEVER determine the main subject.
-Do not create images of the palette itself.
+ABSOLUTE PRODUCT ACCURACY:
+The requested product is the main subject of the image.
+Represent it faithfully and realistically.
+Preserve its authentic shape, materials, colors, ingredients and details.
+Never replace the product with another object.
+Never invent ingredients, toppings, decorations or accessories.
+Do not change the natural colors of the product to match the selected palette.
 
-Create a clean advertising photograph.
-Show the requested product large, clear and recognizable.
+FOOD ACCURACY:
+If the product is food, show only ingredients that naturally belong to that food.
+Keep every ingredient in its realistic natural color.
+Never use fruit, berries, chocolate or unrelated ingredients as decoration.
+For a hot dog, show a bread bun and a realistic sausage.
+Mustard must look like mustard and ketchup must look like ketchup.
+Do not add unexpected ingredients.
+
+BACKGROUND AND COLORS:
+Use the selected palette ONLY for the background, lighting and abstract decorative shapes.
+Keep the background elegant, clean and visually attractive.
+Never use palette colors to replace or transform the product or its ingredients.
+
+COMPOSITION:
+Show one clear main product.
+Make the product large, recognizable and visually appealing.
+Use professional studio lighting.
+Create realistic textures, natural shadows and balanced composition.
+Keep the background simple and uncluttered.
+
+STRICT EXCLUSIONS:
+No unrelated objects.
+No decorative food.
+No random fruits or berries.
+No extra ingredients.
+No people or hands.
 No text, letters, numbers, logos, labels or watermarks.
-No unrelated objects or decorative food.
-Do not show strawberries, raspberries, fruits or ingredients unless they are part of the requested product.
-Use only abstract color shapes in the background.
-Photorealistic product photography.`;
+
+FINAL RESULT:
+A realistic, premium commercial advertising photograph.
+The product must match the requested product exactly.
+Professional quality, clean composition and realistic colors.`;
 
   try {
     const { data, error } = await supabaseClient.functions.invoke(
