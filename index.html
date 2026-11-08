@@ -77,7 +77,7 @@
 
   <section id="art" class="panel hidden">
     <h3>Estúdio de imagens · Arte promocional</h3>
-    <p class="muted">Crie uma arte promocional básica diretamente no aparelho, sem consumir créditos de IA.</p>
+    <p class="muted">Gere uma imagem de produto com IA e monte a arte promocional com textos em português.</p>
     <div class="row">
       <div><label for="biz">Nome do negócio</label><input id="biz" value="Doceria Exemplo"></div>
       <div><label for="product">Produto em destaque</label><input id="product" value="Bolo de chocolate"></div>
@@ -90,9 +90,10 @@
     </div>
     <label for="palette">Paleta</label>
     <select id="palette"><option value="berry">Framboesa e creme</option><option value="cocoa">Cacau e dourado</option><option value="pink">Rosa delicado</option></select>
-    <button class="btn" id="makeArt">Gerar arte</button><button class="btn secondary" id="downloadArt" disabled>Baixar PNG</button>
+    <button class="btn" id="makeArt" type="button">Gerar arte</button><button class="btn secondary" id="downloadArt" type="button" disabled>Baixar PNG</button>
+    <p id="artStatus" class="muted" aria-live="polite">Preencha o produto e escolha uma paleta para começar.</p>
     <canvas id="artCanvas" class="preview" width="1080" height="1350" aria-label="Prévia da arte"></canvas>
-    <div class="notice">Crie artes promocionais profissionais com inteligência artificial. Informe seu produto, escolha as cores e gere imagens exclusivas para divulgar seu negócio.</div>
+    <div class="notice">A imagem do produto é gerada por IA. Os textos da divulgação são aplicados separadamente pelo J.A.R.V.I.S. para manter o português correto.</div>
   </section>
 
   <section id="video" class="panel hidden">
@@ -100,7 +101,7 @@
     <p class="muted">Organizador inicial de roteiro. A geração e renderização de vídeos ainda não estão conectadas.</p>
     <label for="videoTopic">Tema do vídeo</label><input id="videoTopic" placeholder="Ex.: lançamento de um sabor novo">
     <label for="videoAudience">Público</label><input id="videoAudience" placeholder="Ex.: clientes da doceria">
-    <button class="btn" id="makeScript">Montar estrutura de roteiro</button>
+    <button class="btn" id="makeScript" type="button">Montar estrutura de roteiro</button>
     <textarea id="scriptOut" placeholder="O roteiro aparecerá aqui." readonly></textarea>
   </section>
 
@@ -108,13 +109,13 @@
     <div class="notice"><strong>ACESSO AO J.A.R.V.I.S.</strong><p>Entre na sua conta para acessar seus dados comerciais na nuvem.</p></div>
     <label for="authEmail">E-mail</label><input id="authEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
     <label for="authPassword">Senha</label><input id="authPassword" type="password" placeholder="Sua senha" autocomplete="current-password">
-    <button class="btn" id="signUp">Criar conta</button><button class="btn secondary" id="signIn">Entrar</button><button class="btn secondary hidden" id="signOut">Sair da conta</button>
+    <button class="btn" id="signUp" type="button">Criar conta</button><button class="btn secondary" id="signIn" type="button">Entrar</button><button class="btn secondary hidden" id="signOut" type="button">Sair da conta</button>
     <p id="authMessage" class="muted">Você ainda não entrou.</p>
 
     <div id="crmArea" class="hidden">
       <h3>Central comercial</h3>
       <p class="muted">Gerencie oportunidades e clientes em áreas separadas. Seus registros ficam associados à sua conta.</p>
-      <nav class="crm-nav"><button class="btn" id="showLeads">Oportunidades</button><button class="btn secondary" id="showCustomers">Clientes</button></nav>
+      <nav class="crm-nav"><button class="btn" id="showLeads" type="button">Oportunidades</button><button class="btn secondary" id="showCustomers" type="button">Clientes</button></nav>
 
       <div id="leadsSection" class="crm-section">
         <h4>Nova oportunidade</h4>
@@ -122,7 +123,7 @@
         <label for="leadNeed">Possível necessidade</label><input id="leadNeed" placeholder="Ex.: artes para divulgar produtos">
         <label for="leadStatus">Status</label>
         <select id="leadStatus"><option>Para analisar</option><option>Contato autorizado</option><option>Mensagem enviada manualmente</option><option>Não interessado</option></select>
-        <button class="btn" id="saveLead">Salvar oportunidade na nuvem</button>
+        <button class="btn" id="saveLead" type="button">Salvar oportunidade na nuvem</button>
         <h4 style="margin-top:24px">Oportunidades cadastradas <span class="count" id="leadCount">0</span></h4>
         <div id="leadList" class="muted">Entre na sua conta para visualizar.</div>
       </div>
@@ -135,7 +136,7 @@
           <div><label for="customerEmail">E-mail</label><input id="customerEmail" type="email" placeholder="cliente@email.com"></div>
         </div>
         <label for="customerNotes">Observações</label><textarea id="customerNotes" placeholder="Informações importantes sobre o cliente"></textarea>
-        <button class="btn" id="saveCustomer">Cadastrar cliente</button>
+        <button class="btn" id="saveCustomer" type="button">Cadastrar cliente</button>
         <h4 style="margin-top:24px">Clientes cadastrados <span class="count" id="customerCount">0</span></h4>
         <div id="customerList" class="muted">Entre na sua conta para visualizar.</div>
       </div>
@@ -152,98 +153,164 @@
   <footer>J.A.R.V.I.S. V1 · Central pessoal · Supabase</footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+'use strict';
+
+/* SUPABASE
+   A chave publishable é própria para uso no navegador.
+   Nunca coloque aqui uma chave secret ou service_role. */
+const SUPABASE_URL = "https://zvtsudyxldndqofmxucd.supabase.co";
+const SUPABASE_KEY = "sb_publishable_GsXcsiBXxBgEbAXuTKQhWA_MCocigFX";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 /* NAVEGAÇÃO */
-const panels=[...document.querySelectorAll('.panel')];
-document.querySelectorAll('.tile').forEach(button=>{
-  button.addEventListener('click',()=>{
-    panels.forEach(panel=>panel.classList.add('hidden'));
-    const target=document.getElementById(button.dataset.target);
+const panels = [...document.querySelectorAll('.panel')];
+document.querySelectorAll('.tile').forEach(button => {
+  button.addEventListener('click', () => {
+    panels.forEach(panel => panel.classList.add('hidden'));
+    const target = document.getElementById(button.dataset.target);
+    if (!target) return;
     target.classList.remove('hidden');
-    target.scrollIntoView({behavior:'smooth',block:'start'});
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
 
 /* ESTÚDIO DE IMAGENS */
-const canvas=document.getElementById('artCanvas');
-const ctx=canvas.getContext('2d');
-function wrapText(text,x,y,maxWidth,lineHeight,maxLines=3){
-  const words=text.split(/\s+/);let line='';let lines=0;
-  for(const word of words){
-    const test=line?line+' '+word:word;
-    if(ctx.measureText(test).width>maxWidth&&line){
-      ctx.fillText(line,x,y);line=word;y+=lineHeight;lines++;
-      if(lines>=maxLines)return;
-    }else line=test;
-  }
-  if(line)ctx.fillText(line,x,y);
-}
-async function makeArt(){
-  const button = document.getElementById('makeArt');
-  const downloadButton = document.getElementById('downloadArt');
+const canvas = document.getElementById('artCanvas');
+const ctx = canvas.getContext('2d');
+const makeArtButton = document.getElementById('makeArt');
+const downloadArtButton = document.getElementById('downloadArt');
+const artStatus = document.getElementById('artStatus');
+let artReady = false;
 
-  const biz = document.getElementById('biz').value.trim();
-  const product = document.getElementById('product').value.trim();
+function wrapText(text, x, y, maxWidth, lineHeight, maxLines = 3) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  let line = '';
+  let lines = 0;
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, y);
+      line = word;
+      y += lineHeight;
+      lines++;
+      if (lines >= maxLines) return;
+    } else {
+      line = test;
+    }
+  }
+  if (line && lines < maxLines) ctx.fillText(line, x, y);
+}
+
+function drawPromotionText() {
   const headline = document.getElementById('headline').value.trim();
+  const product = document.getElementById('product').value.trim();
   const details = document.getElementById('details').value.trim();
   const price = document.getElementById('price').value.trim();
   const contact = document.getElementById('contact').value.trim();
+
+  const gradient = ctx.createLinearGradient(0, canvas.height * 0.55, 0, canvas.height);
+  gradient.addColorStop(0, 'rgba(0,0,0,0)');
+  gradient.addColorStop(1, 'rgba(0,0,0,0.82)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)';
+  ctx.shadowBlur = 8;
+
+  let y = canvas.height * 0.68;
+  ctx.font = 'bold 52px Arial';
+  ctx.fillText(headline || product, canvas.width / 2, y, canvas.width - 80);
+
+  y += 65;
+  ctx.font = '28px Arial';
+  wrapText(details, canvas.width / 2, y, canvas.width - 100, 38, 3);
+
+  if (price) {
+    y += 120;
+    ctx.font = 'bold 46px Arial';
+    ctx.fillStyle = '#ffd166';
+    ctx.fillText(price, canvas.width / 2, y, canvas.width - 80);
+  }
+
+  if (contact) {
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '26px Arial';
+    ctx.fillText(contact, canvas.width / 2, canvas.height - 35, canvas.width - 80);
+  }
+  ctx.shadowBlur = 0;
+}
+
+async function makeArt() {
+  const biz = document.getElementById('biz').value.trim();
+  const product = document.getElementById('product').value.trim();
   const selectedPalette = document.getElementById('palette').value;
 
-const paletteColors = {
-  'berry': 'deep pink, soft ivory and warm cream',
-  'cocoa': 'dark chocolate brown, golden and beige',
-  'pink': 'soft pink, white and delicate rose'
-};
+  if (!product) {
+    artStatus.textContent = 'Informe o produto que deseja divulgar.';
+    document.getElementById('product').focus();
+    return;
+  }
 
-const prompt = `Create a premium, professional commercial product photograph.
+  const paletteColors = {
+    berry: 'deep pink, soft ivory and warm cream',
+    cocoa: 'dark chocolate brown, golden and beige',
+    pink: 'soft pink, white and delicate rose'
+  };
+  // Corrigido: a variável palette agora é definida antes de ser usada no prompt.
+  const palette = paletteColors[selectedPalette] || 'elegant neutral colors';
 
-PRODUCT TO DISPLAY:
-${product}
+  const prompt = `Create a professional, photorealistic commercial product photograph.
+
+EXACT PRODUCT REQUEST:
+"${product}"
 
 BUSINESS CATEGORY:
-${biz}
+"${biz || 'General business'}"
+
+PRODUCT FIDELITY:
+The exact item described in EXACT PRODUCT REQUEST must be the single main subject.
+Depict that item faithfully. Preserve its real-world shape, materials, colors, proportions and defining details.
+Do not substitute it with another object, food, model, toy or unrelated item.
+Do not add objects that are not normally part of the requested product.
+If the request is a model, miniature, maquette or architectural model, show that requested model itself, not food or a different object.
+If the request is food, show only ingredients and toppings that naturally belong to the named food, in their normal realistic colors.
+Do not assume that every product is food.
 
 COLOR PALETTE:
 ${palette}
 
-ABSOLUTE PRODUCT ACCURACY:
-The requested product is the main subject of the image.
-Represent it faithfully and realistically.
-Preserve its authentic shape, materials, colors, ingredients and details.
-Never replace the product with another object.
-Never invent ingredients, toppings, decorations or accessories.
-Do not change the natural colors of the product to match the selected palette.
-
-FOOD ACCURACY:
-If the product is food, show only ingredients that naturally belong to that food.
-Keep every ingredient in its realistic natural color.
-Never use fruit, berries, chocolate or unrelated ingredients as decoration.
-
-BACKGROUND AND COLORS:
-Use the selected palette ONLY for the background, lighting and abstract decorative shapes.
-Keep the background elegant, clean and visually attractive.
-Never use palette colors to replace or transform the product or its ingredients.
+PALETTE RESTRICTION:
+Use the selected palette only for the background, studio lighting and subtle abstract graphic accents.
+Never recolor, replace or transform the requested product or its parts to match the palette.
+Do not use palette names as instructions to add ingredients, fruit, berries, chocolate or decorations.
 
 COMPOSITION:
-Show one clear main product.
-Make the product large, recognizable and visually appealing.
-Use professional studio lighting.
-Create realistic textures, natural shadows and balanced composition.
-Keep the background simple and uncluttered.
+Show one clear, large, recognizable main subject.
+Use professional commercial studio photography, realistic texture, natural shadows and balanced lighting.
+Keep the background simple, clean and uncluttered.
+Only include accessories if they are explicitly named or essential to accurately display the requested item.
 
-STRICT EXCLUSIONS:
-No unrelated objects.
-No decorative food.
-No random fruits or berries.
-No extra ingredients.
-No people or hands.
-No text, letters, numbers, logos, labels or watermarks.
+DO NOT INCLUDE:
+Unrequested food, fruit, berries, flowers, ingredients, props, people, hands, extra products, text, letters, numbers, logos, labels or watermarks.
 
-FINAL RESULT:
-A realistic, premium commercial advertising photograph.
-The product must match the requested product exactly.
-Professional quality, clean composition and realistic colors.`;
+FINAL REQUIREMENT:
+The image must depict "${product}" and nothing else as the main subject.
+Accuracy to the requested product is more important than artistic decoration.`;
+
+  // Evita que uma imagem anterior pareça ser o resultado de uma nova tentativa.
+  artReady = false;
+  downloadArtButton.disabled = true;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  makeArtButton.disabled = true;
+  makeArtButton.textContent = 'Gerando...';
+  artStatus.textContent = 'Enviando o pedido para a inteligência artificial. Aguarde...';
 
   try {
     const { data, error } = await supabaseClient.functions.invoke(
@@ -252,94 +319,69 @@ Professional quality, clean composition and realistic colors.`;
     );
 
     if (error) throw error;
-    if (!data || !data.image) {
-      throw new Error('A função não retornou a imagem.');
+    if (!data || !data.image || typeof data.image !== 'string') {
+      throw new Error('A função não retornou uma imagem válida.');
     }
 
     const img = new Image();
 
     img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-// Camada escura para facilitar a leitura
-const gradient = ctx.createLinearGradient(0, canvas.height * 0.55, 0, canvas.height);
-gradient.addColorStop(0, 'rgba(0,0,0,0)');
-gradient.addColorStop(1, 'rgba(0,0,0,0.85)');
-ctx.fillStyle = gradient;
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-// Textos em português
-const biz = document.getElementById('biz').value.trim();
-const product = document.getElementById('product').value.trim();
-const headline = document.getElementById('headline').value.trim();
-const details = document.getElementById('details').value.trim();
-const price = document.getElementById('price').value.trim();
-const contact = document.getElementById('contact').value.trim();
-
-ctx.textAlign = 'center';
-ctx.fillStyle = '#ffffff';
-ctx.shadowColor = 'rgba(0,0,0,0.7)';
-ctx.shadowBlur = 8;
-
-let y = canvas.height * 0.68;
-
-ctx.font = 'bold 52px Arial';
-ctx.fillText(headline || product, canvas.width / 2, y);
-
-y += 65;
-ctx.font = '28px Arial';
-wrapText(details, canvas.width / 2, y, canvas.width - 80, 38, 3);
-
-if (price) {
-  y += 120;
-  ctx.font = 'bold 46px Arial';
-  ctx.fillStyle = '#ffd166';
-  ctx.fillText(price, canvas.width / 2, y);
-}
-
-if (contact) {
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '26px Arial';
-  ctx.fillText(contact, canvas.width / 2, canvas.height - 35);
-}
-
-ctx.shadowBlur = 0;
-      downloadButton.disabled = false;
-      button.disabled = false;
-      button.textContent = 'Gerar arte';
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        drawPromotionText();
+        artReady = true;
+        downloadArtButton.disabled = false;
+        artStatus.textContent = 'Imagem gerada. Confira o produto antes de baixar.';
+      } catch (drawError) {
+        console.error(drawError);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        artStatus.textContent = 'A imagem chegou, mas houve um erro ao montar a arte.';
+      } finally {
+        makeArtButton.disabled = false;
+        makeArtButton.textContent = 'Gerar arte';
+      }
     };
 
     img.onerror = () => {
-      alert('A imagem foi recebida, mas não foi possível exibi-la.');
-      button.disabled = false;
-      button.textContent = 'Gerar arte';
+      artReady = false;
+      downloadArtButton.disabled = true;
+      artStatus.textContent = 'A IA retornou um conteúdo que o navegador não conseguiu abrir como imagem.';
+      makeArtButton.disabled = false;
+      makeArtButton.textContent = 'Gerar arte';
     };
 
     img.src = data.image;
-
   } catch (error) {
-    console.error(error);
-    alert('Erro ao gerar imagem: ' + (error.message || 'Tente novamente.'));
-    button.disabled = false;
-    button.textContent = 'Gerar arte';
+    console.error('Erro no Estúdio de imagens:', error);
+    artReady = false;
+    downloadArtButton.disabled = true;
+    artStatus.textContent = 'Não foi possível gerar a imagem: ' + (error.message || 'erro desconhecido') + '.';
+    makeArtButton.disabled = false;
+    makeArtButton.textContent = 'Gerar arte';
   }
 }
 
-document.getElementById('makeArt').addEventListener('click', makeArt);
+makeArtButton.addEventListener('click', makeArt);
 
-document.getElementById('downloadArt').addEventListener('click', () => {
-  const a = document.createElement('a');
-  a.download = 'jarvis-arte-ia.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
+downloadArtButton.addEventListener('click', () => {
+  if (!artReady) return;
+  try {
+    const a = document.createElement('a');
+    a.download = 'jarvis-arte-ia.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } catch (error) {
+    console.error(error);
+    artStatus.textContent = 'Não foi possível preparar o PNG para baixar.';
+  }
 });
 
 /* ESTÚDIO DE VÍDEOS */
-document.getElementById('makeScript').addEventListener('click',()=>{
-  const topic=document.getElementById('videoTopic').value.trim()||'apresentação de produto';
-  const audience=document.getElementById('videoAudience').value.trim()||'clientes';
-  document.getElementById('scriptOut').value=`ROTEIRO — ${topic.toUpperCase()}
+document.getElementById('makeScript').addEventListener('click', () => {
+  const topic = document.getElementById('videoTopic').value.trim() || 'apresentação de produto';
+  const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
+  document.getElementById('scriptOut').value = `ROTEIRO — ${topic.toUpperCase()}
 Público: ${audience}
 
 1. ABERTURA (0–3s): Comece com uma imagem atraente do produto.
@@ -350,47 +392,61 @@ CONFIRMAR ANTES DE PUBLICAR: preço, disponibilidade, ingredientes e condições
 });
 
 /* UTILITÁRIOS */
-function escapeHtml(value){
-  return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[character]));
 }
-async function getCurrentUser(){
-  const {data,error}=await supabaseClient.auth.getUser();
-  if(error||!data.user)return null;
+
+async function getCurrentUser() {
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error || !data.user) return null;
   return data.user;
 }
-const validStatuses=['Para analisar','Contato autorizado','Mensagem enviada manualmente','Não interessado'];
-const leadList=document.getElementById('leadList');
-const customerList=document.getElementById('customerList');
-let currentLeads=[];
-let currentCustomers=[];
 
-function showCRMSection(section){
-  const leads=section==='leads';
-  document.getElementById('leadsSection').classList.toggle('hidden',!leads);
-  document.getElementById('customersSection').classList.toggle('hidden',leads);
-  document.getElementById('showLeads').classList.toggle('secondary',!leads);
-  document.getElementById('showCustomers').classList.toggle('secondary',leads);
+const validStatuses = ['Para analisar', 'Contato autorizado', 'Mensagem enviada manualmente', 'Não interessado'];
+const leadList = document.getElementById('leadList');
+const customerList = document.getElementById('customerList');
+let currentLeads = [];
+let currentCustomers = [];
+
+function showCRMSection(section) {
+  const leads = section === 'leads';
+  document.getElementById('leadsSection').classList.toggle('hidden', !leads);
+  document.getElementById('customersSection').classList.toggle('hidden', leads);
+  document.getElementById('showLeads').classList.toggle('secondary', !leads);
+  document.getElementById('showCustomers').classList.toggle('secondary', leads);
 }
-document.getElementById('showLeads').addEventListener('click',()=>showCRMSection('leads'));
-document.getElementById('showCustomers').addEventListener('click',()=>showCRMSection('customers'));
+document.getElementById('showLeads').addEventListener('click', () => showCRMSection('leads'));
+document.getElementById('showCustomers').addEventListener('click', () => showCRMSection('customers'));
 
 /* OPORTUNIDADES: LISTAR, ABRIR, EDITAR, EXCLUIR E CONVERTER */
-async function loadLeads(){
-  const user=await getCurrentUser();
-  if(!user){leadList.textContent='Entre na sua conta para visualizar suas oportunidades.';document.getElementById('leadCount').textContent='0';return;}
-  leadList.textContent='Carregando oportunidades...';
-  const {data,error}=await supabaseClient.from('opportunities')
+async function loadLeads() {
+  const user = await getCurrentUser();
+  if (!user) {
+    leadList.textContent = 'Entre na sua conta para visualizar suas oportunidades.';
+    document.getElementById('leadCount').textContent = '0';
+    return;
+  }
+  leadList.textContent = 'Carregando oportunidades...';
+  const { data, error } = await supabaseClient.from('opportunities')
     .select('id,company_name,possible_needs,status,created_at')
-    .order('created_at',{ascending:false});
-  if(error){leadList.textContent='Erro ao carregar oportunidades: '+error.message;return;}
-  currentLeads=data||[];
-  document.getElementById('leadCount').textContent=currentLeads.length;
-  if(!currentLeads.length){leadList.innerHTML='<p>Nenhuma oportunidade cadastrada ainda.</p>';return;}
-  leadList.innerHTML=currentLeads.map(item=>`
+    .order('created_at', { ascending: false });
+  if (error) {
+    leadList.textContent = 'Erro ao carregar oportunidades: ' + error.message;
+    return;
+  }
+  currentLeads = data || [];
+  document.getElementById('leadCount').textContent = currentLeads.length;
+  if (!currentLeads.length) {
+    leadList.innerHTML = '<p>Nenhuma oportunidade cadastrada ainda.</p>';
+    return;
+  }
+  leadList.innerHTML = currentLeads.map(item => `
     <div class="record">
       <strong>${escapeHtml(item.company_name)}</strong>
-      <p>${escapeHtml(item.possible_needs||'Sem descrição')}</p>
-      <p>Status: ${escapeHtml(item.status||'Novo')}</p>
+      <p>${escapeHtml(item.possible_needs || 'Sem descrição')}</p>
+      <p>Status: ${escapeHtml(item.status || 'Novo')}</p>
       <div class="actions">
         <button class="btn secondary" data-action="open-lead" data-id="${escapeHtml(item.id)}">Abrir</button>
         <button class="btn" data-action="edit-lead" data-id="${escapeHtml(item.id)}">Editar</button>
@@ -398,198 +454,325 @@ async function loadLeads(){
         <button class="btn danger" data-action="delete-lead" data-id="${escapeHtml(item.id)}">Excluir</button>
       </div>
     </div>`).join('');
-  leadList.querySelectorAll('button[data-action]').forEach(button=>button.addEventListener('click',()=>handleLeadAction(button)));
+  leadList.querySelectorAll('button[data-action]').forEach(button =>
+    button.addEventListener('click', () => handleLeadAction(button))
+  );
 }
-async function handleLeadAction(button){
-  const lead=currentLeads.find(item=>item.id===button.dataset.id);
-  if(!lead)return;
-  const action=button.dataset.action;
-  if(action==='open-lead'){
-    alert('DETALHES DA OPORTUNIDADE\n\nNegócio: '+lead.company_name+'\nNecessidade: '+(lead.possible_needs||'Não informada')+'\nStatus: '+(lead.status||'Não informado')+'\nCriada em: '+new Date(lead.created_at).toLocaleString('pt-BR'));
+
+async function handleLeadAction(button) {
+  const lead = currentLeads.find(item => item.id === button.dataset.id);
+  if (!lead) return;
+  const action = button.dataset.action;
+  if (action === 'open-lead') {
+    alert('DETALHES DA OPORTUNIDADE\n\nNegócio: ' + lead.company_name +
+      '\nNecessidade: ' + (lead.possible_needs || 'Não informada') +
+      '\nStatus: ' + (lead.status || 'Não informado') +
+      '\nCriada em: ' + new Date(lead.created_at).toLocaleString('pt-BR'));
     return;
   }
-  const user=await getCurrentUser();
-  if(!user){alert('Entre na sua conta novamente.');return;}
-  if(action==='edit-lead'){
-    const name=prompt('Nome do negócio:',lead.company_name);if(name===null)return;
-    if(!name.trim()){alert('O nome não pode ficar vazio.');return;}
-    const need=prompt('Possível necessidade:',lead.possible_needs||'');if(need===null)return;
-    const status=prompt('Digite exatamente um dos status abaixo:\n\n'+validStatuses.join('\n'),lead.status||'Para analisar');
-    if(status===null)return;
-    if(!validStatuses.includes(status)){alert('Status inválido. Nenhuma alteração foi feita.');return;}
-    const {data,error}=await supabaseClient.from('opportunities').update({company_name:name.trim(),possible_needs:need.trim(),status}).eq('id',lead.id).eq('user_id',user.id).select('id');
-    if(error||!data?.length){alert('Não foi possível atualizar: '+(error?.message||'Verifique seu acesso.'));return;}
-    alert('Oportunidade atualizada!');await loadLeads();return;
+  const user = await getCurrentUser();
+  if (!user) {
+    alert('Entre na sua conta novamente.');
+    return;
   }
-  if(action==='delete-lead'){
-    if(!confirm('Excluir a oportunidade "'+lead.company_name+'"? Esta ação não poderá ser desfeita.'))return;
-    const {data,error}=await supabaseClient.from('opportunities').delete().eq('id',lead.id).eq('user_id',user.id).select('id');
-    if(error||!data?.length){alert('Não foi possível excluir: '+(error?.message||'Verifique seu acesso.'));return;}
-    alert('Oportunidade excluída.');await loadLeads();return;
+  if (action === 'edit-lead') {
+    const name = prompt('Nome do negócio:', lead.company_name);
+    if (name === null) return;
+    if (!name.trim()) {
+      alert('O nome não pode ficar vazio.');
+      return;
+    }
+    const need = prompt('Possível necessidade:', lead.possible_needs || '');
+    if (need === null) return;
+    const status = prompt('Digite exatamente um dos status abaixo:\n\n' + validStatuses.join('\n'), lead.status || 'Para analisar');
+    if (status === null) return;
+    if (!validStatuses.includes(status)) {
+      alert('Status inválido. Nenhuma alteração foi feita.');
+      return;
+    }
+    const { data, error } = await supabaseClient.from('opportunities')
+      .update({ company_name: name.trim(), possible_needs: need.trim(), status })
+      .eq('id', lead.id).eq('user_id', user.id).select('id');
+    if (error || !data?.length) {
+      alert('Não foi possível atualizar: ' + (error?.message || 'Verifique seu acesso.'));
+      return;
+    }
+    alert('Oportunidade atualizada!');
+    await loadLeads();
+    return;
   }
-  if(action==='convert-lead'){
-    if(!confirm('Cadastrar "'+lead.company_name+'" como cliente? A oportunidade será mantida na lista.'))return;
-    button.disabled=true;
-    const {error}=await supabaseClient.from('customers').insert({user_id:user.id,name:lead.company_name,notes:lead.possible_needs||''});
-    button.disabled=false;
-    if(error){alert('Não foi possível cadastrar o cliente: '+error.message);return;}
+  if (action === 'delete-lead') {
+    if (!confirm('Excluir a oportunidade "' + lead.company_name + '"? Esta ação não poderá ser desfeita.')) return;
+    const { data, error } = await supabaseClient.from('opportunities')
+      .delete().eq('id', lead.id).eq('user_id', user.id).select('id');
+    if (error || !data?.length) {
+      alert('Não foi possível excluir: ' + (error?.message || 'Verifique seu acesso.'));
+      return;
+    }
+    alert('Oportunidade excluída.');
+    await loadLeads();
+    return;
+  }
+  if (action === 'convert-lead') {
+    if (!confirm('Cadastrar "' + lead.company_name + '" como cliente? A oportunidade será mantida na lista.')) return;
+    button.disabled = true;
+    const { error } = await supabaseClient.from('customers').insert({
+      user_id: user.id, name: lead.company_name, notes: lead.possible_needs || ''
+    });
+    button.disabled = false;
+    if (error) {
+      alert('Não foi possível cadastrar o cliente: ' + error.message);
+      return;
+    }
     alert('Cliente cadastrado! A oportunidade original foi mantida.');
-    await loadCustomers();showCRMSection('customers');
+    await loadCustomers();
+    showCRMSection('customers');
   }
 }
 
 /* SALVAR OPORTUNIDADE */
-document.getElementById('saveLead').addEventListener('click',async()=>{
-  const name=document.getElementById('leadName').value.trim();
-  if(!name){alert('Informe o nome do negócio.');return;}
-  const user=await getCurrentUser();if(!user){alert('Entre na sua conta primeiro.');return;}
-  const button=document.getElementById('saveLead');button.disabled=true;button.textContent='Salvando...';
-  const {error}=await supabaseClient.from('opportunities').insert({
-    user_id:user.id,company_name:name,
-    possible_needs:document.getElementById('leadNeed').value.trim(),
-    status:document.getElementById('leadStatus').value
+document.getElementById('saveLead').addEventListener('click', async () => {
+  const name = document.getElementById('leadName').value.trim();
+  if (!name) {
+    alert('Informe o nome do negócio.');
+    return;
+  }
+  const user = await getCurrentUser();
+  if (!user) {
+    alert('Entre na sua conta primeiro.');
+    return;
+  }
+  const button = document.getElementById('saveLead');
+  button.disabled = true;
+  button.textContent = 'Salvando...';
+  const { error } = await supabaseClient.from('opportunities').insert({
+    user_id: user.id,
+    company_name: name,
+    possible_needs: document.getElementById('leadNeed').value.trim(),
+    status: document.getElementById('leadStatus').value
   });
-  button.disabled=false;button.textContent='Salvar oportunidade na nuvem';
-  if(error){alert('Erro ao salvar: '+error.message);return;}
-  document.getElementById('leadName').value='';document.getElementById('leadNeed').value='';
-  alert('Oportunidade salva com sucesso!');await loadLeads();
+  button.disabled = false;
+  button.textContent = 'Salvar oportunidade na nuvem';
+  if (error) {
+    alert('Erro ao salvar: ' + error.message);
+    return;
+  }
+  document.getElementById('leadName').value = '';
+  document.getElementById('leadNeed').value = '';
+  alert('Oportunidade salva com sucesso!');
+  await loadLeads();
 });
 
 /* CLIENTES: CADASTRAR E LISTAR */
-async function loadCustomers(){
-  const user=await getCurrentUser();
-  if(!user){customerList.textContent='Entre na sua conta para visualizar seus clientes.';document.getElementById('customerCount').textContent='0';return;}
-  customerList.textContent='Carregando clientes...';
-  const {data,error}=await supabaseClient.from('customers')
+async function loadCustomers() {
+  const user = await getCurrentUser();
+  if (!user) {
+    customerList.textContent = 'Entre na sua conta para visualizar seus clientes.';
+    document.getElementById('customerCount').textContent = '0';
+    return;
+  }
+  customerList.textContent = 'Carregando clientes...';
+  const { data, error } = await supabaseClient.from('customers')
     .select('id,name,phone,email,notes,created_at')
-    .order('created_at',{ascending:false});
-  if(error){customerList.textContent='Erro ao carregar clientes: '+error.message;return;}
-  currentCustomers=data||[];
-  document.getElementById('customerCount').textContent=currentCustomers.length;
-  if(!currentCustomers.length){customerList.innerHTML='<p>Nenhum cliente cadastrado ainda.</p>';return;}
-  customerList.innerHTML=currentCustomers.map(customer=>`
+    .order('created_at', { ascending: false });
+  if (error) {
+    customerList.textContent = 'Erro ao carregar clientes: ' + error.message;
+    return;
+  }
+  currentCustomers = data || [];
+  document.getElementById('customerCount').textContent = currentCustomers.length;
+  if (!currentCustomers.length) {
+    customerList.innerHTML = '<p>Nenhum cliente cadastrado ainda.</p>';
+    return;
+  }
+  customerList.innerHTML = currentCustomers.map(customer => `
     <div class="record">
       <strong>${escapeHtml(customer.name)}</strong>
-      <p>Telefone: ${escapeHtml(customer.phone||'Não informado')}</p>
-      <p>E-mail: ${escapeHtml(customer.email||'Não informado')}</p>
-      <p>Observações: ${escapeHtml(customer.notes||'Nenhuma')}</p>
+      <p>Telefone: ${escapeHtml(customer.phone || 'Não informado')}</p>
+      <p>E-mail: ${escapeHtml(customer.email || 'Não informado')}</p>
+      <p>Observações: ${escapeHtml(customer.notes || 'Nenhuma')}</p>
       <div class="actions">
         <button class="btn secondary" data-action="open-customer" data-id="${escapeHtml(customer.id)}">Abrir</button>
         <button class="btn" data-action="edit-customer" data-id="${escapeHtml(customer.id)}">Editar</button>
         <button class="btn danger" data-action="delete-customer" data-id="${escapeHtml(customer.id)}">Excluir</button>
       </div>
     </div>`).join('');
-  customerList.querySelectorAll('button[data-action]').forEach(button=>button.addEventListener('click',()=>handleCustomerAction(button)));
+  customerList.querySelectorAll('button[data-action]').forEach(button =>
+    button.addEventListener('click', () => handleCustomerAction(button))
+  );
 }
-document.getElementById('saveCustomer').addEventListener('click',async()=>{
-  const name=document.getElementById('customerName').value.trim();
-  if(!name){alert('Informe o nome do cliente.');return;}
-  const user=await getCurrentUser();if(!user){alert('Entre na sua conta primeiro.');return;}
-  const button=document.getElementById('saveCustomer');button.disabled=true;button.textContent='Cadastrando...';
-  const {error}=await supabaseClient.from('customers').insert({
-    user_id:user.id,name,
-    phone:document.getElementById('customerPhone').value.trim(),
-    email:document.getElementById('customerEmail').value.trim(),
-    notes:document.getElementById('customerNotes').value.trim()
-  });
-  button.disabled=false;button.textContent='Cadastrar cliente';
-  if(error){alert('Erro ao cadastrar cliente: '+error.message);return;}
-  document.getElementById('customerName').value='';
-  document.getElementById('customerPhone').value='';
-  document.getElementById('customerEmail').value='';
-  document.getElementById('customerNotes').value='';
-  alert('Cliente cadastrado com sucesso!');await loadCustomers();
-});
-async function handleCustomerAction(button){
-  const customer=currentCustomers.find(item=>item.id===button.dataset.id);
-  if(!customer)return;
-  const action=button.dataset.action;
-  if(action==='open-customer'){
-    alert('DADOS DO CLIENTE\n\nNome: '+customer.name+'\nTelefone: '+(customer.phone||'Não informado')+'\nE-mail: '+(customer.email||'Não informado')+'\nObservações: '+(customer.notes||'Nenhuma')+'\nCadastrado em: '+new Date(customer.created_at).toLocaleString('pt-BR'));
+
+document.getElementById('saveCustomer').addEventListener('click', async () => {
+  const name = document.getElementById('customerName').value.trim();
+  if (!name) {
+    alert('Informe o nome do cliente.');
     return;
   }
-  const user=await getCurrentUser();if(!user){alert('Entre na sua conta novamente.');return;}
-  if(action==='edit-customer'){
-    const name=prompt('Nome do cliente:',customer.name);if(name===null)return;
-    if(!name.trim()){alert('O nome não pode ficar vazio.');return;}
-    const phone=prompt('Telefone / WhatsApp:',customer.phone||'');if(phone===null)return;
-    const email=prompt('E-mail:',customer.email||'');if(email===null)return;
-    const notes=prompt('Observações:',customer.notes||'');if(notes===null)return;
-    const {data,error}=await supabaseClient.from('customers').update({
-      name:name.trim(),phone:phone.trim(),email:email.trim(),notes:notes.trim()
-    }).eq('id',customer.id).eq('user_id',user.id).select('id');
-    if(error||!data?.length){alert('Não foi possível atualizar: '+(error?.message||'Verifique seu acesso.'));return;}
-    alert('Cliente atualizado com sucesso!');await loadCustomers();return;
+  const user = await getCurrentUser();
+  if (!user) {
+    alert('Entre na sua conta primeiro.');
+    return;
   }
-  if(action==='delete-customer'){
-    if(!confirm('Excluir o cliente "'+customer.name+'"? Esta ação não poderá ser desfeita.'))return;
-    const {data,error}=await supabaseClient.from('customers').delete().eq('id',customer.id).eq('user_id',user.id).select('id');
-    if(error||!data?.length){alert('Não foi possível excluir: '+(error?.message||'Verifique seu acesso.'));return;}
-    alert('Cliente excluído.');await loadCustomers();
+  const button = document.getElementById('saveCustomer');
+  button.disabled = true;
+  button.textContent = 'Cadastrando...';
+  const { error } = await supabaseClient.from('customers').insert({
+    user_id: user.id,
+    name,
+    phone: document.getElementById('customerPhone').value.trim(),
+    email: document.getElementById('customerEmail').value.trim(),
+    notes: document.getElementById('customerNotes').value.trim()
+  });
+  button.disabled = false;
+  button.textContent = 'Cadastrar cliente';
+  if (error) {
+    alert('Erro ao cadastrar cliente: ' + error.message);
+    return;
+  }
+  document.getElementById('customerName').value = '';
+  document.getElementById('customerPhone').value = '';
+  document.getElementById('customerEmail').value = '';
+  document.getElementById('customerNotes').value = '';
+  alert('Cliente cadastrado com sucesso!');
+  await loadCustomers();
+});
+
+async function handleCustomerAction(button) {
+  const customer = currentCustomers.find(item => item.id === button.dataset.id);
+  if (!customer) return;
+  const action = button.dataset.action;
+  if (action === 'open-customer') {
+    alert('DADOS DO CLIENTE\n\nNome: ' + customer.name +
+      '\nTelefone: ' + (customer.phone || 'Não informado') +
+      '\nE-mail: ' + (customer.email || 'Não informado') +
+      '\nObservações: ' + (customer.notes || 'Nenhuma') +
+      '\nCadastrado em: ' + new Date(customer.created_at).toLocaleString('pt-BR'));
+    return;
+  }
+  const user = await getCurrentUser();
+  if (!user) {
+    alert('Entre na sua conta novamente.');
+    return;
+  }
+  if (action === 'edit-customer') {
+    const name = prompt('Nome do cliente:', customer.name);
+    if (name === null) return;
+    if (!name.trim()) {
+      alert('O nome não pode ficar vazio.');
+      return;
+    }
+    const phone = prompt('Telefone / WhatsApp:', customer.phone || '');
+    if (phone === null) return;
+    const email = prompt('E-mail:', customer.email || '');
+    if (email === null) return;
+    const notes = prompt('Observações:', customer.notes || '');
+    if (notes === null) return;
+    const { data, error } = await supabaseClient.from('customers').update({
+      name: name.trim(), phone: phone.trim(), email: email.trim(), notes: notes.trim()
+    }).eq('id', customer.id).eq('user_id', user.id).select('id');
+    if (error || !data?.length) {
+      alert('Não foi possível atualizar: ' + (error?.message || 'Verifique seu acesso.'));
+      return;
+    }
+    alert('Cliente atualizado com sucesso!');
+    await loadCustomers();
+    return;
+  }
+  if (action === 'delete-customer') {
+    if (!confirm('Excluir o cliente "' + customer.name + '"? Esta ação não poderá ser desfeita.')) return;
+    const { data, error } = await supabaseClient.from('customers')
+      .delete().eq('id', customer.id).eq('user_id', user.id).select('id');
+    if (error || !data?.length) {
+      alert('Não foi possível excluir: ' + (error?.message || 'Verifique seu acesso.'));
+      return;
+    }
+    alert('Cliente excluído.');
+    await loadCustomers();
   }
 }
 
 /* AUTENTICAÇÃO */
-const authEmail=document.getElementById('authEmail');
-const authPassword=document.getElementById('authPassword');
-const authMessage=document.getElementById('authMessage');
-const signUpButton=document.getElementById('signUp');
-const signInButton=document.getElementById('signIn');
-const signOutButton=document.getElementById('signOut');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authMessage = document.getElementById('authMessage');
+const signUpButton = document.getElementById('signUp');
+const signInButton = document.getElementById('signIn');
+const signOutButton = document.getElementById('signOut');
 
-async function updateAuthUI(){
-  const {data,error}=await supabaseClient.auth.getSession();
-  if(error){authMessage.textContent='Erro ao verificar acesso: '+error.message;return;}
-  const session=data.session;
-  signUpButton.classList.toggle('hidden',!!session);
-  signInButton.classList.toggle('hidden',!!session);
-  signOutButton.classList.toggle('hidden',!session);
-  authEmail.classList.toggle('hidden',!!session);
-  authPassword.classList.toggle('hidden',!!session);
-  document.getElementById('crmArea').classList.toggle('hidden',!session);
-  authMessage.textContent=session?'Conectado: '+session.user.email:'Você ainda não entrou.';
-  if(session){await loadLeads();await loadCustomers();}
-  else{
-    currentLeads=[];currentCustomers=[];
-    leadList.textContent='Entre na sua conta para visualizar suas oportunidades.';
-    customerList.textContent='Entre na sua conta para visualizar seus clientes.';
-    document.getElementById('leadCount').textContent='0';
-    document.getElementById('customerCount').textContent='0';
+async function updateAuthUI() {
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) {
+    authMessage.textContent = 'Erro ao verificar acesso: ' + error.message;
+    return;
+  }
+  const session = data.session;
+  signUpButton.classList.toggle('hidden', !!session);
+  signInButton.classList.toggle('hidden', !!session);
+  signOutButton.classList.toggle('hidden', !session);
+  authEmail.classList.toggle('hidden', !!session);
+  authPassword.classList.toggle('hidden', !!session);
+  document.getElementById('crmArea').classList.toggle('hidden', !session);
+  authMessage.textContent = session ? 'Conectado: ' + session.user.email : 'Você ainda não entrou.';
+  if (session) {
+    await loadLeads();
+    await loadCustomers();
+  } else {
+    currentLeads = [];
+    currentCustomers = [];
+    leadList.textContent = 'Entre na sua conta para visualizar suas oportunidades.';
+    customerList.textContent = 'Entre na sua conta para visualizar seus clientes.';
+    document.getElementById('leadCount').textContent = '0';
+    document.getElementById('customerCount').textContent = '0';
   }
 }
-signUpButton.addEventListener('click',async()=>{
-  const email=authEmail.value.trim();const password=authPassword.value;
-  if(!email||password.length<6){authMessage.textContent='Informe um e-mail e uma senha com pelo menos 6 caracteres.';return;}
-  const {data,error}=await supabaseClient.auth.signUp({email,password});
-  if(error){authMessage.textContent=error.message;return;}
-  authMessage.textContent=data.session?'Conta criada com sucesso!':'Conta criada. Confira seu e-mail para confirmar o cadastro.';
+
+signUpButton.addEventListener('click', async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  if (!email || password.length < 6) {
+    authMessage.textContent = 'Informe um e-mail e uma senha com pelo menos 6 caracteres.';
+    return;
+  }
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
+  authMessage.textContent = data.session ? 'Conta criada com sucesso!' : 'Conta criada. Confira seu e-mail para confirmar o cadastro.';
   await updateAuthUI();
 });
-signInButton.addEventListener('click',async()=>{
-  const email=authEmail.value.trim();const password=authPassword.value;
-  if(!email||!password){authMessage.textContent='Informe seu e-mail e sua senha.';return;}
-  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
-  if(error){authMessage.textContent=error.message;return;}
+
+signInButton.addEventListener('click', async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  if (!email || !password) {
+    authMessage.textContent = 'Informe seu e-mail e sua senha.';
+    return;
+  }
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
   await updateAuthUI();
 });
-signOutButton.addEventListener('click',async()=>{
-  const {error}=await supabaseClient.auth.signOut();
-  if(error){authMessage.textContent=error.message;return;}
+
+signOutButton.addEventListener('click', async () => {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) {
+    authMessage.textContent = error.message;
+    return;
+  }
   await updateAuthUI();
 });
 
 /* INICIALIZAÇÃO */
-window.addEventListener('load',async()=>{
+window.addEventListener('load', async () => {
   await updateAuthUI();
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(error => console.warn('Service worker:', error));
+  }
 });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL="https://zvtsudyxldndqofmxucd.supabase.co";
-const SUPABASE_KEY="sb_publishable_GsXcsiBXxBgEbAXuTKQhWA_MCocigFX";
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 </script>
 </body>
 </html>
