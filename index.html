@@ -190,19 +190,25 @@ async function makeArt(){
   const contact = document.getElementById('contact').value.trim();
   const palette = document.getElementById('palette').value;
 
-  const prompt = `Crie uma arte publicitária profissional, bonita e chamativa para uma pequena empresa.
-Empresa: ${biz}.
-Produto: ${product}.
-Título principal: ${headline}.
-Detalhes: ${details}.
-Preço: ${price}.
-Contato: ${contact}.
-Estilo visual: ${palette}.
-Composição profissional, cores harmoniosas, iluminação bonita e formato quadrado.
-Não invente textos, letras ou preços.`;
+const prompt = `Create a premium commercial food advertising photograph.
+Main subject: ${product}, shown as a realistic, delicious and appetizing product.
+Business: ${biz}.
+Advertising headline: ${headline}.
+Offer and details: ${details}.
+Price: ${price}.
+Contact: ${contact}.
 
-  button.disabled = true;
-  button.textContent = 'Gerando imagem...';
+VISUAL REQUIREMENTS:
+Create a professional advertising poster, not a simple illustration.
+Show the actual product large and clearly in the foreground.
+Use realistic food photography, natural textures, professional studio lighting and beautiful composition.
+Use a background and decorative elements that match the selected color palette: ${palette}.
+Make the product the main visual focus.
+Leave clean, uncluttered space for advertising text.
+No dogs, no animals, no unrelated objects.
+No cartoon style, no generic food plate.
+No fake logos or invented prices.
+High-end restaurant advertising quality.`;
 
   try {
     const { data, error } = await supabaseClient.functions.invoke(
