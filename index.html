@@ -298,10 +298,24 @@ Product accuracy is the highest priority.`;
   artStatus.textContent = 'Enviando o pedido para a inteligência artificial. Aguarde...';
 
   try {
-    const { data, error } = await supabaseClient.functions.invoke(
-      'gerar-imagem-ia',
-      { body: { prompt } }
-    );
+    const { data: sessionData, error: sessionError } =
+  await supabaseClient.auth.getSession();
+
+const session = sessionData?.session;
+
+if (sessionError || !session) {
+  throw new Error('Entre na sua conta antes de gerar uma imagem.');
+}
+
+const { data, error } = await supabaseClient.functions.invoke(
+  'gerar-imagem-ia',
+  {
+    body: { prompt },
+    headers: {
+      Authorization: `Bearer ${session.access_token}`
+    }
+  }
+);
 
     if (error) throw error;
     if (!data || !data.image || typeof data.image !== 'string') {
