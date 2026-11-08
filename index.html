@@ -190,24 +190,33 @@ async function makeArt(){
   const contact = document.getElementById('contact').value.trim();
   const palette = document.getElementById('palette').value;
 
-const prompt = `Create a premium, photorealistic commercial product photograph.
-Main subject: ${product}.
-Business type: ${biz}.
+const prompt = `Create a professional, photorealistic commercial product photograph.
 
-Show only the actual food product, large and clearly visible.
-Make it look delicious, realistic and professionally photographed.
-Use beautiful studio lighting, natural textures and an attractive composition.
-Use colors inspired by this palette: ${palette}.
-Create a clean advertising background with some empty space around the product.
+MAIN SUBJECT: ${product}
+
+The main subject must be exactly the product named above.
+If the product is a hot dog, show a hot dog.
+If the product is a cake, show a cake.
+Never replace the product with fruits, colors, ingredients or decorative objects.
+
+BUSINESS TYPE: ${biz}
+
+VISUAL STYLE:
+Professional commercial photography, realistic textures, beautiful lighting and attractive composition.
+
+COLOR PALETTE:
+${palette}
 
 IMPORTANT:
-This is a photograph background only.
-Do not include any text, letters, words, numbers, labels, logos, menus or watermarks.
-Do not write ingredients.
-Do not include typography or signs.
+Use the selected palette ONLY for background colors, lighting and decorative accents.
+The palette must NEVER determine the main subject.
+Do not create images of the palette itself.
+
+Create a clean advertising photograph.
+Show the requested product large, clear and recognizable.
+No text, letters, numbers, logos, labels or watermarks.
 No unrelated objects.
-No cartoon style.
-Professional food photography.`;
+Photorealistic product photography.`;
 
   try {
     const { data, error } = await supabaseClient.functions.invoke(
