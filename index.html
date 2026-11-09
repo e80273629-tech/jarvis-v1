@@ -510,7 +510,11 @@ scenes[1].speech = `Veja ${productReference} por inteiro e conheça sua apresent
 scenes[2].speech = 'Observe os acabamentos, materiais e características deste produto!';
 scenes[3].speech = productAudienceIsBusiness
   ? `Avalie como ${productReference} pode atender às necessidades do seu negócio!`
-  : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
+  : productAudienceIsEconomy
+    ? `Descubra como ${productReference} pode ajudar você a buscar praticidade e economia!`
+    : productAudienceIsQuality
+      ? `Conheça os detalhes de ${productReference} e descubra o que merece sua atenção!`
+      : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
 scenes[4].speech = productAudienceIsBusiness
   ? 'Confira os detalhes e avalie se este produto atende às necessidades do seu negócio!'
   : 'Confira os detalhes e as informações antes de fazer sua escolha!';
