@@ -488,9 +488,9 @@ if (style === 'produto') {
 
   scenes[1].visual = `Apresente ${productReference} por inteiro. Mostre também os itens que acompanham o produto, somente se forem informados ou estiverem visíveis.`;
 
-  scenes[2].visual = `Faça closes deste ${productName}. Destaque formato, acabamento, materiais, textura, embalagem e outros detalhes que possam ser observados.`;
+  scenes[2].visual = `Faça closes ${productReferenceOf}. Destaque formato, acabamento, materiais, textura, embalagem e outros detalhes que possam ser observados.`;
 
-scenes[3].visual = `Mostre uma demonstração de uso deste ${productName}, respeitando sua finalidade e sem inventar funções ou resultados.`;
+scenes[3].visual = `Mostre uma demonstração de uso ${productReferenceOf}, respeitando sua finalidade e sem inventar funções ou resultados.`;
 
 scenes[4].visual = `Apresente novamente ${productReference} em uma composição profissional. Destaque apenas características e informações confirmadas.`;
 
@@ -501,7 +501,7 @@ scenes[1].speech = `Veja ${productReference} por inteiro e conheça sua apresent
 scenes[2].speech = 'Observe os acabamentos, materiais e características deste produto!';
 scenes[3].speech = `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
 scenes[4].speech = 'Confira os detalhes e as informações antes de fazer sua escolha!';
-scenes[5].speech = `Gostou deste ${productName}? Entre em contato e consulte as condições para adquirir o seu!`;
+scenes[5].speech = `Gostou ${productReferenceOf}? Entre em contato e consulte as condições para adquirir o seu!`;
 }
 
 if (style === 'social') {
