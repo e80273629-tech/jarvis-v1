@@ -474,12 +474,25 @@ if (style === 'propaganda') {
 }
 
 if (style === 'produto') {
-  scenes[0].speech = `Descubra uma nova forma de conhecer ${businessType}!`;
-  scenes[1].speech = `Apresentamos os detalhes deste produto e o que acompanha o kit!`;
-  scenes[2].speech = `Observe os materiais, os componentes e os detalhes do produto!`;
-  scenes[3].speech = `Conheça as possibilidades de uso e os benefícios deste produto!`;
-  scenes[4].speech = `Veja como cada detalhe foi pensado para facilitar sua experiência!`;
-  scenes[5].speech = `Quer saber mais? Conheça todos os detalhes deste produto!`;
+  scenes[0].title = 'APRESENTAÇÃO DO PRODUTO';
+  scenes[0].visual = 'Comece mostrando o produto em destaque, com enquadramento cinematográfico, iluminação profissional e fundo elegante.';
+
+  scenes[1].visual = 'Mostre o kit completo, organizando os itens lado a lado. Destaque a apresentação e tudo o que acompanha o conjunto, sem acrescentar itens que não foram informados.';
+
+  scenes[2].visual = 'Faça closes dos componentes do kit. Mostre embalagens, formatos, materiais, rótulos e detalhes que possam ser observados nas imagens.';
+
+  scenes[3].visual = 'Apresente uma demonstração visual de como os itens podem ser utilizados na rotina de cuidados com a barba, sem inventar resultados ou benefícios.';
+
+  scenes[4].visual = 'Mostre novamente o kit completo em uma composição profissional. Destaque os componentes e deixe espaço para inserir informações confirmadas sobre o produto.';
+
+  scenes[5].visual = 'Finalize com uma imagem elegante do kit completo. Reserve espaço para nome do produto, preço, contato ou chamada para compra.';
+
+  scenes[0].speech = 'Conheça este kit profissional para cuidados com a barba!';
+  scenes[1].speech = 'Uma apresentação especial dos itens que acompanham este conjunto!';
+  scenes[2].speech = 'Observe de perto cada componente e seus detalhes!';
+  scenes[3].speech = 'Veja como os itens podem fazer parte da sua rotina de cuidados!';
+  scenes[4].speech = 'Confira a apresentação completa e conheça tudo o que acompanha o kit!';
+  scenes[5].speech = 'Quer saber mais? Consulte os detalhes e descubra como adquirir!';
 }
 
 if (style === 'social') {
