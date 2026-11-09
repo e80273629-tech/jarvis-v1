@@ -558,36 +558,28 @@ if (style === 'produto') {
   scenes[0].speech =
     `Conheça ${productReference}! Uma apresentação especial para você descobrir seus detalhes!`;
 
-  scenes[1].speech = productFeatureGroups[0].length
-    ? getFeatureSpeech(0, 'Entre as características informadas estão')
+    scenes[1].speech = productFeatureGroups[0].length
+    ? `Destaque para: ${productFeatureGroups[0].join(' e ')}.`
     : `Veja ${productReference} por inteiro e conheça sua apresentação!`;
 
   scenes[2].speech = productFeatureGroups[1].length
-    ? getFeatureSpeech(1, 'Outro detalhe importante para observar')
+    ? `Outro detalhe para observar: ${productFeatureGroups[1].join(' e ')}.`
     : 'Observe os acabamentos, materiais e características visíveis deste produto!';
 
-  const audienceSpeech = productAudienceIsBusiness
-    ? `Avalie como ${productReference} pode atender às necessidades do seu negócio!`
-    : productAudienceIsEconomy
-      ? `Descubra como ${productReference} pode ajudar você a buscar praticidade e economia!`
-      : productAudienceIsQuality
-        ? `Conheça os detalhes ${productReferenceOf} e descubra o que merece sua atenção!`
-        : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
-
   scenes[3].speech = productFeatureGroups[2].length
-    ? getFeatureSpeech(2, 'Na demonstração, observe')
+    ? `Na demonstração, destaque: ${productFeatureGroups[2].join(' e ')}.`
     : audienceSpeech;
 
   const audienceClosing = productAudienceIsBusiness
-    ? 'Confira os detalhes e avalie se este produto atende às necessidades do seu negócio!'
+    ? `Agora avalie como ${productReference} pode atender às necessidades do seu negócio.`
     : productAudienceIsEconomy
-      ? 'Compare as informações e avalie o custo-benefício antes de fazer sua escolha!'
+      ? 'Compare as características e consulte as condições antes de fazer sua escolha.'
       : productAudienceIsQuality
-        ? 'Observe os acabamentos e as características confirmadas antes de fazer sua escolha!'
-        : 'Confira os detalhes e as informações antes de fazer sua escolha!';
+        ? `Observe os detalhes e avalie se ${productReference} atende ao padrão que você procura.`
+        : `Agora que conhece os detalhes, avalie se ${productReference} combina com sua rotina.`;
 
   scenes[4].speech = productFeatureGroups[3].length
-    ? getFeatureSpeech(3, 'Confira também estas características')
+    ? `E tem mais: ${productFeatureGroups[3].join(' e ')}.`
     : audienceClosing;
 
   scenes[5].speech =
