@@ -1,1 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#07101d"/><circle cx="256" cy="256" r="170" fill="none" stroke="#62d9f5" stroke-width="14"/><path d="M310 155c-25-22-53-32-88-27-76 10-115 76-106 145 9 72 63 116 139 105 27-4 52-15 73-33v-91H260v48h20v17c-12 8-25 12-41 12-42 0-68-31-68-77 0-44 25-76 66-76 21 0 38 7 54 22z" fill="#eaf8ff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#62d9f5"/>
+      <stop offset="100%" stop-color="#a5f3ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="#07101d"/>
+
+  <circle cx="256" cy="256" r="174"
+    fill="none" stroke="url(#glow)" stroke-width="12"/>
+
+  <circle cx="256" cy="256" r="135"
+    fill="none" stroke="#62d9f5"
+    stroke-width="2" opacity=".25"/>
+
+  <path d="M256 125
+    C280 205 307 232 387 256
+    C307 280 280 307 256 387
+    C232 307 205 280 125 256
+    C205 232 232 205 256 125Z"
+    fill="url(#glow)"/>
+
+  <circle cx="256" cy="256" r="24" fill="#07101d"/>
+  <circle cx="256" cy="256" r="9" fill="#ffffff"/>
+</svg>
