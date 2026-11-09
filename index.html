@@ -381,14 +381,94 @@ downloadArtButton.addEventListener('click', () => {
 document.getElementById('makeScript').addEventListener('click', () => {
   const topic = document.getElementById('videoTopic').value.trim() || 'apresentação de produto';
   const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
-  document.getElementById('scriptOut').value = `ROTEIRO — ${topic.toUpperCase()}
-Público: ${audience}
 
-1. ABERTURA (0–3s): Comece com uma imagem atraente do produto.
-2. APRESENTAÇÃO (3–10s): Mostre o produto e destaque uma característica confirmada.
-3. CONVITE (10–15s): Convide o público a conhecer ou consultar o negócio.
+  const scenes = [
+    {
+      time: '00–10s',
+      title: 'ABERTURA IMPACTANTE',
+      visual: 'Mostre uma imagem que desperte curiosidade imediatamente.',
+      speech: `Você já conhece ${topic}?`,
+      audio: 'Música envolvente e efeito sonoro de abertura.'
+    },
+    {
+      time: '10–20s',
+      title: 'APRESENTAÇÃO',
+      visual: 'Apresente o assunto ou produto em destaque.',
+      speech: 'Hoje vamos mostrar algo que merece sua atenção!',
+      audio: 'Música de fundo suave.'
+    },
+    {
+      time: '20–30s',
+      title: 'PRIMEIRO DESTAQUE',
+      visual: 'Mostre um detalhe importante e visualmente interessante.',
+      speech: 'Olha só este detalhe especial!',
+      audio: 'Efeito sonoro de destaque.'
+    },
+    {
+      time: '30–40s',
+      title: 'BENEFÍCIOS',
+      visual: `Mostre como isso pode interessar ao público: ${audience}.`,
+      speech: 'Uma opção que vale a pena conhecer!',
+      audio: 'Música animada.'
+    },
+    {
+      time: '40–50s',
+      title: 'MOMENTO DE DESTAQUE',
+      visual: 'Apresente a melhor imagem ou informação do vídeo.',
+      speech: 'E esse é o grande destaque da apresentação!',
+      audio: 'Efeito sonoro de transição.'
+    },
+    {
+      time: '50–60s',
+      title: 'ENCERRAMENTO',
+      visual: 'Finalize com uma imagem marcante e o nome do negócio.',
+      speech: 'Gostou? Compartilhe e conheça mais!',
+      audio: 'Música finalizando suavemente.'
+    }
+  ];
 
-CONFIRMAR ANTES DE PUBLICAR: preço, disponibilidade, ingredientes e condições da oferta.`;
+  let script = `ROTEIRO PROFISSIONAL — ${topic.toUpperCase()}
+
+PÚBLICO: ${audience}
+DURAÇÃO: 60 SEGUNDOS
+FORMATO: VERTICAL 9:16
+QUANTIDADE: 6 CENAS
+
+`;
+
+  scenes.forEach((scene, index) => {
+    script += `
+CENA ${index + 1} — ${scene.title}
+TEMPO: ${scene.time}
+
+VISUAL:
+${scene.visual}
+
+FALA:
+${scene.speech}
+
+ÁUDIO:
+${scene.audio}
+
+------------------------------
+`;
+  });
+
+  script += `
+ORIENTAÇÕES DE EDIÇÃO:
+- Usar formato vertical 9:16.
+- Fazer transições suaves entre cenas.
+- Adicionar legendas em português.
+- Manter as falas sincronizadas.
+- Usar imagens coerentes com o assunto.
+
+REVISÃO ANTES DE PUBLICAR:
+- Conferir informações e afirmações.
+- Conferir preços e ofertas, quando houver.
+- Conferir ortografia e legendas.
+`;
+
+  document.getElementById('scriptOut').value = script;
 });
 
 /* UTILITÁRIOS */
