@@ -568,7 +568,15 @@ if (style === 'produto') {
 
   scenes[3].speech = productFeatureGroups[2].length
     ? `Na demonstração, destaque: ${productFeatureGroups[2].join(' e ')}.`
-    : audienceSpeech;
+    : (
+    productAudienceIsBusiness
+      ? `Avalie como ${productReference} pode atender às necessidades do seu negócio!`
+      : productAudienceIsEconomy
+        ? `Descubra como ${productReference} pode ajudar você a buscar praticidade e economia!`
+        : productAudienceIsQuality
+          ? `Conheça os detalhes ${productReferenceOf} e descubra o que merece sua atenção!`
+          : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`
+  );
 
   const audienceClosing = productAudienceIsBusiness
     ? `Agora avalie como ${productReference} pode atender às necessidades do seu negócio.`
