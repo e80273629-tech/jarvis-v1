@@ -401,7 +401,7 @@ const audience = document.getElementById('videoAudience').value.trim() || 'clien
 
 const topicLower = topic.toLowerCase();
 const productName = topic
-  .replace(/^(divulgação|apresentação|lançamento|promoção|anúncio)\s+(de|do|da|dos|das)\s+/i, '')
+  .replace(/^(divulgação|apresentação|lançamento|promoção|anúncio)\s+(de|do|da|dos|das)\s+(um|uma|o|a|os|as)?\s*/i, '')
   .replace(/[.!?]+$/, '')
   .trim();
 
