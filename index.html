@@ -400,6 +400,10 @@ const style = document.getElementById('videoStyle').value;
 const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
 
 const topicLower = topic.toLowerCase();
+const productName = topic
+  .replace(/^(divulgação|apresentação|lançamento|promoção|anúncio)\s+(de|do|da|dos|das)\s+/i, '')
+  .replace(/[.!?]+$/, '')
+  .trim();
 
 let businessType = topic;
 
