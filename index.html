@@ -395,6 +395,7 @@ downloadArtButton.addEventListener('click', () => {
 /* ESTÚDIO DE VÍDEOS */
 document.getElementById('makeScript').addEventListener('click', () => {
   const topic = document.getElementById('videoTopic').value.trim() || 'apresentação de produto';
+const style = document.getElementById('videoStyle').value;
   const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
 
   const scenes = [
