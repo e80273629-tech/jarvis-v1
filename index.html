@@ -62,11 +62,19 @@
     <div class="status">● Sistema ativo</div>
   </header>
 
-  <section class="hero">
-  <div class="eyebrow">SUA INTELIGÊNCIA ARTIFICIAL</div>
-  <h2>Bem-vindo à OSVYRA.</h2>
-  <p>Sua inteligência artificial para criação, produtividade e gestão.</p>
-  <p>Estou aqui para organizar ideias, desenvolver projetos e simplificar tarefas. Vamos começar?</p>
+  <section class="panel" id="osvyra-chat">
+  <h3>OSVYRA · Central de inteligência</h3>
+  <p class="muted">Converse com sua assistente e organize suas ideias.</p>
+
+  <div id="chatMessages" class="notice" style="min-height:180px;">
+    <strong>OSVYRA</strong>
+    <p>Olá! Estou pronta para ajudar você. Qual será nossa próxima missão?</p>
+  </div>
+
+  <label for="chatInput">Sua mensagem</label>
+  <textarea id="chatInput" placeholder="Escreva sua mensagem..." rows="3"></textarea>
+
+  <button class="btn" id="sendChat" type="button">Enviar mensagem</button>
 </section>
 
   <section class="grid" aria-label="Módulos">
