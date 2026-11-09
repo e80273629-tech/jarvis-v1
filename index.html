@@ -398,50 +398,52 @@ document.getElementById('makeScript').addEventListener('click', () => {
 const style = document.getElementById('videoStyle').value;
   const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
 
-  const scenes = [
-    {
-      time: '00–10s',
-      title: 'ABERTURA IMPACTANTE',
-      visual: `Comece com um close cinematográfico de uma pizza artesanal saindo do forno a lenha, com queijo derretido, massa dourada e vapor subindo. Aproxime a câmera lentamente para despertar o apetite.`,
-      speech: `Você já conhece ${topic}?`,
-      audio: 'Música envolvente e efeito sonoro de abertura.'
-    },
-    {
-      time: '10–20s',
-      title: 'APRESENTAÇÃO',
-      visual: `Mostre a pizzaria por dentro, com ambiente acolhedor, mesas organizadas e pessoas aproveitando uma pizza artesanal. Faça um movimento suave de câmera revelando o espaço.`,
-      speech: 'Hoje vamos mostrar algo que merece sua atenção!',
-      audio: 'Música de fundo suave.'
-    },
-    {
-      time: '20–30s',
-      title: 'PRIMEIRO DESTAQUE',
-      visual: `Mostre um pizzaiolo preparando a massa artesanal, espalhando molho de tomate e distribuindo ingredientes frescos. Use closes nos detalhes do preparo, com movimentos suaves de câmera.`,
-      speech: 'Olha só este detalhe especial!',
-      audio: 'Efeito sonoro de destaque.'
-    },
-    {
-      time: '30–40s',
-      title: 'BENEFÍCIOS',
-      visual: `Mostre uma família e um grupo de amigos reunidos à mesa, sorrindo e compartilhando fatias de pizza artesanal. Destaque o clima acolhedor e os momentos especiais ao redor da mesa.`,
-      speech: 'Uma opção que vale a pena conhecer!',
-      audio: 'Música animada.'
-    },
-    {
-      time: '40–50s',
-      title: 'MOMENTO DE DESTAQUE',
-      visual: `Mostre uma pizza artesanal completa em destaque, com queijo derretido, borda dourada e ingredientes frescos. Faça uma aproximação cinematográfica e finalize com uma imagem irresistível da pizza.`,
-      speech: 'E esse é o grande destaque da apresentação!',
-      audio: 'Efeito sonoro de transição.'
-    },
-    {
-      time: '50–60s',
-      title: 'ENCERRAMENTO',
-      visual: `Mostre a fachada da pizzaria iluminada e acolhedora, com o nome do estabelecimento em destaque. Finalize com uma tela convidando o público para a inauguração e exibindo as informações de contato.`,
-      speech: 'Gostou? Compartilhe e conheça mais!',
-      audio: 'Música finalizando suavemente.'
-    }
-  ];
+ 
+const scenes = [
+  {
+    time: '00–10s',
+    title: 'ABERTURA IMPACTANTE',
+    visual: `Comece com um close cinematográfico de ${topic}. Destaque o detalhe mais atraente do produto, serviço ou negócio. Use iluminação profissional e movimento suave de câmera para despertar a curiosidade.`,
+    speech: `Você já conhece ${topic}? Prepare-se para uma novidade especial!`,
+    audio: 'Música envolvente, com efeito sonoro de abertura.'
+  },
+  {
+    time: '10–20s',
+    title: 'APRESENTAÇÃO',
+    visual: `Mostre ${topic} em seu ambiente real de apresentação ou funcionamento. Valorize a identidade do negócio, seus produtos, serviços ou espaço.`,
+    speech: `Hoje vamos apresentar ${topic} e mostrar o que torna essa opção especial!`,
+    audio: 'Música de fundo agradável, acompanhando o ritmo das imagens.'
+  },
+  {
+    time: '20–30s',
+    title: 'PRIMEIRO DESTAQUE',
+    visual: `Mostre de perto os principais detalhes de ${topic}. Destaque qualidade, características, preparação ou funcionamento, conforme o assunto.`,
+    speech: `Qualidade, atenção aos detalhes e uma experiência que merece ser conhecida!`,
+    audio: 'Efeito sonoro suave para destacar os detalhes.'
+  },
+  {
+    time: '30–40s',
+    title: 'BENEFÍCIOS',
+    visual: `Mostre pessoas utilizando, experimentando ou aproveitando ${topic}, de maneira coerente com o negócio. Transmita confiança e satisfação.`,
+    speech: `Uma opção pensada para oferecer praticidade, qualidade e uma experiência especial!`,
+    audio: 'Música animada e agradável.'
+  },
+  {
+    time: '40–50s',
+    title: 'MOMENTO DE DESTAQUE',
+    visual: `Apresente a melhor imagem de ${topic}. Faça uma aproximação cinematográfica e valorize seu principal diferencial.`,
+    speech: `Venha conhecer de perto tudo o que ${topic} pode oferecer!`,
+    audio: 'Efeito sonoro de destaque e transição.'
+  },
+  {
+    time: '50–60s',
+    title: 'ENCERRAMENTO',
+    visual: `Finalize mostrando ${topic} em destaque. Apresente o nome do negócio e reserve espaço para endereço, contato ou redes sociais.`,
+    speech: `Esperamos por você! Entre em contato e venha conhecer!`,
+    audio: 'Música de encerramento com finalização suave.'
+  }
+];
+
 if (style === 'propaganda') {
   scenes[0].speech = `Uma novidade deliciosa está chegando! Venha conhecer nossa pizzaria artesanal!`;
   scenes[1].speech = `Prepare-se para experimentar pizzas artesanais, feitas para tornar seus momentos ainda mais especiais!`;
