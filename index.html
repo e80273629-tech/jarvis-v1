@@ -477,6 +477,23 @@ REVISÃO ANTES DE PUBLICAR:
   document.getElementById('scriptOut').value = script;
 });
 
+document.getElementById('copyScript').addEventListener('click', async () => {
+  const script = document.getElementById('scriptOut').value;
+  const status = document.getElementById('copyStatus');
+
+  if (!script.trim()) {
+    status.textContent = 'Gere um roteiro primeiro.';
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(script);
+    status.textContent = 'Roteiro copiado com sucesso!';
+  } catch (error) {
+    status.textContent = 'Não foi possível copiar automaticamente.';
+  }
+});
+
 /* UTILITÁRIOS */
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, character => ({
