@@ -404,6 +404,9 @@ const productName = topic
   .replace(/^(divulgação|apresentação|lançamento|promoção|anúncio)\s+(de|do|da|dos|das)\s+(um|uma|o|a|os|as)?\s*/i, '')
   .replace(/[.!?]+$/, '')
   .trim();
+const productReference = /^(o|a|os|as|um|uma)\s/i.test(productName)
+  ? productName
+  : `este ${productName}`;
 
 let businessType = topic;
 
