@@ -496,6 +496,25 @@ document.getElementById('copyScript').addEventListener('click', async () => {
     status.textContent = 'Não foi possível copiar automaticamente.';
   }
 });
+document.getElementById('downloadScript').addEventListener('click', () => {
+  const script = document.getElementById('scriptOut').value;
+
+  if (!script.trim()) {
+    document.getElementById('copyStatus').textContent = 'Gere um roteiro primeiro.';
+    return;
+  }
+
+  const blob = new Blob([script], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = 'roteiro-jarvis.txt';
+  link.click();
+
+  URL.revokeObjectURL(url);
+  document.getElementById('copyStatus').textContent = 'Roteiro baixado com sucesso!';
+});
 
 /* UTILITÁRIOS */
 function escapeHtml(value) {
