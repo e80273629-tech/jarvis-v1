@@ -505,7 +505,9 @@ scenes[5].visual = `Finalize com ${productReference} em destaque. Reserve espaç
   scenes[0].speech = `Conheça ${productReference}! Uma apresentação especial para você descobrir todos os detalhes!`;
 scenes[1].speech = `Veja ${productReference} por inteiro e conheça sua apresentação!`;
 scenes[2].speech = 'Observe os acabamentos, materiais e características deste produto!';
-scenes[3].speech = `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
+scenes[3].speech = productAudienceIsBusiness
+  ? `Avalie como ${productReference} pode atender às necessidades do seu negócio!`
+  : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
 scenes[4].speech = 'Confira os detalhes e as informações antes de fazer sua escolha!';
 scenes[5].speech = `Gostou ${productReferenceOf}? Entre em contato e consulte as condições para adquirir ${productIsFeminine ? 'a sua' : 'o seu'}!`;
 }
