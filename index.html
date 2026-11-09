@@ -410,9 +410,9 @@ const productNameFormatted =
 
 const productIsFeminine = /(a|ção|são|gem|dade|ice)$/i.test(productName);
 
-const productReference = `${productIsFeminine ? 'esta' : 'este'} ${productName}`;
+const productReference = `${productIsFeminine ? 'esta' : 'este'} ${productNameFormatted}`;
 
-const productReferenceOf = `${productIsFeminine ? 'desta' : 'deste'} ${productName}`;
+const productReferenceOf = `${productIsFeminine ? 'desta' : 'deste'} ${productNameFormatted}`;
 
 let businessType = topic;
 
