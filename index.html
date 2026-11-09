@@ -495,48 +495,64 @@ if (style === 'propaganda') {
   scenes[5].speech = `Estamos esperando por você! Entre em contato e saiba mais!`;
 }
 
+
 if (style === 'produto') {
   const productAudienceLower = audience.toLowerCase();
-const productAudienceIsBusiness =
-  /(comerciantes|lojistas|empreendedores|empresários|empresas|estabelecimentos|restaurantes|cafeterias|revendedores|negócios)/i.test(productAudienceLower);
+
+  const productAudienceIsBusiness =
+    /(comerciantes|lojistas|empreendedores|empresários|empresas|estabelecimentos|restaurantes|cafeterias|revendedores|negócios)/i.test(productAudienceLower);
 
   const productAudienceIsEconomy =
-  /(economia|econômico|econômica|preço acessível|preço baixo|barato|barata|custo-benefício|economizar)/i.test(productAudienceLower);
+    /(economia|econômico|econômica|preço acessível|preço baixo|barato|barata|custo-benefício|economizar)/i.test(productAudienceLower);
 
-const productAudienceIsQuality =
-  /(qualidade|premium|durabilidade|resistência|sofisticação|alto padrão)/i.test(productAudienceLower);
+  const productAudienceIsQuality =
+    /(qualidade|premium|durabilidade|resistência|sofisticação|alto padrão)/i.test(productAudienceLower);
+
+  const productDetailsVisual = productDetails
+    ? ` Utilize estas características informadas: ${productDetails}. Não acrescente especificações que não foram fornecidas.`
+    : ' Não invente características, materiais, funções ou especificações.';
+
   scenes[0].title = 'APRESENTAÇÃO DO PRODUTO';
-  scenes[0].visual = `Mostre ${productReference} em destaque, com enquadramento cinematográfico, iluminação profissional e fundo elegante.`;
 
-  scenes[1].visual = `Apresente ${productReference} por inteiro. Mostre também os itens que acompanham o produto, somente se forem informados ou estiverem visíveis.`;
+  scenes[0].visual = `Mostre ${productReference} em destaque, com enquadramento cinematográfico, iluminação profissional e fundo elegante.${productDetailsVisual}`;
 
-  scenes[2].visual = `Faça closes ${productReferenceOf}. Destaque formato, acabamento, materiais, textura, embalagem e outros detalhes que possam ser observados.`;
+  scenes[1].visual = `Apresente ${productReference} por inteiro. Mostre os itens que acompanham o produto somente se forem informados ou estiverem visíveis.${productDetailsVisual}`;
 
-scenes[3].visual = `Mostre uma demonstração de uso ${productReferenceOf}, respeitando sua finalidade e sem inventar funções ou resultados.`;
+  scenes[2].visual = `Faça closes ${productReferenceOf}. Destaque formato, acabamento, materiais, textura e as características informadas.${productDetailsVisual}`;
 
-scenes[4].visual = `Apresente novamente ${productReference} em uma composição profissional. Destaque apenas características e informações confirmadas.`;
+  scenes[3].visual = `Mostre uma demonstração de uso ${productReferenceOf}, respeitando sua finalidade e utilizando somente funções e características confirmadas.${productDetailsVisual}`;
 
-scenes[5].visual = `Finalize com ${productReference} em destaque. Reserve espaço para preço, contato e chamada para compra.`;
+  scenes[4].visual = `Apresente novamente ${productReference} em uma composição profissional. Destaque seus diferenciais confirmados.${productDetailsVisual}`;
+
+  scenes[5].visual = `Finalize com ${productReference} em destaque. Reserve espaço para preço, contato e chamada para compra.${productDetailsVisual}`;
 
   scenes[0].speech = `Conheça ${productReference}! Uma apresentação especial para você descobrir todos os detalhes!`;
-scenes[1].speech = `Veja ${productReference} por inteiro e conheça sua apresentação!`;
-scenes[2].speech = 'Observe os acabamentos, materiais e características deste produto!';
-scenes[3].speech = productAudienceIsBusiness
-  ? `Avalie como ${productReference} pode atender às necessidades do seu negócio!`
-  : productAudienceIsEconomy
-    ? `Descubra como ${productReference} pode ajudar você a buscar praticidade e economia!`
-    : productAudienceIsQuality
-      ? `Conheça os detalhes ${productReferenceOf} e descubra o que merece sua atenção!`
-      : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
-scenes[4].speech = productAudienceIsBusiness
-  ? 'Confira os detalhes e avalie se este produto atende às necessidades do seu negócio!'
-  : productAudienceIsEconomy
-    ? 'Compare as informações e avalie o custo-benefício antes de fazer sua escolha!'
-    : productAudienceIsQuality
-      ? 'Observe os acabamentos e as características confirmadas antes de fazer sua escolha!'
-      : 'Confira os detalhes e as informações antes de fazer sua escolha!';
-scenes[5].speech = `Gostou ${productReferenceOf}? Entre em contato e consulte as condições para adquirir ${productIsFeminine ? 'a sua' : 'o seu'}!`;
+
+  scenes[1].speech = productDetails
+    ? `Conheça algumas características informadas ${productReferenceOf}: ${productDetails}!`
+    : `Veja ${productReference} por inteiro e conheça sua apresentação!`;
+
+  scenes[2].speech = 'Observe os acabamentos, materiais e características deste produto!';
+
+  scenes[3].speech = productAudienceIsBusiness
+    ? `Avalie como ${productReference} pode atender às necessidades do seu negócio!`
+    : productAudienceIsEconomy
+      ? `Descubra como ${productReference} pode ajudar você a buscar praticidade e economia!`
+      : productAudienceIsQuality
+        ? `Conheça os detalhes ${productReferenceOf} e descubra o que merece sua atenção!`
+        : `Descubra como ${productReference} pode fazer parte do seu dia a dia!`;
+
+  scenes[4].speech = productAudienceIsBusiness
+    ? 'Confira os detalhes e avalie se este produto atende às necessidades do seu negócio!'
+    : productAudienceIsEconomy
+      ? 'Compare as informações e avalie o custo-benefício antes de fazer sua escolha!'
+      : productAudienceIsQuality
+        ? 'Observe os acabamentos e as características confirmadas antes de fazer sua escolha!'
+        : 'Confira os detalhes e as informações antes de fazer sua escolha!';
+
+  scenes[5].speech = `Gostou ${productReferenceOf}? Entre em contato e consulte as condições para adquirir ${productIsFeminine ? 'a sua' : 'o seu'}!`;
 }
+
 
 if (style === 'social') {
   scenes[0].title = 'GANCHO INICIAL';
