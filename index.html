@@ -496,12 +496,24 @@ if (style === 'produto') {
 }
 
 if (style === 'social') {
-  scenes[0].speech = `Você sabia disso sobre ${topic}?`;
-  scenes[1].speech = 'Fica até o final porque tem uma surpresa!';
-  scenes[2].speech = 'Olha só esse detalhe que chama atenção!';
-  scenes[3].speech = `Isso pode interessar muito a ${audience}!`;
-  scenes[4].speech = 'Agora vem a parte mais interessante!';
-  scenes[5].speech = 'Comente o que achou e compartilhe!';
+  scenes[0].title = 'GANCHO INICIAL';
+  scenes[0].visual = 'Comece com um close de uma barba bem apresentada. Use movimento rápido de câmera e texto grande na tela para despertar curiosidade.';
+  scenes[0].speech = 'Quer cuidar melhor da barba? Estas três dicas podem ajudar!';
+
+  scenes[1].visual = 'Mostre uma pessoa lavando a barba cuidadosamente, com imagens próximas e movimentos naturais.';
+  scenes[1].speech = 'Primeira dica: mantenha a barba limpa, usando um produto adequado para essa região!';
+
+  scenes[2].visual = 'Mostre a barba sendo seca delicadamente com uma toalha, destacando os movimentos suaves.';
+  scenes[2].speech = 'Segunda dica: depois da lavagem, seque com cuidado, sem esfregar com força!';
+
+  scenes[3].visual = 'Mostre uma pessoa penteando a barba, começando pelas pontas e organizando os fios.';
+  scenes[3].speech = 'Terceira dica: penteie a barba com cuidado para ajudar a organizar os fios!';
+
+  scenes[4].visual = 'Apresente uma sequência rápida relembrando as três dicas, com textos curtos e imagens correspondentes.';
+  scenes[4].speech = 'Limpeza, secagem cuidadosa e penteado: três cuidados para incluir na rotina!';
+
+  scenes[5].visual = 'Finalize com um close de uma barba bem apresentada e uma pergunta em destaque na tela.';
+  scenes[5].speech = 'Qual dessas dicas você já pratica? Comente e compartilhe com seus amigos!';
 }
 
 const styleNames = {
