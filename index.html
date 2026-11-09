@@ -486,6 +486,8 @@ if (style === 'propaganda') {
 
 if (style === 'produto') {
   const productAudienceLower = audience.toLowerCase();
+const productAudienceIsBusiness =
+  /(comerciantes|lojistas|empreendedores|empresários|empresas|estabelecimentos|restaurantes|cafeterias|revendedores|negócios)/i.test(productAudienceLower);
 
   const productAudienceIsEconomy =
   /(economia|econômico|econômica|preço acessível|preço baixo|barato|barata|custo-benefício|economizar)/i.test(productAudienceLower);
