@@ -442,6 +442,32 @@ const style = document.getElementById('videoStyle').value;
       audio: 'Música finalizando suavemente.'
     }
   ];
+if (style === 'propaganda') {
+  scenes[0].speech = `Atenção! ${topic} chegou com novidades especiais!`;
+  scenes[1].speech = 'Temos uma oportunidade especial esperando por você!';
+  scenes[2].speech = 'Conheça nossos diferenciais!';
+  scenes[3].speech = `Preparamos tudo pensando em ${audience}.`;
+  scenes[4].speech = 'Não perca essa oportunidade!';
+  scenes[5].speech = 'Venha conhecer! Estamos esperando por você!';
+}
+
+if (style === 'produto') {
+  scenes[0].speech = `Conheça de perto: ${topic}!`;
+  scenes[1].speech = 'Vamos apresentar esse produto para você!';
+  scenes[2].speech = 'Observe os detalhes e características!';
+  scenes[3].speech = `Veja por que pode ser interessante para ${audience}.`;
+  scenes[4].speech = 'Confira tudo o que ele oferece!';
+  scenes[5].speech = 'Gostou? Conheça mais sobre esse produto!';
+}
+
+if (style === 'social') {
+  scenes[0].speech = `Você sabia disso sobre ${topic}?`;
+  scenes[1].speech = 'Fica até o final porque tem uma surpresa!';
+  scenes[2].speech = 'Olha só esse detalhe que chama atenção!';
+  scenes[3].speech = `Isso pode interessar muito a ${audience}!`;
+  scenes[4].speech = 'Agora vem a parte mais interessante!';
+  scenes[5].speech = 'Comente o que achou e compartilhe!';
+}
 
 const styleNames = {
   propaganda: 'PROPAGANDA',
