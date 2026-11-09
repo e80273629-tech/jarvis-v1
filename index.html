@@ -487,8 +487,11 @@ if (style === 'propaganda') {
 if (style === 'produto') {
   const productAudienceLower = audience.toLowerCase();
 
-  const productAudienceIsBusiness =
-    /(comerciantes|lojistas|empreendedores|empresários|empresas|estabelecimentos|restaurantes|cafeterias|revendedores|negócios)/i.test(productAudienceLower);
+  const productAudienceIsEconomy =
+  /(economia|econômico|econômica|preço acessível|preço baixo|barato|barata|custo-benefício|economizar)/i.test(productAudienceLower);
+
+const productAudienceIsQuality =
+  /(qualidade|premium|durabilidade|resistência|sofisticação|alto padrão)/i.test(productAudienceLower);
   scenes[0].title = 'APRESENTAÇÃO DO PRODUTO';
   scenes[0].visual = `Mostre ${productReference} em destaque, com enquadramento cinematográfico, iluminação profissional e fundo elegante.`;
 
