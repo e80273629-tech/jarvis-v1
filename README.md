@@ -1,4 +1,4 @@
-# J.A.R.V.I.S. V1
+# OSVYRA — Inteligência Artificial
 
 Protótipo web instalável (PWA), pensado primeiro para Android.
 
