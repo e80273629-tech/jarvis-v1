@@ -405,8 +405,7 @@ const productName = topic
   .replace(/^(um|uma|o|a|os|as)\s+/i, '')
   .replace(/[.!?]+$/, '')
   .trim();
-const productNameFormatted =
-  productName.charAt(0).toLowerCase() + productName.slice(1);
+const productNameFormatted = productName.toLowerCase();
 
 const productIsFeminine = /(a|ção|são|gem|dade|ice)$/i.test(productName);
 
