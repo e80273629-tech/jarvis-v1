@@ -396,10 +396,29 @@ downloadArtButton.addEventListener('click', () => {
 document.getElementById('makeScript').addEventListener('click', () => {
   const topic = document.getElementById('videoTopic').value.trim() || 'apresentação de produto';
 const style = document.getElementById('videoStyle').value;
-  const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
+  
+const audience = document.getElementById('videoAudience').value.trim() || 'clientes';
 
- 
+const topicLower = topic.toLowerCase();
+
+let businessType = topic;
+
+if (topicLower.includes('pizzaria') || topicLower.includes('pizza')) {
+  businessType = 'pizzaria artesanal';
+} else if (topicLower.includes('barbearia') || topicLower.includes('barbeiro')) {
+  businessType = 'barbearia moderna';
+} else if (topicLower.includes('salão') || topicLower.includes('beleza')) {
+  businessType = 'salão de beleza';
+} else if (topicLower.includes('loja de roupa') || topicLower.includes('roupa')) {
+  businessType = 'loja de roupas';
+} else if (topicLower.includes('restaurante')) {
+  businessType = 'restaurante';
+} else if (topicLower.includes('doceria') || topicLower.includes('confeitaria')) {
+  businessType = 'doceria';
+}
+
 const scenes = [
+
   {
     time: '00–10s',
     title: 'ABERTURA IMPACTANTE',
