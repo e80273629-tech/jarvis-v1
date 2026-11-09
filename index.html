@@ -402,8 +402,10 @@ const audience = document.getElementById('videoAudience').value.trim() || 'clien
 const topicLower = topic.toLowerCase();
 const productName = topic
   .replace(/^(divulgação|apresentação|lançamento|promoção|anúncio)\s+(de|do|da|dos|das)\s+(um|uma|o|a|os|as)?\s*/i, '')
+  .replace(/^(um|uma|o|a|os|as)\s+/i, '')
   .replace(/[.!?]+$/, '')
   .trim();
+
 const productIsFeminine = /(a|ção|são|gem|dade|ice)$/i.test(productName);
 
 const productReference = `${productIsFeminine ? 'esta' : 'este'} ${productName}`;
