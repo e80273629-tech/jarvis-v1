@@ -219,9 +219,43 @@
   border-color: #62d9f5;
 }
 
-@media (min-width: 700px) {
+/* ADAPTAÇÃO PARA COMPUTADOR */
+@media (min-width: 900px) {
+  .side-menu {
+    left: 0;
+    width: 250px;
+  }
+
   .wrap {
+    margin-left: 250px;
+    width: calc(100% - 250px);
     padding-left: 30px;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* ADAPTAÇÃO PARA CELULAR */
+@media (max-width: 899px) {
+  .side-menu {
+    left: -280px;
+    width: 260px;
+  }
+
+  .side-menu.open {
+    left: 0;
+  }
+
+  .wrap {
+    width: 100%;
+    margin-left: 0;
+    padding: 70px 16px 22px;
+  }
+
+  .menu-toggle {
+    display: block;
   }
 }
   </style>
