@@ -749,10 +749,37 @@ function escapeHtml(value) {
   }[character]));
 }
 
-async function getCurrentUser() {
-  const { data, error } = await supabaseClient.auth.getUser();
-  if (error || !data.user) return null;
-  return data.user;
+async function loadTasks() {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const list = document.getElementById("tasksList");
+  const message = document.getElementById("taskMessage");
+
+  const { data, error } = await supabaseClient
+    .from("osvyra_tasks")
+    .select("id, title, description, status, scheduled_at, result")
+    .eq("user_id", user.id)
+    .order("scheduled_at", { ascending: true });
+
+  if (error) {
+    message.textContent = "Erro ao carregar lembretes.";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.textContent = "Nenhum lembrete cadastrado.";
+    return;
+  }
+
+  list.innerHTML = data.map(task => `
+    <div class="card">
+      <strong>${escapeHtml(task.title || "")}</strong>
+      <p>${escapeHtml(task.description || "")}</p>
+      <small>Status: ${escapeHtml(task.status || "")}</small>
+      <p>${task.scheduled_at ? new Date(task.scheduled_at).toLocaleString("pt-BR") : "Sem horário"}</p>
+    </div>
+  `).join("");
 }
 
 const validStatuses = ['Para analisar', 'Contato autorizado', 'Mensagem enviada manualmente', 'Não interessado'];
