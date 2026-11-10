@@ -371,6 +371,291 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
+    
+/* OSVYRA — PÁGINA PÚBLICA */
+.public-landing {
+  min-height: 85vh;
+  padding: 12px 0 35px;
+  overflow: hidden;
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px 18px;
+  border: 1px solid rgba(110, 170, 255, .2);
+  border-radius: 16px;
+  background: rgba(7, 15, 35, .7);
+  backdrop-filter: blur(15px);
+}
+
+.landing-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.landing-symbol {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #63e7ff;
+  border-radius: 50%;
+  color: #63e7ff;
+  box-shadow: 0 0 20px #299dff66;
+}
+
+.landing-nav a {
+  color: #c4d5f5;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.landing-nav button {
+  padding: 10px 18px;
+  border: 1px solid #63e7ff88;
+  border-radius: 10px;
+  color: #fff;
+  background: #142c4c;
+  cursor: pointer;
+}
+
+.landing-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  align-items: center;
+  min-height: 510px;
+  padding: 55px 35px;
+  margin-top: 18px;
+  border: 1px solid rgba(110, 170, 255, .2);
+  border-radius: 24px;
+  background: linear-gradient(120deg, rgba(5, 13, 34, .94), rgba(17, 25, 62, .68));
+  overflow: hidden;
+}
+
+.landing-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.landing-tag,
+.landing-section-title span {
+  color: #63e7ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.landing-copy h2 {
+  margin: 20px 0;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.08;
+  letter-spacing: -2px;
+}
+
+.landing-copy h2 span {
+  color: #78cfff;
+  text-shadow: 0 0 30px #278dff88;
+}
+
+.landing-copy p,
+.landing-section-title p {
+  max-width: 490px;
+  color: #b5c5e3;
+  line-height: 1.8;
+}
+
+.landing-cta {
+  margin-top: 22px;
+  padding: 15px 23px;
+  border: 0;
+  border-radius: 12px;
+  color: #06111d;
+  background: linear-gradient(100deg, #63e7ff, #8c9dff);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0 28px #3caaff44;
+}
+
+.landing-cta span {
+  margin-left: 15px;
+}
+
+.landing-note {
+  margin-top: 35px;
+  color: #718bad;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.landing-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 330px;
+}
+
+.visual-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 220px;
+  height: 220px;
+  border: 1px solid #63e7ff66;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2369b855, #0a153500 68%);
+  box-shadow: 0 0 65px #318cff33, inset 0 0 40px #318cff22;
+}
+
+.core-ring {
+  position: absolute;
+  inset: -24px;
+  border: 1px solid #63e7ff55;
+  border-radius: 50%;
+  transform: rotateX(65deg);
+  box-shadow: 0 0 25px #399dff33;
+}
+
+.ring-two {
+  inset: -45px;
+  border-color: #a38aff55;
+  transform: rotateY(65deg);
+}
+
+.core-letter {
+  color: #8eeeff;
+  font-size: 100px;
+  font-weight: 200;
+  text-shadow: 0 0 35px #39bfff;
+}
+
+.visual-label {
+  position: absolute;
+  color: #83dfff;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.label-top {
+  top: 25px;
+  right: 10px;
+}
+
+.label-bottom {
+  bottom: 25px;
+  left: 5px;
+}
+
+.landing-orbit {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  filter: blur(75px);
+  pointer-events: none;
+}
+
+.orbit-one {
+  top: -100px;
+  right: 10%;
+  background: #245cff55;
+}
+
+.orbit-two {
+  bottom: -150px;
+  left: 25%;
+  background: #a13cff33;
+}
+
+.landing-features {
+  padding: 65px 5px 25px;
+}
+
+.landing-section-title {
+  margin-bottom: 25px;
+}
+
+.landing-section-title h2 {
+  font-size: clamp(23px, 4vw, 34px);
+  margin: 12px 0;
+}
+
+.landing-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.landing-feature {
+  padding: 24px;
+  border: 1px solid rgba(110, 170, 255, .22);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(20, 35, 72, .82), rgba(8, 16, 37, .78));
+  backdrop-filter: blur(15px);
+}
+
+.landing-feature > span {
+  color: #63e7ff;
+  font-size: 28px;
+}
+
+.landing-feature h3 {
+  margin-bottom: 8px;
+}
+
+.landing-feature p {
+  color: #aebfdd;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.landing-bottom {
+  padding: 35px 20px;
+  margin-top: 25px;
+  text-align: center;
+  border: 1px solid rgba(110, 170, 255, .2);
+  border-radius: 20px;
+  background: rgba(12, 24, 52, .75);
+}
+
+@media (max-width: 650px) {
+  .landing-hero {
+    grid-template-columns: 1fr;
+    padding: 40px 22px;
+  }
+
+  .landing-visual {
+    min-height: 260px;
+  }
+
+  .visual-core {
+    width: 170px;
+    height: 170px;
+  }
+
+  .core-letter {
+    font-size: 75px;
+  }
+
+  .landing-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-nav a {
+    display: none;
+  }
+
+  .landing-copy h2 {
+    font-size: 42px;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -407,6 +692,78 @@ body {
     <div class="brand"><div class="orb">O</div><div><h1>OSVYRA</h1><div class="sub">INTELIGÊNCIA ARTIFICIAL</div></div></div>
     <div class="status">● Sistema ativo</div>
   </header>
+
+<section id="publicLanding" class="public-landing hidden">
+  <nav class="landing-nav">
+    <div class="landing-brand">
+      <span class="landing-symbol">O</span>
+      <span>OSVYRA</span>
+    </div>
+    <a href="#landingFeatures">Recursos</a>
+    <button id="landingLogin" type="button">Entrar</button>
+  </nav>
+
+  <div class="landing-hero">
+    <div class="landing-orbit orbit-one"></div>
+    <div class="landing-orbit orbit-two"></div>
+
+    <div class="landing-copy">
+      <span class="landing-tag">✦ INTELIGÊNCIA ARTIFICIAL</span>
+      <h2>Suas ideias.<br><span>Um novo universo.</span></h2>
+      <p>
+        Uma plataforma inteligente para transformar ideias em criações,
+        organizar projetos e explorar novas possibilidades.
+      </p>
+      <button id="landingStart" class="landing-cta" type="button">
+        Começar agora <span>→</span>
+      </button>
+      <div class="landing-note">OSVYRA AI STUDIO · SUA CENTRAL CRIATIVA</div>
+    </div>
+
+    <div class="landing-visual" aria-hidden="true">
+      <div class="visual-core">
+        <div class="core-ring"></div>
+        <div class="core-ring ring-two"></div>
+        <div class="core-letter">O</div>
+      </div>
+      <span class="visual-label label-top">AI SYSTEM</span>
+      <span class="visual-label label-bottom">CREATIVE INTELLIGENCE</span>
+    </div>
+  </div>
+
+  <div id="landingFeatures" class="landing-features">
+    <div class="landing-section-title">
+      <span>EXPLORE A PLATAFORMA</span>
+      <h2>Ferramentas para criar e organizar</h2>
+      <p>Conheça algumas das possibilidades da OSVYRA.</p>
+    </div>
+
+    <div class="landing-feature-grid">
+      <article class="landing-feature">
+        <span>✦</span>
+        <h3>Estúdio de imagens</h3>
+        <p>Crie imagens e materiais promocionais para seus projetos.</p>
+      </article>
+      <article class="landing-feature">
+        <span>◈</span>
+        <h3>Estúdio de vídeos</h3>
+        <p>Estruture ideias, cenas e roteiros para conteúdos audiovisuais.</p>
+      </article>
+      <article class="landing-feature">
+        <span>⌘</span>
+        <h3>Central inteligente</h3>
+        <p>Organize clientes, oportunidades, tarefas e projetos.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="landing-bottom">
+    <h2>O próximo passo começa com uma ideia.</h2>
+    <button id="landingStartBottom" class="landing-cta" type="button">
+      Acessar a OSVYRA →
+    </button>
+  </div>
+</section>
 
   <section class="panel" id="osvyra-chat">
   <h3>OSVYRA · Central de inteligência</h3>
