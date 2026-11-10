@@ -1143,7 +1143,7 @@ conversationHistory.push(
   { role: "user", content: text },
   { role: "assistant", content: data.answer }
 );
-if (conversationHistory.length > 20) {
+if (conversationHistory.length > 10) {
   conversationHistory.splice(0, 2);
 }
 localStorage.setItem("osvyraHistory", JSON.stringify(conversationHistory));
