@@ -53,6 +53,99 @@
     footer{color:#7188a2;font-size:12px;text-align:center;margin-top:24px}
     @media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wrap{padding-top:32px}}
     @media(max-width:430px){.row{grid-template-columns:1fr}.hero{padding:19px}.top{align-items:flex-start}}
+    .osvyra-tools {
+  width: 100%;
+  margin: 35px 0;
+}
+
+.tools-heading {
+  margin-bottom: 25px;
+}
+
+.tools-heading span {
+  color: #55aaff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.tools-heading h2 {
+  color: #ffffff;
+  font-size: 28px;
+  margin: 10px 0;
+}
+
+.tools-heading p {
+  color: #c5d0e0;
+  font-size: 15px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.tool-card {
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  color: #ffffff;
+  background: #101d33;
+  border: 1px solid #29476c;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.tool-card:hover {
+  border-color: #399cff;
+  transform: translateY(-3px);
+}
+
+.tool-card img {
+  width: 100%;
+  height: 175px;
+  object-fit: cover;
+  display: block;
+}
+
+.tool-content {
+  padding: 18px;
+}
+
+.tool-icon {
+  font-size: 25px;
+}
+
+.tool-content h3 {
+  color: #ffffff;
+  font-size: 19px;
+  margin: 12px 0 8px;
+}
+
+.tool-content p {
+  color: #c5d0e0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tool-content strong {
+  display: block;
+  color: #63b2ff;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+@media (max-width: 650px) {
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tools-heading h2 {
+    font-size: 23px;
+  }
+}
   </style>
 </head>
 <body>
