@@ -280,6 +280,87 @@
 .back-button.hidden {
   display: none !important;
 }
+    /* OSVYRA — VISUAL FUTURISTA */
+:root {
+  --bg: #050816;
+  --panel: rgba(13, 23, 48, 0.78);
+  --panel2: rgba(19, 31, 65, 0.82);
+  --line: rgba(107, 153, 255, 0.22);
+  --cyan: #63e7ff;
+  --muted: #a8b7d8;
+  --white: #f4f7ff;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(0, 120, 255, .22), transparent 38%),
+    radial-gradient(ellipse at 85% 20%, rgba(139, 55, 255, .20), transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(0, 220, 255, .10), transparent 45%),
+    linear-gradient(135deg, #030611, #091329 55%, #050816);
+  background-attachment: fixed;
+}
+
+.wrap {
+  position: relative;
+  isolation: isolate;
+}
+
+.wrap::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(100, 160, 255, .12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 160, 255, .12) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+.panel, .hero, .tile, .tool-card {
+  background: linear-gradient(
+    145deg,
+    rgba(20, 35, 72, .82),
+    rgba(8, 16, 37, .78)
+  );
+  border: 1px solid rgba(105, 169, 255, .22);
+  box-shadow:
+    0 12px 45px rgba(0, 0, 0, .25),
+    inset 0 1px 0 rgba(255, 255, 255, .06);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 20px;
+}
+
+.tool-card, .tile {
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+.tool-card:hover, .tile:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 231, 255, .65);
+  box-shadow: 0 12px 35px rgba(0, 170, 255, .13);
+}
+
+button, .btn {
+  transition: .2s ease;
+}
+
+button:hover, .btn:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 22px rgba(99, 231, 255, .18);
+}
+
+h1, h2, h3 {
+  letter-spacing: .02em;
+}
+
+::selection {
+  background: rgba(99, 231, 255, .35);
+  color: white;
+}
   </style>
 </head>
 <body>
