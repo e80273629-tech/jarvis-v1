@@ -151,6 +151,24 @@
     <p id="authMessage" class="muted">Você ainda não entrou.</p>
 
     <div id="crmArea" class="hidden">
+
+  <h3>Lembretes e tarefas</h3>
+  <p class="muted">Organize tarefas e lembretes programados.</p>
+
+  <div class="card">
+    <label for="taskTitle">Título</label>
+    <input id="taskTitle" type="text" placeholder="Ex.: Revisar projeto">
+
+    <label for="taskDescription">Descrição</label>
+    <textarea id="taskDescription" placeholder="Detalhes da tarefa"></textarea>
+
+    <label for="taskSchedule">Data e horário</label>
+    <input id="taskSchedule" type="datetime-local">
+
+    <button id="saveTask">Salvar lembrete</button>
+    <p id="taskMessage" class="muted"></p>
+    <div id="tasksList"></div>
+  </div>
       <h3>Central comercial</h3>
       <p class="muted">Gerencie oportunidades e clientes em áreas separadas. Seus registros ficam associados à sua conta.</p>
       <nav class="crm-nav"><button class="btn" id="showLeads" type="button">Oportunidades</button><button class="btn secondary" id="showCustomers" type="button">Clientes</button></nav>
