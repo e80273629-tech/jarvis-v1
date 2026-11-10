@@ -1032,20 +1032,13 @@ document.querySelectorAll('.tile, .tool-card').forEach(button => {
       return;
     }
 
-    // Esconde todas as telas e a página inicial
-    panels.forEach(panel => panel.classList.add('hidden'));
-    document.getElementById('moduleGrid').classList.add('hidden');
+    if (targetId !== currentOsvyraScreen) {
+      osvyraScreenHistory.push(currentOsvyraScreen);
+    }
 
-    // Mostra somente a tela escolhida
-    target.classList.remove('hidden');
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    showOsvyraScreen(targetId);
   });
 });
-
 
 /* ESTÚDIO DE IMAGENS */
 
@@ -1083,9 +1076,9 @@ function showOsvyraScreen(screen) {
   });
 
   backButton.classList.toggle(
-    'hidden',
-    osvyraScreenHistory.length === 0
-  );
+  'hidden',
+  screen === 'home' || osvyraScreenHistory.length === 0
+);
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
