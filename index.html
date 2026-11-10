@@ -1215,10 +1215,12 @@ messages.appendChild(p);
   input.value = "";
   button.disabled = true;
 
-  try const typing = document.createElement("p");
-typing.id = "osvyraTyping";
-typing.textContent = "● ● ● OSVYRA está digitando...";
-messages.appendChild(typing);
+  try {
+    const typing = document.createElement("p");
+    typing.id = "osvyraTyping";
+    typing.textContent = "● ● ● OSVYRA está digitando...";
+    messages.appendChild(typing);
+
     const { data, error } = await supabaseClient.functions.invoke("osvyra-chat", {
       body: {
         messages: [...conversationHistory, { role: "user", content: text }]
