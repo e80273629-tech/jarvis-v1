@@ -1243,6 +1243,9 @@ localStorage.setItem("osvyraHistory", JSON.stringify(conversationHistory));
   } catch (error) {
     messages.innerHTML += `<p><strong>Erro:</strong> Não consegui responder. Tente novamente.</p>`;
   } finally {
+    const typing = document.getElementById("osvyraTyping");
+    if (typing) typing.remove();
+
     button.disabled = false;
   }
 });
