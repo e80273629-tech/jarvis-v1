@@ -231,20 +231,28 @@
   <button id="menuToggle" class="menu-toggle" type="button" aria-label="Abrir menu">
   ☰
 </button>
-  <aside id="sideMenu" class="side-menu">
+ 
+<aside id="sideMenu" class="side-menu">
   <div class="menu-brand">
     <strong>OSVYRA</strong>
     <span>INTELIGÊNCIA ARTIFICIAL</span>
   </div>
 
-  <button class="menu-item" data-screen="home">⌂ Página inicial</button>
-  <button class="menu-item" data-screen="osvyra-chat">✦ Chat IA</button>
-  <button class="menu-item" data-screen="art">🎨 Estúdio de imagens</button>
-  <button class="menu-item" data-screen="video">🎬 Estúdio de vídeos</button>
-  <button class="menu-item" data-screen="video">📝 Roteiros</button>
-  <button class="menu-item" data-screen="clients">📁 Projetos e conta</button>
-  <button class="menu-item" data-screen="phone">📱 Automação Android</button>
+  <button class="menu-item" data-screen="profile">
+    👤 Meu perfil
+  </button>
+
+  <button class="menu-item" data-screen="settings">
+    ⚙️ Configurações
+  </button>
+
+  <div class="menu-divider"></div>
+
+  <button class="menu-item" id="signOut" type="button">
+    ↪ Sair da conta
+  </button>
 </aside>
+
   <header class="top">
     <div class="brand"><div class="orb">O</div><div><h1>OSVYRA</h1><div class="sub">INTELIGÊNCIA ARTIFICIAL</div></div></div>
     <div class="status">● Sistema ativo</div>
@@ -327,7 +335,18 @@
       </div>
     </button>
 
+  
   </div>
+
+  <button class="tool-card assistant-cta" data-target="osvyra-chat" type="button">
+    <div class="tool-content">
+      <span class="tool-icon">✦</span>
+      <h3>Prefere conversar com a assistente?</h3>
+      <p>Conte à OSVYRA o que deseja criar e receba orientação para escolher a ferramenta certa.</p>
+      <strong>Conversar com a OSVYRA →</strong>
+    </div>
+  </button>
+
 </section>
 
   <section id="art" class="panel hidden">
@@ -393,7 +412,7 @@
     <div class="notice"><strong>ACESSO À OSVYRA</strong><p>Entre na sua conta para acessar seus dados comerciais na nuvem.</p></div>
     <label for="authEmail">E-mail</label><input id="authEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
     <label for="authPassword">Senha</label><input id="authPassword" type="password" placeholder="Sua senha" autocomplete="current-password">
-    <button class="btn" id="signUp" type="button">Criar conta</button><button class="btn secondary" id="signIn" type="button">Entrar</button><button class="btn secondary hidden" id="signOut" type="button">Sair da conta</button>
+    <button class="btn" id="signUp" type="button">Criar conta</button><button class="btn secondary" id="signIn" type="button">Entrar</button>
     <p id="authMessage" class="muted">Você ainda não entrou.</p>
 
     <div id="crmArea" class="hidden">
@@ -452,6 +471,32 @@
     <p class="muted">Próxima integração a avaliar: automações locais por rotinas Android, com confirmação antes de ações externas.</p>
   </section>
 
+  <section id="profile" class="panel hidden">
+    <h3>Meu perfil</h3>
+    <p class="muted">Informações da sua conta OSVYRA.</p>
+
+    <div class="notice">
+      <strong>Conta conectada</strong>
+      <p id="profileEmail">Carregando e-mail...</p>
+      <p>Seu acesso está conectado ao Supabase.</p>
+    </div>
+  </section>
+
+  <section id="settings" class="panel hidden">
+    <h3>Configurações</h3>
+    <p class="muted">Preferências da sua plataforma OSVYRA.</p>
+
+    <div class="notice">
+      <strong>Personalização</strong>
+      <p>Em breve você poderá personalizar suas preferências da plataforma.</p>
+    </div>
+
+    <div class="notice">
+      <strong>Conta e segurança</strong>
+      <p>As informações da sua conta são gerenciadas com segurança pelo sistema de autenticação.</p>
+    </div>
+  </section>
+
   <footer>OSVYRA · Inteligência Artificial · Supabase</footer>
 </div>
 
@@ -469,24 +514,31 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* NAVEGAÇÃO */
 const panels = [...document.querySelectorAll('.panel')];
 
+
 document.querySelectorAll('.tile, .tool-card').forEach(button => {
   button.addEventListener('click', () => {
-    panels.forEach(panel => panel.classList.add('hidden'));
-
-    const target = document.getElementById(button.dataset.target);
+    const targetId = button.dataset.target;
+    const target = document.getElementById(targetId);
 
     if (!target) {
-      console.warn('Ferramenta não encontrada:', button.dataset.target);
+      console.warn('Ferramenta não encontrada:', targetId);
       return;
     }
 
+    // Esconde todas as telas e a página inicial
+    panels.forEach(panel => panel.classList.add('hidden'));
+    document.getElementById('moduleGrid').classList.add('hidden');
+
+    // Mostra somente a tela escolhida
     target.classList.remove('hidden');
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
     });
   });
 });
+
 
 /* ESTÚDIO DE IMAGENS */
 /* NAVEGAÇÃO DO MENU LATERAL */
@@ -1442,11 +1494,11 @@ async function updateAuthUI() {
   document.getElementById('sideMenu').classList.toggle('hidden', !session);
   document.getElementById('menuToggle').classList.toggle('hidden', !session);
 
-  // CHAT: primeira tela após o login
-  document.getElementById('osvyra-chat').classList.toggle('hidden', !session);
+  // Página inicial: aparece após o login
+document.getElementById('moduleGrid').classList.toggle('hidden', !session);
 
-  // Os cards de ferramentas não aparecem na página inicial
-  document.getElementById('moduleGrid').classList.add('hidden');
+// Chat: abre somente quando o usuário escolher conversar
+document.getElementById('osvyra-chat').classList.add('hidden');
 
   // Fecha o menu ao sair da conta
   if (!session) {
