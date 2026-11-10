@@ -781,7 +781,48 @@ async function loadTasks() {
     </div>
   `).join("");
 }
+document.getElementById("saveTask").addEventListener("click", async () => {
+  const user = await getCurrentUser();
 
+  const title = document.getElementById("taskTitle").value.trim();
+  const description = document.getElementById("taskDescription").value.trim();
+  const schedule = document.getElementById("taskSchedule").value;
+  const message = document.getElementById("taskMessage");
+
+  if (!user) {
+    message.textContent = "Faça login primeiro.";
+    return;
+  }
+
+  if (!title || !schedule) {
+    message.textContent = "Preencha o título e a data.";
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("osvyra_tasks")
+    .insert({
+      user_id: user.id,
+      title: title,
+      description: description,
+      scheduled_at: new Date(schedule).toISOString(),
+      status: "pending"
+    });
+
+  if (error) {
+    message.textContent = "Erro ao salvar lembrete.";
+    console.error(error);
+    return;
+  }
+
+  message.textContent = "Lembrete salvo com sucesso!";
+  document.getElementById("taskTitle").value = "";
+  document.getElementById("taskDescription").value = "";
+  document.getElementById("taskSchedule").value = "";
+
+  await loadTasks();
+});
+  
 const validStatuses = ['Para analisar', 'Contato autorizado', 'Mensagem enviada manualmente', 'Não interessado'];
 const leadList = document.getElementById('leadList');
 const customerList = document.getElementById('customerList');
