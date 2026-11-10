@@ -1108,7 +1108,7 @@ window.addEventListener('load', async () => {
 });
 </script>
 <script>
-const conversationHistory = [];
+const conversationHistory = JSON.parse(localStorage.getItem("osvyraHistory") || "[]");
 document.getElementById("sendChat").addEventListener("click", async () => {
   const input = document.getElementById("chatInput");
   const messages = document.getElementById("chatMessages");
