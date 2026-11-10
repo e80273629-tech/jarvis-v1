@@ -2004,8 +2004,24 @@ const authMessage = document.getElementById('authMessage');
 const signUpButton = document.getElementById('signUp');
 const signInButton = document.getElementById('signIn');
 const signOutButton = document.getElementById('signOut');
+let loginPanelRequested = false;
+function showLandingLogin() {
+  loginPanelRequested = true;
 
+  document.getElementById('publicLanding').classList.add('hidden');
+  document.getElementById('clients').classList.remove('hidden');
+  document.getElementById('moduleGrid').classList.add('hidden');
 
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+[
+  'landingStart',
+  'landingStartBottom',
+  'landingLogin'
+].forEach(id => {
+  document.getElementById(id).addEventListener('click', showLandingLogin);
+});
 async function updateAuthUI() {
   const { data, error } = await supabaseClient.auth.getSession();
 
@@ -2015,7 +2031,8 @@ async function updateAuthUI() {
   }
 
   const session = data.session;
-
+const publicLanding = document.getElementById('publicLanding');
+publicLanding.classList.toggle('hidden', !!session || loginPanelRequested);
   signUpButton.classList.toggle('hidden', !!session);
   signInButton.classList.toggle('hidden', !!session);
   signOutButton.classList.toggle('hidden', !session);
@@ -2023,7 +2040,7 @@ async function updateAuthUI() {
   authPassword.classList.toggle('hidden', !!session);
 
   document.getElementById('crmArea').classList.toggle('hidden', !session);
-  document.getElementById('clients').classList.toggle('hidden', !!session);
+  document.getElementById('clients').classList.toggle('hidden', !!session || !loginPanelRequested);
 
   // MENU: somente para usuários conectados
   document.getElementById('sideMenu').classList.toggle('hidden', !session);
@@ -2094,10 +2111,13 @@ signInButton.addEventListener('click', async () => {
 
 signOutButton.addEventListener('click', async () => {
   const { error } = await supabaseClient.auth.signOut();
+
   if (error) {
-    authMessage.textContent = error.message;
+    authMessage.textContent = 'Erro ao sair: ' + error.message;
     return;
   }
+
+  loginPanelRequested = false;
   await updateAuthUI();
 });
 
