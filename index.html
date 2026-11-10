@@ -146,6 +146,84 @@
     font-size: 23px;
   }
 }
+          /* MENU LATERAL OSVYRA */
+.menu-toggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1001;
+  background: #142b45;
+  color: #ffffff;
+  border: 1px solid #62d9f5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 260px;
+  height: 100vh;
+  background: #0b1728;
+  border-right: 1px solid #263b55;
+  padding: 75px 16px 20px;
+  z-index: 1000;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+.menu-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 25px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #263b55;
+}
+
+.menu-brand strong {
+  color: #62d9f5;
+  font-size: 23px;
+  letter-spacing: 3px;
+}
+
+.menu-brand span {
+  color: #9fb2c8;
+  font-size: 10px;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 8px;
+  text-align: left;
+  color: #f3f8ff;
+  background: #14243a;
+  border: 1px solid #263b55;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background: #193b58;
+  border-color: #62d9f5;
+}
+
+@media (min-width: 700px) {
+  .wrap {
+    padding-left: 30px;
+  }
+}
   </style>
 </head>
 <body>
