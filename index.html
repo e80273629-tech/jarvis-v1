@@ -219,25 +219,29 @@
   border-color: #62d9f5;
 }
 
-/* ADAPTAÇÃO PARA COMPUTADOR */
+/* COMPUTADOR */
 @media (min-width: 900px) {
   .side-menu {
+    left: -280px;
+    width: 260px;
+  }
+
+  .side-menu.open {
     left: 0;
-    width: 250px;
   }
 
   .wrap {
-    margin-left: 250px;
-    width: calc(100% - 250px);
-    padding-left: 30px;
+    margin-left: 0;
+    width: 100%;
+    padding: 22px 16px;
   }
 
   .menu-toggle {
-    display: none;
+    display: block;
   }
 }
 
-/* ADAPTAÇÃO PARA CELULAR */
+/* CELULAR */
 @media (max-width: 899px) {
   .side-menu {
     left: -280px;
