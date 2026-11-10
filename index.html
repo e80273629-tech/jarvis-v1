@@ -600,11 +600,47 @@ document.querySelectorAll('.tile, .tool-card').forEach(button => {
 
 
 /* ESTÚDIO DE IMAGENS */
+
 /* NAVEGAÇÃO DO MENU LATERAL */
 const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
 const menuItems = document.querySelectorAll('.menu-item');
 const homeScreen = document.getElementById('moduleGrid');
+const backButton = document.getElementById('backButton');
+
+let currentOsvyraScreen = 'home';
+let osvyraScreenHistory = [];
+
+function showOsvyraScreen(screen) {
+  const target = screen === 'home'
+    ? homeScreen
+    : document.getElementById(screen);
+
+  if (!target) {
+    console.warn('Tela não encontrada:', screen);
+    return;
+  }
+
+  panels.forEach(panel => panel.classList.add('hidden'));
+  homeScreen.classList.add('hidden');
+  target.classList.remove('hidden');
+
+  currentOsvyraScreen = screen;
+
+  menuItems.forEach(item => {
+    item.classList.toggle(
+      'active',
+      item.dataset.screen === screen
+    );
+  });
+
+  backButton.classList.toggle(
+    'hidden',
+    osvyraScreenHistory.length === 0
+  );
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 menuToggle.addEventListener('click', () => {
   sideMenu.classList.toggle('open');
@@ -619,31 +655,23 @@ menuItems.forEach(item => {
   item.addEventListener('click', () => {
     const screen = item.dataset.screen;
 
-    panels.forEach(panel => panel.classList.add('hidden'));
-    homeScreen.classList.add('hidden');
-
-    if (screen === 'home') {
-      homeScreen.classList.remove('hidden');
-    } else {
-      const target = document.getElementById(screen);
-
-      if (!target) {
-        console.warn('Tela não encontrada:', screen);
-        return;
-      }
-
-      target.classList.remove('hidden');
+    if (screen !== currentOsvyraScreen) {
+      osvyraScreenHistory.push(currentOsvyraScreen);
+      showOsvyraScreen(screen);
     }
-
-    menuItems.forEach(button => button.classList.remove('active'));
-    item.classList.add('active');
 
     sideMenu.classList.remove('open');
     menuToggle.setAttribute('aria-expanded', 'false');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
+
+backButton.addEventListener('click', () => {
+  if (osvyraScreenHistory.length === 0) return;
+
+  const previousScreen = osvyraScreenHistory.pop();
+  showOsvyraScreen(previousScreen);
+});
+
 const canvas = document.getElementById('artCanvas');
 const ctx = canvas.getContext('2d');
 const makeArtButton = document.getElementById('makeArt');
