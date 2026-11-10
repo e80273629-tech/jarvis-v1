@@ -1135,6 +1135,7 @@ async function updateAuthUI() {
   if (session) {
     await loadLeads();
     await loadCustomers();
+    loadTasks();
   } else {
     currentLeads = [];
     currentCustomers = [];
