@@ -1199,6 +1199,7 @@ window.addEventListener('load', async () => {
 </script>
 <script>
 const conversationHistory = JSON.parse(localStorage.getItem("osvyraHistory") || "[]");
+
 document.getElementById("sendChat").addEventListener("click", async () => {
   const input = document.getElementById("chatInput");
   const messages = document.getElementById("chatMessages");
@@ -1207,20 +1208,21 @@ document.getElementById("sendChat").addEventListener("click", async () => {
 
   if (!text) return;
 
-  const p = document.createElement("p");
-const label = document.createElement("strong");
-label.textContent = "Você: ";
-p.append(label, document.createTextNode(text));
-messages.appendChild(p);
+  const userMessage = document.createElement("p");
+  const userLabel = document.createElement("strong");
+  userLabel.textContent = "Você: ";
+  userMessage.append(userLabel, document.createTextNode(text));
+  messages.appendChild(userMessage);
+
   input.value = "";
   button.disabled = true;
 
-  try {
-    const typing = document.createElement("p");
-    typing.id = "osvyraTyping";
-    typing.textContent = "● ● ● OSVYRA está digitando...";
-    messages.appendChild(typing);
+  const typing = document.createElement("p");
+  typing.id = "osvyraTyping";
+  typing.textContent = "● ● ● OSVYRA está digitando...";
+  messages.appendChild(typing);
 
+  try {
     const { data, error } = await supabaseClient.functions.invoke("osvyra-chat", {
       body: {
         messages: [...conversationHistory, { role: "user", content: text }]
@@ -1228,26 +1230,33 @@ messages.appendChild(p);
     });
 
     if (error) throw error;
+    if (!data || !data.answer) throw new Error("Resposta vazia");
 
-    const p = document.createElement("p");
-const label = document.createElement("strong");
-label.textContent = "OSVYRA: ";
-p.append(label, document.createTextNode(data.answer));
-messages.appendChild(p);
-conversationHistory.push(
-  { role: "user", content: text },
-  { role: "assistant", content: data.answer }
-);
-if (conversationHistory.length > 10) {
-  conversationHistory.splice(0, 2);
-}
-localStorage.setItem("osvyraHistory", JSON.stringify(conversationHistory));
+    const assistantMessage = document.createElement("p");
+    const assistantLabel = document.createElement("strong");
+    assistantLabel.textContent = "OSVYRA: ";
+    assistantMessage.append(assistantLabel, document.createTextNode(data.answer));
+    messages.appendChild(assistantMessage);
+
+    conversationHistory.push(
+      { role: "user", content: text },
+      { role: "assistant", content: data.answer }
+    );
+
+    if (conversationHistory.length > 10) {
+      conversationHistory.splice(0, 2);
+    }
+
+    localStorage.setItem("osvyraHistory", JSON.stringify(conversationHistory));
+
   } catch (error) {
-    messages.innerHTML += `<p><strong>Erro:</strong> Não consegui responder. Tente novamente.</p>`;
-  } finally {
-    const typing = document.getElementById("osvyraTyping");
-    if (typing) typing.remove();
+    console.error("Erro no chat OSVYRA:", error);
+    const errorMessage = document.createElement("p");
+    errorMessage.textContent = "Não consegui responder. Tente novamente.";
+    messages.appendChild(errorMessage);
 
+  } finally {
+    typing.remove();
     button.disabled = false;
   }
 });
