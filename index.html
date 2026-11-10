@@ -361,14 +361,12 @@ h1, h2, h3 {
   background: rgba(99, 231, 255, .35);
   color: white;
 }
- /* OSVYRA — IMAGEM FUTURISTA */
+ /* OSVYRA — FUNDO LIMPO */
 body {
-  background-image:
-    linear-gradient(rgba(3, 6, 17, 0.55), rgba(3, 6, 17, 0.85)),
-    url('./osvyra-hero-final.png');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(40, 75, 160, .22), transparent 42%),
+    radial-gradient(ellipse at 85% 80%, rgba(105, 55, 170, .16), transparent 40%),
+    #070b18;
   background-attachment: fixed;
 }
     
@@ -384,11 +382,12 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  padding: 12px 18px;
-  border: 1px solid rgba(110, 170, 255, .2);
-  border-radius: 16px;
-  background: rgba(7, 15, 35, .7);
-  backdrop-filter: blur(15px);
+  padding: 14px 22px;
+  border: 1px solid rgba(125, 155, 255, .22);
+  border-radius: 18px;
+  background: rgba(9, 15, 35, .88);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
 }
 
 .landing-brand {
@@ -398,18 +397,19 @@ body {
   font-weight: 900;
   letter-spacing: 3px;
 }
-
 .landing-symbol {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #63e7ff;
-  border-radius: 50%;
-  color: #63e7ff;
-  box-shadow: 0 0 20px #299dff66;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(125, 170, 255, .65);
+  border-radius: 13px;
+  color: #a9c7ff;
+  background: linear-gradient(145deg, #233d78, #111b3b);
+  box-shadow: 0 0 24px rgba(80, 130, 255, .25);
+  font-size: 20px;
+  font-weight: 900;
 }
-
 .landing-nav a {
   color: #c4d5f5;
   text-decoration: none;
@@ -435,7 +435,9 @@ body {
   margin-top: 18px;
   border: 1px solid rgba(110, 170, 255, .2);
   border-radius: 24px;
-  background: linear-gradient(120deg, rgba(5, 13, 34, .94), rgba(17, 25, 62, .68));
+ background:
+  radial-gradient(circle at 80% 50%, rgba(80, 105, 255, .20), transparent 38%),
+  linear-gradient(120deg, #101a35, #0b1024 75%);
   overflow: hidden;
 }
 
@@ -460,8 +462,11 @@ body {
 }
 
 .landing-copy h2 span {
-  color: #78cfff;
-  text-shadow: 0 0 30px #278dff88;
+  background: linear-gradient(90deg, #75e7ff, #a69aff, #75aaff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: none;
 }
 
 .landing-copy p,
@@ -473,18 +478,20 @@ body {
 
 .landing-cta {
   margin-top: 22px;
-  padding: 15px 23px;
-  border: 0;
-  border-radius: 12px;
-  color: #06111d;
-  background: linear-gradient(100deg, #63e7ff, #8c9dff);
+  padding: 16px 27px;
+  border: 1px solid rgba(180, 210, 255, .35);
+  border-radius: 14px;
+  color: #071020;
+  background: linear-gradient(100deg, #63e7ff, #9b9cff, #b18aff);
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 0 28px #3caaff44;
+  box-shadow: 0 8px 30px rgba(80, 130, 255, .25);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.landing-cta span {
-  margin-left: 15px;
+.landing-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(100, 130, 255, .38);
 }
 
 .landing-note {
@@ -593,16 +600,18 @@ body {
 }
 
 .landing-feature {
-  padding: 24px;
-  border: 1px solid rgba(110, 170, 255, .22);
-  border-radius: 18px;
-  background: linear-gradient(145deg, rgba(20, 35, 72, .82), rgba(8, 16, 37, .78));
-  backdrop-filter: blur(15px);
+  padding: 28px;
+  border: 1px solid rgba(125, 155, 255, .20);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(25, 38, 78, .85), rgba(10, 16, 37, .92));
+  backdrop-filter: blur(18px);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
 
-.landing-feature > span {
-  color: #63e7ff;
-  font-size: 28px;
+.landing-feature:hover {
+  transform: translateY(-5px);
+  border-color: rgba(110, 190, 255, .55);
+  box-shadow: 0 15px 35px rgba(30, 80, 180, .16);
 }
 
 .landing-feature h3 {
@@ -616,19 +625,24 @@ body {
 }
 
 .landing-bottom {
-  padding: 35px 20px;
-  margin-top: 25px;
+  padding: 48px 25px;
+  margin-top: 30px;
   text-align: center;
-  border: 1px solid rgba(110, 170, 255, .2);
-  border-radius: 20px;
-  background: rgba(12, 24, 52, .75);
+  border: 1px solid rgba(125, 155, 255, .22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at center, rgba(75, 90, 190, .20), transparent 70%),
+    linear-gradient(145deg, #111a36, #0b1024);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, .20);
 }
 
 @media (max-width: 650px) {
   .landing-hero {
-    grid-template-columns: 1fr;
-    padding: 40px 22px;
-  }
+  grid-template-columns: 1fr;
+  padding: 38px 20px;
+  min-height: auto;
+  gap: 10px;
+}
 
   .landing-visual {
     min-height: 260px;
