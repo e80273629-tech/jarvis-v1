@@ -1128,7 +1128,7 @@ messages.appendChild(p);
   try {
     const { data, error } = await supabaseClient.functions.invoke("osvyra-chat", {
       body: {
-        messages: [{ role: "user", content: text }]
+        messages: [...conversationHistory, { role: "user", content: text }]
       }
     });
 
