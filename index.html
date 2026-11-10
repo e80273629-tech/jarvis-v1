@@ -373,13 +373,23 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* NAVEGAÇÃO */
 const panels = [...document.querySelectorAll('.panel')];
-document.querySelectorAll('.tile').forEach(button => {
+
+document.querySelectorAll('.tile, .tool-card').forEach(button => {
   button.addEventListener('click', () => {
     panels.forEach(panel => panel.classList.add('hidden'));
+
     const target = document.getElementById(button.dataset.target);
-    if (!target) return;
+
+    if (!target) {
+      console.warn('Ferramenta não encontrada:', button.dataset.target);
+      return;
+    }
+
     target.classList.remove('hidden');
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
   });
 });
 
