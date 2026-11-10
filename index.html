@@ -1418,23 +1418,46 @@ const signUpButton = document.getElementById('signUp');
 const signInButton = document.getElementById('signIn');
 const signOutButton = document.getElementById('signOut');
 
+
 async function updateAuthUI() {
   const { data, error } = await supabaseClient.auth.getSession();
+
   if (error) {
     authMessage.textContent = 'Erro ao verificar acesso: ' + error.message;
     return;
   }
+
   const session = data.session;
+
   signUpButton.classList.toggle('hidden', !!session);
   signInButton.classList.toggle('hidden', !!session);
   signOutButton.classList.toggle('hidden', !session);
   authEmail.classList.toggle('hidden', !!session);
   authPassword.classList.toggle('hidden', !!session);
+
   document.getElementById('crmArea').classList.toggle('hidden', !session);
-  document.getElementById('osvyra-chat').classList.add('hidden');
-document.getElementById('moduleGrid').classList.toggle('hidden', !session);
-document.getElementById('clients').classList.toggle('hidden', !!session);
-  authMessage.textContent = session ? 'Conectado: ' + session.user.email : 'Você ainda não entrou.';
+  document.getElementById('clients').classList.toggle('hidden', !!session);
+
+  // MENU: somente para usuários conectados
+  document.getElementById('sideMenu').classList.toggle('hidden', !session);
+  document.getElementById('menuToggle').classList.toggle('hidden', !session);
+
+  // CHAT: primeira tela após o login
+  document.getElementById('osvyra-chat').classList.toggle('hidden', !session);
+
+  // Os cards de ferramentas não aparecem na página inicial
+  document.getElementById('moduleGrid').classList.add('hidden');
+
+  // Fecha o menu ao sair da conta
+  if (!session) {
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('menuToggle').setAttribute('aria-expanded', 'false');
+  }
+
+  authMessage.textContent = session
+    ? 'Conectado: ' + session.user.email
+    : 'Você ainda não entrou.';
+
   if (session) {
     await loadLeads();
     await loadCustomers();
@@ -1442,8 +1465,10 @@ document.getElementById('clients').classList.toggle('hidden', !!session);
   } else {
     currentLeads = [];
     currentCustomers = [];
+
     leadList.textContent = 'Entre na sua conta para visualizar suas oportunidades.';
     customerList.textContent = 'Entre na sua conta para visualizar seus clientes.';
+
     document.getElementById('leadCount').textContent = '0';
     document.getElementById('customerCount').textContent = '0';
   }
