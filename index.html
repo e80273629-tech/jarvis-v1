@@ -489,6 +489,50 @@ document.querySelectorAll('.tile, .tool-card').forEach(button => {
 });
 
 /* ESTÚDIO DE IMAGENS */
+/* NAVEGAÇÃO DO MENU LATERAL */
+const menuToggle = document.getElementById('menuToggle');
+const sideMenu = document.getElementById('sideMenu');
+const menuItems = document.querySelectorAll('.menu-item');
+const homeScreen = document.getElementById('moduleGrid');
+
+menuToggle.addEventListener('click', () => {
+  sideMenu.classList.toggle('open');
+
+  menuToggle.setAttribute(
+    'aria-expanded',
+    sideMenu.classList.contains('open')
+  );
+});
+
+menuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const screen = item.dataset.screen;
+
+    panels.forEach(panel => panel.classList.add('hidden'));
+    homeScreen.classList.add('hidden');
+
+    if (screen === 'home') {
+      homeScreen.classList.remove('hidden');
+    } else {
+      const target = document.getElementById(screen);
+
+      if (!target) {
+        console.warn('Tela não encontrada:', screen);
+        return;
+      }
+
+      target.classList.remove('hidden');
+    }
+
+    menuItems.forEach(button => button.classList.remove('active'));
+    item.classList.add('active');
+
+    sideMenu.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
 const canvas = document.getElementById('artCanvas');
 const ctx = canvas.getContext('2d');
 const makeArtButton = document.getElementById('makeArt');
