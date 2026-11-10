@@ -1431,7 +1431,7 @@ async function updateAuthUI() {
   authEmail.classList.toggle('hidden', !!session);
   authPassword.classList.toggle('hidden', !!session);
   document.getElementById('crmArea').classList.toggle('hidden', !session);
-  document.getElementById('osvyra-chat').classList.toggle('hidden', !session);
+  document.getElementById('osvyra-chat').classList.add('hidden');
 document.getElementById('moduleGrid').classList.toggle('hidden', !session);
 document.getElementById('clients').classList.toggle('hidden', !!session);
   authMessage.textContent = session ? 'Conectado: ' + session.user.email : 'Você ainda não entrou.';
