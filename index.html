@@ -1107,5 +1107,43 @@ window.addEventListener('load', async () => {
   }
 });
 </script>
+<script>
+document.getElementById("sendChat").addEventListener("click", async () => {
+  const input = document.getElementById("chatInput");
+  const messages = document.getElementById("chatMessages");
+  const button = document.getElementById("sendChat");
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  const p = document.createElement("p");
+const label = document.createElement("strong");
+label.textContent = "Você: ";
+p.append(label, document.createTextNode(text));
+messages.appendChild(p);
+  input.value = "";
+  button.disabled = true;
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("osvyra-chat", {
+      body: {
+        messages: [{ role: "user", content: text }]
+      }
+    });
+
+    if (error) throw error;
+
+    const p = document.createElement("p");
+const label = document.createElement("strong");
+label.textContent = "OSVYRA: ";
+p.append(label, document.createTextNode(data.answer));
+messages.appendChild(p);
+  } catch (error) {
+    messages.innerHTML += `<p><strong>Erro:</strong> Não consegui responder. Tente novamente.</p>`;
+  } finally {
+    button.disabled = false;
+  }
+});
+</script>
 </body>
 </html>
