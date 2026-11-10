@@ -1146,6 +1146,7 @@ conversationHistory.push(
 if (conversationHistory.length > 20) {
   conversationHistory.splice(0, 2);
 }
+localStorage.setItem("osvyraHistory", JSON.stringify(conversationHistory));
   } catch (error) {
     messages.innerHTML += `<p><strong>Erro:</strong> Não consegui responder. Tente novamente.</p>`;
   } finally {
