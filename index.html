@@ -389,18 +389,52 @@
 /* BOTÃO VOLTAR */
 .back-button {
   position: fixed;
-  top: 15px;
-  left: 75px;
+  top: 18px;
+  left: 78px;
   z-index: 1001;
-  background: #142b45;
-  color: #ffffff;
-  border: 1px solid #62d9f5;
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 20px;
+  color: #a9f3ff;
+  background: linear-gradient(
+    135deg,
+    rgba(18, 48, 82, .96),
+    rgba(10, 22, 48, .96)
+  );
+  border: 1px solid rgba(99, 231, 255, .5);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .4px;
   cursor: pointer;
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, .25),
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 0 14px rgba(75, 210, 255, .08);
+  transition: .25s ease;
 }
 
+.back-button:hover {
+  color: #ffffff;
+  border-color: #63e7ff;
+  background: linear-gradient(
+    135deg,
+    rgba(25, 75, 115, .98),
+    rgba(15, 35, 70, .98)
+  );
+  transform: translateX(-3px);
+  box-shadow: 0 0 22px rgba(75, 210, 255, .22);
+}
+
+.back-button:active {
+  transform: scale(.97);
+}
+
+.back-button:focus-visible {
+  outline: 2px solid #63e7ff;
+  outline-offset: 4px;
+}
 .back-button.hidden {
   display: none !important;
 }
@@ -947,6 +981,243 @@ body {
 
   .landing-copy h2 {
     font-size: 42px;
+  }
+}
+/* OSVYRA - ESTÚDIO DE VÍDEOS */
+#video {
+  position: relative;
+  padding: 30px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(65, 120, 255, .16), transparent 38%),
+    linear-gradient(145deg, rgba(17, 31, 66, .96), rgba(5, 13, 32, .98));
+  border: 1px solid rgba(90, 195, 255, .28);
+  border-radius: 22px;
+  box-shadow:
+    0 15px 45px rgba(0, 0, 0, .25),
+    inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+#video h3 {
+  color: #e5f8ff;
+  font-size: 25px;
+  font-weight: 850;
+  margin-bottom: 10px;
+  text-shadow: 0 0 18px rgba(70, 195, 255, .22);
+}
+
+#video > p.muted {
+  color: #aebfdd;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 26px;
+}
+
+#video label {
+  display: block;
+  margin: 20px 0 8px;
+  color: #8ceeff;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: .3px;
+}
+
+#video input,
+#video select,
+#video textarea {
+  width: 100%;
+  padding: 14px 15px;
+  color: #eef8ff;
+  background: rgba(4, 13, 32, .78);
+  border: 1px solid rgba(100, 175, 255, .25);
+  border-radius: 11px;
+  outline: none;
+  font-size: 14px;
+  transition: .25s ease;
+}
+
+#video input:focus,
+#video select:focus,
+#video textarea:focus {
+  border-color: #63e7ff;
+  box-shadow: 0 0 18px rgba(75, 210, 255, .15);
+}
+
+#video input::placeholder,
+#video textarea::placeholder {
+  color: #7185a8;
+}
+
+#video textarea {
+  resize: vertical;
+  line-height: 1.7;
+}
+
+#video #scriptOut {
+  min-height: 220px;
+  margin-top: 20px;
+  border-color: rgba(90, 195, 255, .35);
+  background: rgba(3, 10, 27, .9);
+}
+
+#video button {
+  margin-top: 18px;
+  padding: 13px 20px;
+  color: #031323;
+  background: linear-gradient(100deg, #63e7ff, #8c9cff);
+  border: 1px solid rgba(130, 235, 255, .65);
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+#video button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(75, 210, 255, .28);
+}
+
+#video #copyScript,
+#video #downloadScript {
+  color: #c8f7ff;
+  background: rgba(30, 75, 125, .35);
+  border-color: rgba(90, 195, 255, .35);
+}
+
+#video #copyStatus {
+  margin-top: 14px;
+  color: #75eaff;
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  #video {
+    padding: 20px 16px;
+  }
+
+  #video h3 {
+    font-size: 22px;
+  }
+
+  #video button {
+    width: 100%;
+  }
+}
+    /* OSVYRA - ESTÚDIO DE IMAGENS */
+#art {
+  position: relative;
+  padding: 30px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(155, 85, 255, .16), transparent 38%),
+    linear-gradient(145deg, rgba(25, 25, 65, .96), rgba(7, 12, 32, .98));
+  border: 1px solid rgba(155, 135, 255, .3);
+  border-radius: 22px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, .25);
+}
+
+#art h3 {
+  color: #eeeaff;
+  font-size: 25px;
+  font-weight: 850;
+  margin-bottom: 10px;
+  text-shadow: 0 0 18px rgba(155, 125, 255, .25);
+}
+
+#art > p.muted {
+  color: #b9b8dc;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+#art label {
+  display: block;
+  margin: 18px 0 8px;
+  color: #c5b8ff;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+#art input,
+#art select {
+  width: 100%;
+  padding: 14px 15px;
+  color: #f2efff;
+  background: rgba(7, 10, 32, .8);
+  border: 1px solid rgba(155, 135, 255, .28);
+  border-radius: 11px;
+  outline: none;
+  font-size: 14px;
+  transition: .25s ease;
+}
+
+#art input:focus,
+#art select:focus {
+  border-color: #a99aff;
+  box-shadow: 0 0 18px rgba(155, 125, 255, .18);
+}
+
+#art button {
+  margin-top: 20px;
+  padding: 13px 20px;
+  color: #100d2b;
+  background: linear-gradient(100deg, #b5a5ff, #73ddff);
+  border: 1px solid rgba(190, 175, 255, .6);
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+#art button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(155, 135, 255, .3);
+}
+
+#art button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#art #downloadArt {
+  color: #ddd6ff;
+  background: rgba(65, 55, 125, .4);
+}
+
+#art #artCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 24px;
+  border: 1px solid rgba(155, 135, 255, .35);
+  border-radius: 15px;
+  box-shadow: 0 0 25px rgba(125, 95, 255, .12);
+}
+
+#art .notice {
+  margin-top: 18px;
+  padding: 14px;
+  color: #c7c3e8;
+  background: rgba(90, 70, 160, .12);
+  border: 1px solid rgba(155, 135, 255, .2);
+  border-radius: 11px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 650px) {
+  #art {
+    padding: 20px 16px;
+  }
+
+  #art h3 {
+    font-size: 22px;
+  }
+
+  #art button {
+    width: 100%;
   }
 }
 
