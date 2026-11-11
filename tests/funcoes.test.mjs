@@ -136,6 +136,16 @@ const REQUIREMENTS = {
     ['retorno HTTP 402', /\b402\b/],
     ['imagem no corpo da resposta', /\bimage\s*:/],
   ],
+  'gerar-video-ia': [
+    ['autenticação do usuário', /auth\/v1\/user/],
+    ['token do Hugging Face lido do ambiente', /Deno\.env\.get\(\s*["']HF_TOKEN["']\s*\)/],
+    ['Space oficial LTX-Video', /Lightricks\/ltx-video-distilled/],
+    ['modo text-to-video explícito', /"text-to-video"/],
+    ['submit devolve eventId', /eventId/],
+    ['poll lê o SSE do Gradio', /text\/event-stream/],
+    ['probe usa /gradio_api/info sem gerar', /gradio_api\/info/],
+    ['duração inválida é rejeitada', /Duração inválida/],
+  ],
 };
 
 for (const name of declared) {
@@ -172,6 +182,52 @@ for (const name of declared) {
 // -------------------------------------------------- pastas órfãs no repositório
 for (const d of dirs) {
   check(declared.includes(d), `config.toml declara a função ${d}`);
+}
+
+// --------------------------------------- invariantes da função de vídeo
+//
+// Estas regras não são "estilo": cada uma protege uma decisão explícita do
+// utilizador (custo zero, sem créditos de imagem, sem vazar o token).
+const VIDEO_FN = join(FN_ROOT, 'gerar-video-ia', 'index.ts');
+
+if (existsSync(VIDEO_FN)) {
+  const videoSrc = readFileSync(VIDEO_FN, 'utf8');
+  console.log('\n--- invariantes de gerar-video-ia ---');
+
+  check(
+    !/consume_image_credit|refund_image_credit|user_credits/.test(videoSrc),
+    'gerar-video-ia: não toca nos créditos de imagem'
+  );
+
+  check(
+    /hasToken\s*:\s*(hfToken\.length|Boolean\()/.test(videoSrc),
+    'gerar-video-ia: health devolve hasToken como booleano'
+  );
+
+  check(
+    !/tokenPreview|hfToken\.slice|hfToken\.substring|hfToken\.charAt/.test(videoSrc),
+    'gerar-video-ia: health não expõe trecho, prefixo ou comprimento do token'
+  );
+
+  check(
+    /const ALLOWED_DURATIONS = \[2, 5, 8\];/.test(videoSrc),
+    'gerar-video-ia: durações oferecidas são 2, 5 e 8 segundos'
+  );
+
+  check(
+    !/ALLOWED_DURATIONS\s*=\s*\[[^\]]*\b10\b/.test(videoSrc),
+    'gerar-video-ia: não oferece 10s (o máximo do modelo é 8,5s)'
+  );
+
+  check(
+    /improve_texture|\bfalse\b[\s\S]{0,40}seed/.test(videoSrc) || /poupar cota/.test(videoSrc),
+    'gerar-video-ia: documenta a economia de cota'
+  );
+
+  check(
+    /AbortController/.test(videoSrc) && /AbortError/.test(videoSrc),
+    'gerar-video-ia: poll tem timeout e trata abort como pendente'
+  );
 }
 
 // ------------------------------------------------------------------ resultado
