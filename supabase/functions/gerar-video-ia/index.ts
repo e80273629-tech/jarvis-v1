@@ -80,6 +80,9 @@ const FRAME_STEP = 8;
 /** Limite do JSON recebido pela função (16 KB). */
 export const MAX_REQUEST_BYTES = 16 * 1024;
 
+/** Teto da resposta JSON recebida ao enviar um vídeo ao Space (64 KB). */
+export const MAX_SUBMIT_RESPONSE_BYTES = 64 * 1024;
+
 /** Acima deste tamanho o vídeo volta só como URL, para não inflar a resposta. */
 export const MAX_INLINE_BYTES = 6 * 1024 * 1024;
 
@@ -554,7 +557,26 @@ Deno.serve(async (req) => {
         body: JSON.stringify(payload),
       });
 
-      const submitText = await submitResponse.text();
+      const submitBody = await readBoundedBody(
+        submitResponse,
+        MAX_SUBMIT_RESPONSE_BYTES
+      );
+
+      if (submitBody.truncated) {
+        console.error(
+          "Resposta do Space excedeu o limite de tamanho:",
+          submitResponse.status,
+          submitBody.sizeBytes
+        );
+        return respond({
+          success: false,
+          error: "O serviço de vídeo devolveu uma resposta muito grande. Tente novamente mais tarde.",
+        }, 502);
+      }
+
+      const submitText = submitBody.bytes
+        ? new TextDecoder().decode(submitBody.bytes)
+        : "";
 
       if (!submitResponse.ok) {
         console.error(
