@@ -1307,6 +1307,87 @@ h1, h2, h3 {
   margin-top: 15px;
   font-size: 13px;
 }
+
+  /* ===== Vídeos com IA — geração experimental ===== */
+  .video-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .video-actions button { margin-top: 0; }
+
+  .video-progress {
+    margin-top: 14px;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(90, 185, 255, .15);
+  }
+
+  .video-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #5ab9ff, #8be9fd);
+    transition: width .4s ease;
+  }
+
+  .video-confirm {
+    margin-top: 16px;
+    padding: 13px;
+    border: 1px solid rgba(90, 185, 255, .35);
+    border-radius: 10px;
+    background: rgba(4, 12, 30, .85);
+  }
+
+  .video-confirm button { margin-top: 10px; }
+
+  .video-result {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .video-result video {
+    width: 100%;
+    max-height: 480px;
+    border-radius: 12px;
+    background: #000;
+  }
+
+  .video-result a { text-align: center; }
+
+  .video-history {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 12px 0 22px;
+  }
+
+  .video-history-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid rgba(90, 185, 255, .3);
+    border-radius: 10px;
+    background: rgba(4, 12, 30, .85);
+  }
+
+  .video-history-item video {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+  }
+
+  .video-history-item small {
+    color: #9fb6d4;
+    font-size: 11px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
   /* ===== Estúdio de imagens — modos e modo conversacional ===== */
   [hidden] { display: none !important; }
 
@@ -1827,13 +1908,14 @@ h1, h2, h3 {
 
 <section id="video-ai" class="panel hidden">
     <h3>🎬 Vídeos com IA</h3>
-    <p class="muted">Descreva a cena, escolha duração e formato e prepare a geração do vídeo com inteligência artificial.</p>
+    <p class="muted">Geração experimental com LTX-Video no Hugging Face ZeroGPU. Custo zero: nenhum crédito de imagem é utilizado.</p>
 
     <div id="videoGenerator" class="video-generator">
       <h3>🎬 Gerador de vídeos com IA</h3>
 
-      <p class="muted">
-        Prepare sua cena para geração de vídeo com inteligência artificial.
+      <p class="muted" id="videoCostNote">
+        A cota gratuita do ZeroGPU é de 5 minutos de GPU por dia para toda a plataforma.
+        Prefira vídeos curtos e evite repetições desnecessárias.
       </p>
 
       <label for="videoPrompt">Descreva o vídeo que deseja criar</label>
@@ -1845,25 +1927,47 @@ h1, h2, h3 {
 
       <label for="videoDuration">Duração desejada</label>
       <select id="videoDuration">
+        <option value="2">2 segundos (teste)</option>
         <option value="5">5 segundos</option>
-        <option value="10">10 segundos</option>
+        <option value="8">8 segundos</option>
       </select>
 
       <label for="videoFormat">Formato do vídeo</label>
       <select id="videoFormat">
         <option value="9:16">Vertical — 9:16</option>
-        <option value="16:9">Horizontal — 16:9</option>
+        <option value="16:9" selected>Horizontal — 16:9</option>
         <option value="1:1">Quadrado — 1:1</option>
       </select>
 
-      <button class="btn" id="prepareVideo" type="button">
-        Preparar geração de vídeo
-      </button>
+      <div class="video-actions">
+        <button class="btn" id="generateVideo" type="button">Gerar vídeo</button>
+        <button class="btn secondary" id="videoProbe" type="button">Verificar serviço</button>
+      </div>
 
+      <p id="videoHealth" class="muted"></p>
       <p id="videoStatus" class="muted">
-        A geração real será conectada após escolhermos um serviço gratuito.
+        Pronto para gerar. A geração só começa depois que você confirmar.
       </p>
+
+      <div id="videoProgress" class="video-progress" hidden>
+        <div id="videoProgressBar" class="video-progress-bar"></div>
+      </div>
+
+      <div id="videoConfirm" class="video-confirm" hidden>
+        <p id="videoConfirmText" class="muted"></p>
+        <button class="btn" id="videoConfirmYes" type="button">Confirmar geração</button>
+        <button class="btn secondary" id="videoConfirmNo" type="button">Cancelar</button>
+      </div>
+
+      <div id="videoResult" class="video-result" hidden>
+        <video id="videoPlayer" controls playsinline preload="metadata"></video>
+        <a class="btn secondary" id="videoDownload" download="osvyra-video.mp4" href="#">Baixar vídeo</a>
+      </div>
     </div>
+
+    <h4>Histórico local</h4>
+    <p class="muted">Os últimos 5 vídeos ficam salvos apenas neste navegador. Ainda não sincronizam entre dispositivos.</p>
+    <div id="videoHistory" class="video-history"></div>
 
     <button class="btn secondary" id="goToScript" type="button">📝 Abrir Roteiro inteligente</button>
   </section>
@@ -3551,30 +3655,448 @@ if (sharedOnLoad) {
   applySharedPayload(sharedOnLoad);
 }
 
-/* PREPARAÇÃO DE VÍDEO IA */
-document.getElementById('prepareVideo').addEventListener('click', () => {
-  const prompt = document.getElementById('videoPrompt').value.trim();
-  const duration = document.getElementById('videoDuration').value;
-  const format = document.getElementById('videoFormat').value;
-  const status = document.getElementById('videoStatus');
+/* ================= VÍDEOS COM IA — geração real (LTX-Video / ZeroGPU) =================
+ *
+ * A geração nunca começa sozinha: o botão "Gerar vídeo" apenas abre a
+ * confirmação, e a chamada externa só acontece em "Confirmar geração".
+ * Nenhum crédito de imagem é consumido por este fluxo.
+ */
 
-  if (!prompt) {
-    status.textContent = 'Descreva o vídeo antes de continuar.';
+const VIDEO_HISTORY_LIMIT = 5;
+const VIDEO_DB_NAME = 'osvyra-videos';
+const VIDEO_DB_STORE = 'videos';
+const VIDEO_POLL_INTERVAL_MS = 4000;
+const VIDEO_POLL_MAX_ATTEMPTS = 15;
+
+const videoState = {
+  userId: '',
+  pending: null,
+  currentUrl: '',
+  historyUrls: []
+};
+
+const videoEl = {
+  prompt: document.getElementById('videoPrompt'),
+  duration: document.getElementById('videoDuration'),
+  format: document.getElementById('videoFormat'),
+  status: document.getElementById('videoStatus'),
+  health: document.getElementById('videoHealth'),
+  progress: document.getElementById('videoProgress'),
+  progressBar: document.getElementById('videoProgressBar'),
+  result: document.getElementById('videoResult'),
+  player: document.getElementById('videoPlayer'),
+  download: document.getElementById('videoDownload'),
+  confirm: document.getElementById('videoConfirm'),
+  confirmText: document.getElementById('videoConfirmText'),
+  confirmYes: document.getElementById('videoConfirmYes'),
+  confirmNo: document.getElementById('videoConfirmNo'),
+  history: document.getElementById('videoHistory'),
+  generate: document.getElementById('generateVideo'),
+  probe: document.getElementById('videoProbe')
+};
+
+function videoSleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function videoSetProgress(percent) {
+  const safe = Math.max(0, Math.min(100, percent));
+  videoEl.progressBar.style.width = safe + '%';
+}
+
+function videoDataUrlToBlob(dataUrl) {
+  const parts = String(dataUrl).split(',');
+  const header = parts[0] || '';
+  const base64 = parts[1] || '';
+  const mimeMatch = /data:([^;]+)/.exec(header);
+  const mime = mimeMatch ? mimeMatch[1] : 'video/mp4';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: mime });
+}
+
+/* ---------- histórico local por usuário (IndexedDB, 5 vídeos) ---------- */
+
+function videoOpenDb() {
+  return new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('IndexedDB indisponível'));
+      return;
+    }
+
+    const request = indexedDB.open(VIDEO_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(VIDEO_DB_STORE)) {
+        const store = db.createObjectStore(VIDEO_DB_STORE, { keyPath: 'id' });
+        store.createIndex('userId', 'userId', { unique: false });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Falha ao abrir o histórico'));
+  });
+}
+
+async function videoHistoryAll() {
+  const db = await videoOpenDb();
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(VIDEO_DB_STORE, 'readonly');
+      const index = tx.objectStore(VIDEO_DB_STORE).index('userId');
+      const request = index.getAll(videoState.userId || 'desconhecido');
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function videoHistoryPrune() {
+  const records = await videoHistoryAll();
+  if (records.length <= VIDEO_HISTORY_LIMIT) return;
+
+  const excess = records
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(VIDEO_HISTORY_LIMIT);
+
+  const db = await videoOpenDb();
+
+  try {
+    await new Promise(resolve => {
+      const tx = db.transaction(VIDEO_DB_STORE, 'readwrite');
+      const store = tx.objectStore(VIDEO_DB_STORE);
+      excess.forEach(item => store.delete(item.id));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function videoHistorySave(record) {
+  const db = await videoOpenDb();
+
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(VIDEO_DB_STORE, 'readwrite');
+      tx.objectStore(VIDEO_DB_STORE).put(record);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function videoHistoryRender() {
+  videoEl.history.innerHTML = '';
+
+  videoState.historyUrls.forEach(url => URL.revokeObjectURL(url));
+  videoState.historyUrls = [];
+
+  let records = [];
+
+  try {
+    records = await videoHistoryAll();
+  } catch (_error) {
     return;
   }
 
-  const videoRequest = {
-    prompt,
-    duration,
-    format,
-    language: 'pt-BR'
-  };
+  records
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, VIDEO_HISTORY_LIMIT)
+    .forEach(record => {
+      const item = document.createElement('div');
+      item.className = 'video-history-item';
 
-  status.textContent =
-    'Solicitação preparada! A integração com o serviço de geração será configurada depois. Nenhum crédito foi utilizado.';
+      const player = document.createElement('video');
+      player.controls = true;
+      player.playsInline = true;
+      player.preload = 'metadata';
 
-  console.log('Solicitação de vídeo preparada:', videoRequest);
+      if (record.blob instanceof Blob) {
+        const url = URL.createObjectURL(record.blob);
+        videoState.historyUrls.push(url);
+        player.src = url;
+      }
+
+      const meta = document.createElement('small');
+      meta.textContent =
+        `${record.duration}s · ${record.format} · ` +
+        new Date(record.createdAt).toLocaleString('pt-BR');
+
+      const caption = document.createElement('small');
+      caption.textContent = record.prompt.length > 90
+        ? record.prompt.slice(0, 90) + '…'
+        : record.prompt;
+
+      item.append(player, meta, caption);
+      videoEl.history.append(item);
+    });
+}
+
+/* ---------- sessão e chamadas à Edge Function ---------- */
+
+async function videoEnsureSession() {
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    const session = data && data.session;
+
+    if (!session || !session.user) {
+      videoState.userId = '';
+      return null;
+    }
+
+    videoState.userId = session.user.id;
+    return session;
+  } catch (_error) {
+    videoState.userId = '';
+    return null;
+  }
+}
+
+async function videoInvoke(payload) {
+  const { data, error } = await supabaseClient.functions.invoke('gerar-video-ia', {
+    body: payload
+  });
+
+  if (error) {
+    let message = error.message || 'Falha ao contactar o serviço de vídeo.';
+
+    try {
+      if (error.context && typeof error.context.json === 'function') {
+        const body = await error.context.json();
+        if (body && body.error) message = body.error;
+      }
+    } catch (_parseError) {
+      /* mantém a mensagem original */
+    }
+
+    throw new Error(message);
+  }
+
+  if (!data || data.success === false) {
+    throw new Error((data && data.error) || 'O serviço de vídeo não concluiu a solicitação.');
+  }
+
+  return data;
+}
+
+/* ---------- verificação do serviço (não consome cota) ---------- */
+
+videoEl.probe.addEventListener('click', async () => {
+  videoEl.probe.disabled = true;
+  videoEl.health.textContent = 'Verificando o serviço…';
+
+  try {
+    const session = await videoEnsureSession();
+
+    if (!session) {
+      videoEl.health.textContent = 'Entre na sua conta para verificar o serviço.';
+      return;
+    }
+
+    const health = await videoInvoke({ action: 'health' });
+
+    if (!health.hasToken) {
+      videoEl.health.textContent =
+        'HF_TOKEN não está configurado no servidor. A geração ficará indisponível.';
+      return;
+    }
+
+    const probe = await videoInvoke({ action: 'probe' });
+
+    if (!probe.tokenValid) {
+      videoEl.health.textContent =
+        'O Hugging Face recusou o token configurado. Verifique o secret HF_TOKEN.';
+      return;
+    }
+
+    videoEl.health.textContent = probe.spaceReachable
+      ? 'Serviço disponível: token válido e Space acessível. Nenhuma cota foi consumida.'
+      : 'Token válido, mas o Space não respondeu agora. Tente novamente mais tarde.';
+  } catch (error) {
+    videoEl.health.textContent = 'Não foi possível verificar: ' + error.message;
+  } finally {
+    videoEl.probe.disabled = false;
+  }
 });
+
+/* ---------- geração: confirmação explícita antes de qualquer ação externa ---------- */
+
+videoEl.generate.addEventListener('click', async () => {
+  const prompt = videoEl.prompt.value.trim();
+
+  if (!prompt) {
+    videoEl.status.textContent = 'Descreva o vídeo antes de continuar.';
+    videoEl.prompt.focus();
+    return;
+  }
+
+  const session = await videoEnsureSession();
+
+  if (!session) {
+    videoEl.status.textContent = 'Entre na sua conta para gerar vídeos.';
+    return;
+  }
+
+  const duration = Number(videoEl.duration.value);
+  const format = videoEl.format.value;
+
+  videoState.pending = { prompt, duration, format };
+
+  videoEl.confirmText.textContent =
+    `Gerar vídeo de ${duration}s em ${format}? ` +
+    'Isso consome a cota gratuita do ZeroGPU (5 minutos por dia para toda a plataforma) ' +
+    'e não utiliza créditos de imagem.';
+
+  videoEl.confirm.hidden = false;
+  videoEl.status.textContent = 'Confirme a geração para continuar.';
+});
+
+videoEl.confirmNo.addEventListener('click', () => {
+  videoState.pending = null;
+  videoEl.confirm.hidden = true;
+  videoEl.status.textContent =
+    'Geração cancelada. Nada foi enviado e nenhuma cota foi consumida.';
+});
+
+videoEl.confirmYes.addEventListener('click', async () => {
+  const pending = videoState.pending;
+
+  if (!pending) return;
+
+  videoEl.confirm.hidden = true;
+  videoState.pending = null;
+
+  await videoGenerate(pending);
+});
+
+async function videoPollUntilDone(eventId) {
+  for (let attempt = 0; attempt < VIDEO_POLL_MAX_ATTEMPTS; attempt += 1) {
+    const data = await videoInvoke({ action: 'poll', eventId });
+
+    if (data.status === 'complete') return data;
+
+    if (data.status === 'error') {
+      throw new Error(data.error || 'A geração falhou no serviço gratuito.');
+    }
+
+    videoSetProgress(Math.min(92, 25 + (attempt + 1) * 4));
+    videoEl.status.textContent = `Gerando… verificação ${attempt + 1} de ${VIDEO_POLL_MAX_ATTEMPTS}.`;
+
+    await videoSleep(VIDEO_POLL_INTERVAL_MS);
+  }
+
+  throw new Error('A geração demorou mais que o esperado. Tente novamente mais tarde.');
+}
+
+async function videoShowResult(result, request) {
+  let blob = null;
+
+  if (result.video) {
+    blob = videoDataUrlToBlob(result.video);
+  } else if (result.videoUrl) {
+    const response = await fetch(result.videoUrl);
+
+    if (!response.ok) {
+      throw new Error('O vídeo foi gerado, mas não pôde ser baixado.');
+    }
+
+    blob = await response.blob();
+  }
+
+  if (!blob) {
+    throw new Error('A geração terminou sem devolver um vídeo.');
+  }
+
+  if (videoState.currentUrl) {
+    URL.revokeObjectURL(videoState.currentUrl);
+  }
+
+  videoState.currentUrl = URL.createObjectURL(blob);
+  videoEl.player.src = videoState.currentUrl;
+  videoEl.download.href = videoState.currentUrl;
+  videoEl.download.setAttribute('download', `osvyra-video-${Date.now()}.mp4`);
+  videoEl.result.hidden = false;
+
+  try {
+    await videoHistorySave({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      userId: videoState.userId || 'desconhecido',
+      prompt: request.prompt,
+      duration: request.duration,
+      format: request.format,
+      blob,
+      createdAt: Date.now()
+    });
+
+    await videoHistoryPrune();
+    await videoHistoryRender();
+  } catch (historyError) {
+    console.warn('Não foi possível salvar o vídeo no histórico local:', historyError);
+  }
+}
+
+async function videoGenerate(request) {
+  videoEl.generate.disabled = true;
+  videoEl.probe.disabled = true;
+  videoEl.result.hidden = true;
+  videoEl.progress.hidden = false;
+  videoSetProgress(8);
+  videoEl.status.textContent = 'Enviando para a fila do ZeroGPU…';
+
+  try {
+    const submitted = await videoInvoke({
+      action: 'submit',
+      prompt: request.prompt,
+      duration: request.duration,
+      format: request.format
+    });
+
+    videoSetProgress(25);
+    videoEl.status.textContent =
+      'Na fila do ZeroGPU. Isso pode levar alguns minutos…';
+
+    const result = await videoPollUntilDone(submitted.eventId);
+
+    videoSetProgress(100);
+
+    const size = result.sizeBytes
+      ? ` (${Math.max(1, Math.round(result.sizeBytes / 1024))} KB)`
+      : '';
+
+    videoEl.status.textContent = `Vídeo pronto${size}. Nenhum crédito de imagem foi usado.`;
+
+    await videoShowResult(result, request);
+  } catch (error) {
+    videoSetProgress(0);
+    videoEl.status.textContent = error.message;
+  } finally {
+    videoEl.progress.hidden = true;
+    videoEl.generate.disabled = false;
+    videoEl.probe.disabled = false;
+  }
+}
+
+/* Recarrega o histórico ao abrir a tela de vídeos. */
+document.querySelectorAll('[data-target="video-ai"]').forEach(button => {
+  button.addEventListener('click', () => {
+    videoHistoryRender();
+  });
+});
+
+videoHistoryRender();
 /* ENVIAR ROTEIRO PARA VÍDEOS COM IA */
 document.getElementById('sendToVideo').addEventListener('click', () => {
   const script = document.getElementById('scriptOut').value.trim();
@@ -3587,7 +4109,7 @@ document.getElementById('sendToVideo').addEventListener('click', () => {
 
   document.getElementById('videoPrompt').value = script;
   document.getElementById('videoStatus').textContent =
-    'Roteiro recebido! Revise a descrição e prepare a geração do vídeo. Nenhum crédito foi utilizado.';
+    'Roteiro recebido! Revise a descrição e clique em Gerar vídeo. Nenhum crédito foi utilizado.';
 
   status.textContent = 'Roteiro enviado para Vídeos com IA!';
   navigate('video-ai');
