@@ -280,7 +280,10 @@ async function openStudio(config = {}) {
         body: '/* supabase-js não é baixado: o stub do init script permanece em window.supabase */'
       });
     }
-    return route.abort();
+    // Recursos externos (fotos de exemplo) são servidos localmente: abortar
+    // geraria erros de rede no console e confundiria a checagem de erros de JS.
+    const png = Buffer.from(String(TINY_PNG).split(',').pop(), 'base64');
+    return route.fulfill({ status: 200, contentType: 'image/png', body: png });
   });
 
   const page = await context.newPage();
@@ -404,6 +407,7 @@ try {
     check('Histórico grava 1 imagem', history.length === 1, `${history.length}`);
     check('Histórico é gravado por usuário', history[0]?.userId === 'user-teste-1', String(history[0]?.userId));
     check('Histórico guarda a descrição', /bolo de chocolate/.test(history[0]?.description || ''));
+    await page.waitForSelector('#artHistoryList .history-item');
     check('Histórico aparece na tela', await page.isVisible('#artHistoryList .history-item'));
 
     await context.close();
