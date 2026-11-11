@@ -437,6 +437,8 @@ Deno.serve(async (req) => {
 
     const body = parsedBody as Record<string, unknown>;
     const action = typeof body.action === "string" ? body.action : "";
+    // Diagnóstico sem prompt, token ou identificador de geração.
+    console.info("[video-ia] action:", action);
 
     // ------------------------------------------------ health (sem segredo)
     if (action === "health") {
@@ -638,6 +640,8 @@ Deno.serve(async (req) => {
         return respond({ success: false, error: friendly }, 502);
       }
 
+      console.info("[video-ia] submit upstream status:", submitResponse.status);
+
       let eventId = "";
 
       try {
@@ -653,6 +657,8 @@ Deno.serve(async (req) => {
           error: "O serviço não devolveu um identificador de geração válido.",
         }, 502);
       }
+
+      console.info("[video-ia] submit accepted");
 
       return respond({
         success: true,
@@ -683,6 +689,7 @@ Deno.serve(async (req) => {
         return respond({ error: "Identificador de geração inválido." }, 400);
       }
 
+      console.info("[video-ia] poll started");
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), POLL_TIMEOUT_MS);
 
@@ -696,6 +703,8 @@ Deno.serve(async (req) => {
           },
           signal: controller.signal,
         });
+
+        console.info("[video-ia] poll upstream status:", streamResponse.status);
 
         if (!streamResponse.ok) {
           return respond({
@@ -789,10 +798,13 @@ Deno.serve(async (req) => {
       }
 
       const events = parseSse(raw);
+      // Regista apenas os nomes dos eventos, nunca o conteúdo do SSE.
+      console.info("[video-ia] poll events:", events.map((item) => item.event).join(","));
 
       const errorEvent = events.find((item) => item.event === "error");
 
       if (errorEvent) {
+        console.info("[video-ia] poll result: error");
         return respond({
           success: false,
           status: "error",
@@ -803,6 +815,7 @@ Deno.serve(async (req) => {
       const completeEvent = events.find((item) => item.event === "complete");
 
       if (!completeEvent) {
+        console.info("[video-ia] poll result: pending");
         return respond({
           success: true,
           status: "pending",
@@ -819,12 +832,15 @@ Deno.serve(async (req) => {
       }
 
       if (!videoUrl) {
+        console.info("[video-ia] poll result: complete_without_video");
         return respond({
           success: false,
           status: "error",
           error: "A geração terminou sem devolver um vídeo.",
         });
       }
+
+      console.info("[video-ia] poll result: complete_with_video_url");
 
       // Tenta embutir os bytes para evitar expiração da URL e CORS no cliente.
       // O download só acontece no host do Space: se a URL não passar na
