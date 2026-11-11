@@ -801,7 +801,7 @@ check('O download tem AbortSignal', /signal:\s*downloadController\.signal/.test(
 check('O download checa Content-Length', /content-length/.test(fnSrc));
 check('O download usa readBoundedBody', /readBoundedBody\(fileResponse, MAX_INLINE_BYTES\)/.test(fnSrc));
 check('A URL é validada antes do download', /if \(!isSpaceUrl\(videoUrl\)\)/.test(fnSrc));
-check('O buffer SSE tem teto explícito', /received > MAX_SSE_BYTES/.test(fnSrc));
+check('O buffer SSE verifica o tamanho do chunk antes de anexar', /chunkBytes > MAX_SSE_BYTES - received/.test(fnSrc) && /raw\.length > MAX_SSE_BYTES/.test(fnSrc));
 check('O poll continua com timeout de 20s', /POLL_TIMEOUT_MS = 20000/.test(fnSrc));
 check('O limite inline continua em 6 MB', /MAX_INLINE_BYTES = 6 \* 1024 \* 1024/.test(fnSrc));
 check('Nenhum token do Hugging Face está hardcoded', !/hf_[A-Za-z0-9]{20,}/.test(fnSrc));
