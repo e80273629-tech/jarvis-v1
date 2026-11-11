@@ -19,7 +19,7 @@ jobs:
       - name: Baixar somente a branch autorizada
         uses: actions/checkout@v4
         with:
-          ref: osvyra-v1-rebuild
+          ref: 41aba9d069b0ab7d35e2b719255a3c4c50b46e4
 
       - name: Conferir commit e arquivo-alvo
         run: |
