@@ -765,7 +765,7 @@ check('Autenticação tem timeout', /AbortSignal\.timeout\(AUTH_TIMEOUT_MS\)/.te
 check('Diagnóstico tem timeout', (fnSrc.match(/AbortSignal\.timeout\(PROBE_TIMEOUT_MS\)/g) || []).length === 2);
 check('Diagnóstico limita a resposta do Space', /readBoundedBody\(info, MAX_PROBE_RESPONSE_BYTES\)/.test(fnSrc));
 check('Envio tem timeout', /AbortSignal\.timeout\(SUBMIT_TIMEOUT_MS\)/.test(fnSrc));
-check('Submit valida o formato do eventId', /!\\/\\^\\[A-Za-z0-9_\\-\\]\\{4,120\\}\\$\\/.test\(eventId\)/.test(fnSrc));
+check('Submit valida o formato do eventId', fnSrc.includes('!/^[A-Za-z0-9_-]{4,120}$/.test(eventId)'));
 check('O download usa redirect: "manual"', /redirect:\s*"manual"/.test(fnSrc));
 check('O download tem AbortSignal', /signal:\s*downloadController\.signal/.test(fnSrc));
 check('O download checa Content-Length', /content-length/.test(fnSrc));
