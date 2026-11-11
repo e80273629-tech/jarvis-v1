@@ -48,7 +48,7 @@ const corsHeaders = {
 
 /** Space oficial da Lightricks (licença LTX: uso comercial abaixo de US$10M). */
 const SPACE_ID = "Lightricks/ltx-video-distilled";
-const SPACE_BASE = "https://lightricks-ltx-video-distilled.hf.space";
+export const SPACE_BASE = "https://lightricks-ltx-video-distilled.hf.space";
 const GRADIO_CALL = `${SPACE_BASE}/gradio_api/call/text_to_video`;
 const HF_WHOAMI = "https://huggingface.co/api/whoami-v2";
 
