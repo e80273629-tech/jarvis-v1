@@ -258,6 +258,14 @@ const SUPABASE_STUB = `
             }
 
             if (payload.action === 'poll') {
+              const sequence = window.__OSVYRA_TEST_POLL_SEQUENCE__ || [];
+              if (sequence.length) {
+                const next = sequence.shift();
+                if (next === null) return { data: null, error: null };
+                if (next === 'pending') {
+                  return { data: { success: true, status: 'pending' }, error: null };
+                }
+              }
               return {
                 data: {
                   success: true,
@@ -365,6 +373,10 @@ if (chromium) {
     value => {
       window.__OSVYRA_TEST_SESSION__ = value.session;
       window.__OSVYRA_TEST_VIDEO_B64__ = value.video;
+      window.__OSVYRA_TEST_POLL_SEQUENCE__ = [];
+      const originalSetTimeout = window.setTimeout.bind(window);
+      window.setTimeout = (callback, delay, ...args) =>
+        originalSetTimeout(callback, delay === 4000 ? 0 : delay, ...args);
     },
     { session: SESSION, video: TEST_VIDEO_B64 }
   );
@@ -488,6 +500,44 @@ if (chromium) {
     'O histórico identifica a duração do vídeo',
     (await page.locator('#videoHistory .video-history-item').first().textContent()).includes('2s')
   );
+
+  console.log('\\n--- polling com respostas pendentes ---');
+
+  await page.evaluate(() => {
+    window.__OSVYRA_TEST_POLL_SEQUENCE__ = ['pending', 'pending', 'complete'];
+  });
+  await page.locator('#generateVideo').click();
+  await page.waitForSelector('#videoConfirm:not([hidden])');
+  await page.locator('#videoConfirmYes').click();
+  await page.waitForFunction(() =>
+    document.getElementById('videoStatus').textContent.includes('Vídeo pronto'),
+    { timeout: 15000 }
+  );
+  const pendingCalls = await page.evaluate(() =>
+    window.__OSVYRA_TEST_CALLS__.filter(call => call.payload?.action === 'poll').length
+  );
+  check('O navegador continua consultando após respostas pending', pendingCalls >= 4);
+  check('Duas respostas pending seguidas não interrompem a geração', pendingCalls >= 4);
+  check(
+    'A geração termina quando uma consulta posterior retorna complete',
+    (await page.locator('#videoResult').isVisible()) &&
+      (await page.locator('#videoStatus').textContent()).includes('Vídeo pronto')
+  );
+
+  console.log('\\n--- resposta null sem mensagem confusa ---');
+
+  await page.evaluate(() => {
+    window.__OSVYRA_TEST_POLL_SEQUENCE__ = [null];
+  });
+  await page.locator('#generateVideo').click();
+  await page.waitForSelector('#videoConfirm:not([hidden])');
+  await page.locator('#videoConfirmYes').click();
+  await page.waitForFunction(() =>
+    document.getElementById('videoStatus').textContent.includes('não concluiu a solicitação')
+  );
+  const nullStatus = await page.locator('#videoStatus').textContent();
+  check('Resposta null produz mensagem compreensível', nullStatus.includes('O serviço de vídeo não concluiu a solicitação.'));
+  check('A interface não exibe apenas a palavra null', nullStatus.trim() !== 'null');
 
   console.log('\n--- verificação do serviço sem consumir cota ---');
 
