@@ -311,8 +311,11 @@ if (chromium) {
       (await page.locator('#shareInSource').textContent()).includes('exemplo.com'));
     check('Data e horário já vêm sugeridos',
       (await page.locator('#shareInSchedule').inputValue()).length >= 16);
-    check('Nada é salvo antes da confirmação',
-      (await page.evaluate(() => window.__OSVYRA_TEST_CALLS__.length)) === 0);
+    const writesBeforeConfirm = await page.evaluate(() =>
+      window.__OSVYRA_TEST_CALLS__.filter(call => ['insert', 'update', 'upsert', 'delete'].includes(call.op)));
+
+    check('Nada é salvo antes da confirmação', writesBeforeConfirm.length === 0,
+      writesBeforeConfirm.map(call => `${call.table}.${call.op}`).join(', '));
 
     await page.locator('#shareCreateTask').click();
     await page.waitForFunction(() => !document.getElementById('projects').classList.contains('hidden'));
@@ -403,6 +406,9 @@ if (chromium) {
     check('Compartilhar arte exige uma arte gerada',
       (await page.locator('#artStatus').textContent()).includes('Gere a arte antes de compartilhar'));
     check('Compartilhar arte não dispara erro com canvas vazio', errors.length === 0, errors.join(' | '));
+
+    await page.locator('#backButton').click();
+    await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
 
     await page.locator('[data-target="video"]').click();
     await page.waitForFunction(() => !document.getElementById('video').classList.contains('hidden'));
