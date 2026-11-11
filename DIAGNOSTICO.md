@@ -96,7 +96,7 @@ Observação de transparência: a listagem remota de colunas (spec OpenAPI) exig
 - **Erros reais expostos**: `describeSupabaseError()` e `reportTaskError()` mostram `message`, `code` e `details`, registram o erro completo no console e indicam o arquivo SQL de correção.
 - **Validação de data/horário**: `parseScheduleValue()` converte o campo `datetime-local` sem lançar `RangeError`; título, data e formato são validados antes de qualquer chamada ao Supabase.
 - **Lista de lembretes**: estado "Carregando...", renderização com status traduzido (Pendente/Concluída) e data em pt-BR.
-- **Conclusão de tarefa (UPDATE)**: botão "Concluir" executa `update({status:'done'})` com `.eq('id').eq('user_id').select('id')` e confirma se a linha foi realmente alterada — sem isso, um UPDATE bloqueado por RLS passaria silenciosamente.
+- **Conclusão de tarefa (UPDATE)**: botão "Concluir" executa `update({status:'completed'})` com `.eq('id').eq('user_id').select('id')` e confirma se a linha foi realmente alterada — sem isso, um UPDATE bloqueado por RLS passaria silenciosamente. O valor `completed` é o aceito pela constraint `osvyra_tasks_status_check` (a tabela aceita `pending`, `running`, `completed`, `failed`, `cancelled`); enviar `done` causava o erro `23514` "violates check constraint".
 - **Migração `supabase/osvyra_tasks_rls.sql`** (idempotente, executar no SQL Editor): garante `enable row level security`, concede `select, insert, update` ao papel `authenticated` e cria as três políticas `auth.uid() = user_id`. **O RLS nunca é desativado.**
 - Login, CRM, oportunidades, clientes, chat, perfil, configurações e estúdio de imagens preservados.
 
@@ -111,7 +111,7 @@ Observação de transparência: a listagem remota de colunas (spec OpenAPI) exig
 | Gravação com sucesso | INSERT em `osvyra_tasks` com `user_id` da sessão, `status: pending` e `scheduled_at` ISO válido + confirmação |
 | Gravação bloqueada (42501) | mensagem real do Supabase exibida |
 | Validação | título vazio e data vazia bloqueados sem chamar o Supabase |
-| UPDATE | conclui lembrete com `status: done` e confirma a linha alterada |
+| UPDATE | conclui lembrete com `status: completed` (aceito pela constraint) e confirma a linha alterada |
 | Migração | RLS ativo (sem `disable`), grant ao `authenticated`, 3 políticas por usuário |
 
 Regressão de navegação: `node tests/navegacao.test.mjs` — **39/39 aprovadas**.

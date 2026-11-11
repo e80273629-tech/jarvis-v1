@@ -9,7 +9,9 @@
  * Este teste verifica:
  *  - leitura: erro real (código + mensagem) exibido e caminho de sucesso renderizando;
  *  - gravação: INSERT com user_id do usuário autenticado, status e data ISO;
- *  - UPDATE: conclusão de lembrete confirmando a linha alterada;
+ *  - UPDATE: conclusão de lembrete confirmando a linha alterada e usando o
+ *    status aceito pela constraint osvyra_tasks_status_check ("completed",
+ *    nunca "done");
  *  - validação de título e de data/horário antes de chamar o Supabase;
  *  - a migração SQL mantém o RLS ATIVO e cria políticas por usuário.
  *
@@ -37,6 +39,12 @@ function check(name, condition, detail = '') {
 /* 1. Checagens estruturais                                            */
 /* ------------------------------------------------------------------ */
 
+check('Conclusão envia o status aceito pela constraint (completed)',
+  /\.update\(\{ status: "completed" \}\)/.test(html));
+check('Código não envia o status inválido "done" ao banco',
+  !/status:\s*["']done["']/.test(html));
+check('Interface traduz completed como "Concluída"',
+  /completed:\s*["']Concluída["']/.test(html));
 check('Consulta usa a tabela existente osvyra_tasks', html.includes('.from("osvyra_tasks")'));
 check('Consulta filtra pelo usuário autenticado', /from\("osvyra_tasks"\)[\s\S]{0,300}eq\("user_id", user\.id\)/.test(html));
 check('INSERT associa o registro ao usuário autenticado', /insert\(\{[\s\S]{0,200}user_id: user\.id/.test(html));
@@ -213,7 +221,7 @@ async function scenario(config, run) {
 {
   const tasks = [
     { id: 'task-1', title: 'Revisar projeto', description: 'Ajustar cores', status: 'pending', scheduled_at: '2026-12-01T12:30:00.000Z', result: null },
-    { id: 'task-2', title: 'Enviar proposta', description: '', status: 'done', scheduled_at: null, result: null }
+    { id: 'task-2', title: 'Enviar proposta', description: '', status: 'completed', scheduled_at: null, result: null }
   ];
   const { output, errors } = await scenario({ tasks }, async page => ({
     text: await page.textContent('#tasksList'),
@@ -307,7 +315,7 @@ async function scenario(config, run) {
   });
   const update = (output.updates || [])[0] || {};
   check('Concluir lembrete faz UPDATE de status na osvyra_tasks',
-    update.table === 'osvyra_tasks' && update.payload && update.payload.status === 'done');
+    update.table === 'osvyra_tasks' && update.payload && update.payload.status === 'completed');
   check('Concluir lembrete confirma ao usuário', /Lembrete concluído/.test(output.message || ''), output.message || '');
   check('Concluir lembrete não gera erro de JavaScript', errors.length === 0, errors.join(' | '));
 }
