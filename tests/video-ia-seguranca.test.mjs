@@ -88,7 +88,7 @@ async function loadFunctionModule() {
 
   try {
     execFileSync(
-      '/usr/bin/tsc',
+      process.env.TSC_BIN || 'tsc',
       [fnPath, '--target', 'es2022', '--module', 'esnext', '--skipLibCheck', '--outDir', dir],
       { stdio: 'ignore' }
     );
