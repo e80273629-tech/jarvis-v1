@@ -132,6 +132,9 @@ const {
   MAX_REQUEST_BYTES,
   MAX_SUBMIT_RESPONSE_BYTES,
   MAX_SSE_BYTES,
+  AUTH_TIMEOUT_MS,
+  PROBE_TIMEOUT_MS,
+  SUBMIT_TIMEOUT_MS,
   DOWNLOAD_TIMEOUT_MS,
   SPACE_BASE
 } = mod;
@@ -140,6 +143,9 @@ check('O handler é registrado uma única vez via Deno.serve', served.length ===
 check('As constantes de segurança estão exportadas', MAX_INLINE_BYTES === 6 * 1024 * 1024 && MAX_SSE_BYTES === 2 * 1024 * 1024);
 check('O limite do corpo da requisição é 16 KB', MAX_REQUEST_BYTES === 16 * 1024);
 check('O limite da resposta de submit é 64 KB', MAX_SUBMIT_RESPONSE_BYTES === 64 * 1024);
+check('Timeout de autenticação é 10s', AUTH_TIMEOUT_MS === 10000);
+check('Timeout de diagnóstico é 12s', PROBE_TIMEOUT_MS === 12000);
+check('Timeout de envio é 20s', SUBMIT_TIMEOUT_MS === 20000);
 check('O teto do SSE é 2 MB', MAX_SSE_BYTES === 2097152);
 check('O teto do download é 6 MB', MAX_INLINE_BYTES === 6291456);
 check('O timeout do download é de aproximadamente 30s', DOWNLOAD_TIMEOUT_MS >= 25000 && DOWNLOAD_TIMEOUT_MS <= 35000);
@@ -423,6 +429,45 @@ async function pollOnce() {
   return handlerOnce(JSON.stringify({ action: 'poll', eventId: 'evt-teste-0001' }));
 }
 
+/* --- 3.0a Timeouts de autenticação, diagnóstico e envio --- */
+const originalFetchForTimeouts = globalThis.fetch;
+let authSignal;
+globalThis.fetch = async (input, init = {}) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  authSignal = init.signal;
+  if (url === AUTH_URL) { const error = new Error('timeout auth'); error.name = 'TimeoutError'; throw error; }
+  throw new Error('URL inesperada no timeout auth: ' + url);
+};
+const authTimedOut = await handlerOnce(JSON.stringify({ action: 'health' }));
+check('Timeout de autenticação devolve HTTP 504', authTimedOut.status === 504);
+check('Autenticação recebe AbortSignal', authSignal instanceof AbortSignal);
+
+let submitSignal;
+globalThis.fetch = async (input, init = {}) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  if (url === AUTH_URL) return new Response(JSON.stringify({ id: 'usuario-de-teste' }), { status: 200 });
+  if (url === CALL_PREFIX) { submitSignal = init.signal; const error = new Error('timeout submit'); error.name = 'TimeoutError'; throw error; }
+  throw new Error('URL inesperada no timeout submit: ' + url);
+};
+const submitTimedOut = await handlerOnce(JSON.stringify({ action: 'submit', prompt: 'Vídeo de teste', duration: 2, format: '16:9' }));
+check('Timeout de envio devolve HTTP 504', submitTimedOut.status === 504);
+check('Envio ao Space recebe AbortSignal', submitSignal instanceof AbortSignal);
+
+let probeSignals = [];
+globalThis.fetch = async (input, init = {}) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  if (url === AUTH_URL) return new Response(JSON.stringify({ id: 'usuario-de-teste' }), { status: 200 });
+  probeSignals.push(init.signal);
+  if (url === 'https://huggingface.co/api/whoami-v2') return new Response('{}', { status: 200 });
+  if (url === SPACE_BASE + '/gradio_api/info') return new Response(JSON.stringify({ named_endpoints: {} }), { status: 200 });
+  throw new Error('URL inesperada no teste de probe: ' + url);
+};
+const probeResult = await handlerOnce(JSON.stringify({ action: 'probe' }));
+check('Diagnóstico continua respondendo sem geração', probeResult.status === 200);
+check('As duas chamadas de diagnóstico recebem AbortSignal', probeSignals.length === 2 && probeSignals.every(signal => signal instanceof AbortSignal));
+globalThis.fetch = originalFetchForTimeouts;
+
+
 /* --- 3.0b Resposta do submit limitada sem gerar vídeo real --- */
 const originalFetchForSubmit = globalThis.fetch;
 let submitResponseCancelled = false;
@@ -672,6 +717,9 @@ check(
 console.log('\n--- invariantes do código ---');
 
 check('Não existe mais leitura sem teto (arrayBuffer)', !/\.arrayBuffer\(\)/.test(fnSrc));
+check('Autenticação tem timeout', /AbortSignal\.timeout\(AUTH_TIMEOUT_MS\)/.test(fnSrc));
+check('Diagnóstico tem timeout', (fnSrc.match(/AbortSignal\.timeout\(PROBE_TIMEOUT_MS\)/g) || []).length === 2);
+check('Envio tem timeout', /AbortSignal\.timeout\(SUBMIT_TIMEOUT_MS\)/.test(fnSrc));
 check('O download usa redirect: "manual"', /redirect:\s*"manual"/.test(fnSrc));
 check('O download tem AbortSignal', /signal:\s*downloadController\.signal/.test(fnSrc));
 check('O download checa Content-Length', /content-length/.test(fnSrc));
