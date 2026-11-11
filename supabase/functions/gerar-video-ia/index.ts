@@ -77,6 +77,9 @@ const MIN_FRAMES = 9;
 const MAX_FRAMES = 257;
 const FRAME_STEP = 8;
 
+/** Limite do JSON recebido pela função (16 KB). */
+export const MAX_REQUEST_BYTES = 16 * 1024;
+
 /** Acima deste tamanho o vídeo volta só como URL, para não inflar a resposta. */
 export const MAX_INLINE_BYTES = 6 * 1024 * 1024;
 
@@ -171,7 +174,7 @@ function encodeBase64(bytes: Uint8Array): string {
 
 
 export async function readBoundedBody(
-  response: Response,
+  response: Pick<Response, "headers" | "body">,
   maxBytes: number
 ): Promise<{ bytes: Uint8Array | null; sizeBytes: number; truncated: boolean }> {
   const declared = Number(response.headers.get("content-length") ?? "");
@@ -386,7 +389,31 @@ Deno.serve(async (req) => {
     // 2. Segredo lido apenas do ambiente — nunca devolvido ao cliente
     const hfToken = Deno.env.get("HF_TOKEN") || "";
 
-    const body = await req.json();
+    const requestBody = await readBoundedBody(req, MAX_REQUEST_BYTES);
+
+    if (requestBody.truncated) {
+      return respond({
+        error: "A solicitação é muito grande. Reduza os dados enviados e tente novamente.",
+      }, 413);
+    }
+
+    if (!requestBody.bytes) {
+      return respond({ error: "Corpo da solicitação ausente ou inválido." }, 400);
+    }
+
+    let parsedBody: unknown;
+
+    try {
+      parsedBody = JSON.parse(new TextDecoder().decode(requestBody.bytes));
+    } catch {
+      return respond({ error: "O corpo da solicitação precisa ser um JSON válido." }, 400);
+    }
+
+    if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody)) {
+      return respond({ error: "Formato de solicitação inválido." }, 400);
+    }
+
+    const body = parsedBody as Record<string, unknown>;
     const action = typeof body.action === "string" ? body.action : "";
 
     // ------------------------------------------------ health (sem segredo)
