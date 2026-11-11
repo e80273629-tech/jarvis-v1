@@ -268,6 +268,21 @@ async function openStudio(config = {}) {
 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.addInitScript(stubSupabase, settings);
+
+  // O index.html carrega supabase-js por <script src>. Sem interceptar, o CDN
+  // sobrescreveria window.supabase e o teste falaria com a rede real.
+  await context.route('**/*', route => {
+    const url = route.request().url();
+    if (url.startsWith(base)) return route.continue();
+    if (url.includes('supabase-js')) {
+      return route.fulfill({
+        contentType: 'application/javascript',
+        body: '/* supabase-js não é baixado: o stub do init script permanece em window.supabase */'
+      });
+    }
+    return route.abort();
+  });
+
   const page = await context.newPage();
 
   page.on('pageerror', error => pageErrors.push(`${page.url()} :: ${error.message}`));
