@@ -34,7 +34,7 @@ Consequência: mesmo com login válido a home e o menu podem nunca aparecer, e o
 - Seletor morto `.tile` no binding de ferramentas (nenhum elemento `.tile` existe) e `showOsvyraScreen`/`osvyraScreenHistory` declarados **depois** do primeiro uso, o que fragiliza o roteamento.
 - Dois blocos `<script>` independentes sem estado de navegação compartilhado; histórico de telas sem sincronização com o histórico do navegador (botão "voltar" do Android fecha o app em vez de voltar de tela).
 - Menu lateral só tem Perfil/Configurações/Sair: nenhuma ferramenta é acessível pelo menu em celular.
-- `#phone` (Automação Android) existe e não é alcançável por nenhum caminho de navegação.
+- `#phone` (Automação Android) existe e hoje é alcançável pelo menu (`navigate('phone')` e hash `#phone`); a tela, porém, é apenas informativa — não tem lógica nem integrações.
 
 ## Plano de correção
 
