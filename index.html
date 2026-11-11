@@ -2494,6 +2494,26 @@ function formatSchedule(value) {
   return date.toLocaleString("pt-BR");
 }
 
+/* A constraint osvyra_tasks_status_check aceita apenas:
+   pending, running, completed, failed, cancelled.
+   "done" aparece somente como tolerância de leitura de linhas antigas. */
+const TASK_STATUS_LABELS = {
+  pending: "Pendente",
+  running: "Em andamento",
+  completed: "Concluída",
+  failed: "Falhou",
+  cancelled: "Cancelada",
+  done: "Concluída"
+};
+
+function isTaskCompleted(task) {
+  return !!task && (task.status === "completed" || task.status === "done");
+}
+
+function taskStatusLabel(task) {
+  return TASK_STATUS_LABELS[task && task.status] || "Pendente";
+}
+
 let currentTasks = [];
 
 async function loadTasks() {
@@ -2530,9 +2550,9 @@ async function loadTasks() {
     <div class="card" data-task-id="${escapeHtml(task.id || "")}">
       <strong>${escapeHtml(task.title || "")}</strong>
       <p>${escapeHtml(task.description || "")}</p>
-      <small>Status: ${task.status === "done" ? "Concluída" : "Pendente"}</small>
+      <small>Status: ${escapeHtml(taskStatusLabel(task))}</small>
       <p>${escapeHtml(formatSchedule(task.scheduled_at))}</p>
-      ${task.status === "done" ? "" : `<button class="btn secondary" type="button" data-complete-task="${escapeHtml(task.id || "")}">Concluir</button>`}
+      ${isTaskCompleted(task) ? "" : `<button class="btn secondary" type="button" data-complete-task="${escapeHtml(task.id || "")}">Concluir</button>`}
     </div>
   `).join("");
 }
@@ -2553,7 +2573,7 @@ document.getElementById("tasksList").addEventListener("click", async event => {
   const taskId = button.getAttribute("data-complete-task");
   const { data, error } = await supabaseClient
     .from("osvyra_tasks")
-    .update({ status: "done" })
+    .update({ status: "completed" })
     .eq("id", taskId)
     .eq("user_id", user.id)
     .select("id");
