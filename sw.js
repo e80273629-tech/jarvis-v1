@@ -4,7 +4,7 @@
    - Web Share Target: a navegação com ?share-target=1 preserva os parâmetros
      para a tela #share-in e continua funcionando sem conexão. */
 
-const CACHE = 'osvyra-v4-cache';
+const CACHE = 'osvyra-v5-cache';
 const SHARE_PARAM = 'share-target';
 
 const FILES = [
