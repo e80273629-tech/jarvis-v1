@@ -88,6 +88,9 @@ export const SUBMIT_TIMEOUT_MS = 20000;
 /** Teto da resposta JSON recebida ao enviar um vídeo ao Space (64 KB). */
 export const MAX_SUBMIT_RESPONSE_BYTES = 64 * 1024;
 
+/** Teto da resposta de diagnóstico do Space (128 KB). */
+export const MAX_PROBE_RESPONSE_BYTES = 128 * 1024;
+
 /** Acima deste tamanho o vídeo volta só como URL, para não inflar a resposta. */
 export const MAX_INLINE_BYTES = 6 * 1024 * 1024;
 
@@ -478,8 +481,21 @@ Deno.serve(async (req) => {
         spaceReachable = info.ok;
 
         if (info.ok) {
-          const config = await info.json();
-          endpoints = Object.keys(config?.named_endpoints || {});
+          const infoBody = await readBoundedBody(info, MAX_PROBE_RESPONSE_BYTES);
+
+          if (infoBody.truncated || !infoBody.bytes) {
+            console.error("Resposta de diagnóstico do Space excedeu o limite ou veio vazia.");
+          } else {
+            try {
+              const config = JSON.parse(new TextDecoder().decode(infoBody.bytes));
+              const namedEndpoints = config?.named_endpoints;
+              if (namedEndpoints && typeof namedEndpoints === "object" && !Array.isArray(namedEndpoints)) {
+                endpoints = Object.keys(namedEndpoints);
+              }
+            } catch (infoJsonError) {
+              console.error("Resposta JSON inválida no diagnóstico do Space:", infoJsonError);
+            }
+          }
         }
       } catch (spaceError) {
         console.error("Falha ao alcançar o Space:", spaceError);
