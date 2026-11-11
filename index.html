@@ -1307,6 +1307,181 @@ h1, h2, h3 {
   margin-top: 15px;
   font-size: 13px;
 }
+  /* ===== Estúdio de imagens — modos e modo conversacional ===== */
+  [hidden] { display: none !important; }
+
+  .art-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .art-head h3 { margin: 0; }
+
+  .credit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .credit-badge[data-state="known"] {
+    background: rgba(126, 231, 178, 0.14);
+    border-color: rgba(126, 231, 178, 0.42);
+    color: #b8f5d6;
+  }
+
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 16px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .mode-tab {
+    flex: 1 1 0;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .mode-tab.is-active {
+    background: #7ee7b2;
+    color: #10241b;
+  }
+
+  .mode-tab:focus-visible {
+    outline: 2px solid #7ee7b2;
+    outline-offset: 2px;
+  }
+
+  .chat-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 12px;
+    margin: 10px 0 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .chat-stream .msg {
+    margin: 0;
+    padding: 9px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    max-width: 92%;
+    overflow-wrap: anywhere;
+  }
+
+  .chat-stream .msg-user {
+    align-self: flex-end;
+    background: rgba(126, 231, 178, 0.16);
+    border: 1px solid rgba(126, 231, 178, 0.34);
+  }
+
+  .chat-stream .msg-assistant {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .credit-confirm {
+    margin: 12px 0;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255, 209, 102, 0.10);
+    border: 1px solid rgba(255, 209, 102, 0.42);
+  }
+
+  .credit-confirm p { margin: 0 0 12px; }
+
+  .free-preview {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    margin: 14px 0 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .history-title {
+    margin: 22px 0 4px;
+    font-size: 0.95rem;
+  }
+
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .history-item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .history-item img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .history-open {
+    min-height: 36px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(126, 231, 178, 0.18);
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #artFreeMode textarea {
+    width: 100%;
+    min-height: 84px;
+    resize: vertical;
+  }
+
+  @media (max-width: 480px) {
+    .mode-tab { font-size: 0.82rem; padding: 10px 8px; }
+    .chat-stream { max-height: 260px; }
+  }
   </style>
 </head>
 <body>
@@ -1538,25 +1713,69 @@ h1, h2, h3 {
 </section>
 
   <section id="art" class="panel hidden">
-    <h3>Estúdio de imagens · Arte promocional</h3>
-    <p class="muted">Gere uma imagem de produto com IA e monte a arte promocional com textos em português.</p>
-    <div class="row">
-      <div><label for="biz">Nome do negócio</label><input id="biz" value="Doceria Exemplo"></div>
-      <div><label for="product">Produto em destaque</label><input id="product" value="Bolo de chocolate"></div>
+    <div class="art-head">
+      <h3>Estúdio de imagens</h3>
+      <span id="artCreditBadge" class="credit-badge" data-state="unknown" aria-live="polite">Créditos: —</span>
     </div>
-    <label for="headline">Chamada principal</label><input id="headline" value="Um carinho em forma de doce">
-    <label for="details">Detalhes / oferta</label><input id="details" value="Feito com carinho • Consulte os sabores">
-    <div class="row">
-      <div><label for="price">Preço (opcional)</label><input id="price" placeholder="Ex.: R$ 25,00"></div>
-      <div><label for="contact">Contato (opcional)</label><input id="contact" placeholder="WhatsApp ou Instagram"></div>
+    <p class="muted" id="artCreditNote">O saldo aparece após a primeira geração desta sessão.</p>
+
+    <div class="mode-tabs" role="tablist" aria-label="Modo do Estúdio de imagens">
+      <button class="mode-tab is-active" type="button" role="tab" aria-selected="true" data-art-mode="promo">Arte promocional</button>
+      <button class="mode-tab" type="button" role="tab" aria-selected="false" data-art-mode="free">Imagem livre</button>
     </div>
-    <label for="palette">Paleta</label>
-    <select id="palette"><option value="berry">Framboesa e creme</option><option value="cocoa">Cacau e dourado</option><option value="pink">Rosa delicado</option></select>
-    <button class="btn" id="makeArt" type="button">Gerar arte</button><button class="btn secondary" id="downloadArt" type="button" disabled>Baixar PNG</button>
-    <button class="btn secondary" id="shareArt" type="button">📤 Compartilhar arte</button>
-    <p id="artStatus" class="muted" aria-live="polite">Preencha o produto e escolha uma paleta para começar.</p>
-    <canvas id="artCanvas" class="preview" width="1080" height="1350" aria-label="Prévia da arte"></canvas>
-    <div class="notice">A imagem do produto é gerada por IA. Os textos da divulgação são aplicados separadamente pela OSVYRA para manter o português correto.</div>
+
+    <div id="artPromoMode">
+      <p class="muted">Gere uma imagem de produto com IA e monte a arte promocional com textos em português.</p>
+      <div class="row">
+        <div><label for="biz">Nome do negócio</label><input id="biz" value="Doceria Exemplo"></div>
+        <div><label for="product">Produto em destaque</label><input id="product" value="Bolo de chocolate"></div>
+      </div>
+      <label for="headline">Chamada principal</label><input id="headline" value="Um carinho em forma de doce">
+      <label for="details">Detalhes / oferta</label><input id="details" value="Feito com carinho • Consulte os sabores">
+      <div class="row">
+        <div><label for="price">Preço (opcional)</label><input id="price" placeholder="Ex.: R$ 25,00"></div>
+        <div><label for="contact">Contato (opcional)</label><input id="contact" placeholder="WhatsApp ou Instagram"></div>
+      </div>
+      <label for="palette">Paleta</label>
+      <select id="palette"><option value="berry">Framboesa e creme</option><option value="cocoa">Cacau e dourado</option><option value="pink">Rosa delicado</option></select>
+      <button class="btn" id="makeArt" type="button">Gerar arte</button><button class="btn secondary" id="downloadArt" type="button" disabled>Baixar PNG</button>
+      <button class="btn secondary" id="shareArt" type="button">📤 Compartilhar arte</button>
+      <p id="artStatus" class="muted" aria-live="polite">Preencha o produto e escolha uma paleta para começar.</p>
+      <canvas id="artCanvas" class="preview" width="1080" height="1350" aria-label="Prévia da arte"></canvas>
+      <div class="notice">A imagem do produto é gerada por IA. Os textos da divulgação são aplicados separadamente pela OSVYRA para manter o português correto.</div>
+    </div>
+
+    <div id="artFreeMode" hidden>
+      <p class="muted">Descreva a imagem em linguagem natural. Cada geração custa <strong>1 crédito</strong> e sempre pede confirmação antes de enviar. As mensagens seguintes viram ajustes: a imagem é recriada a partir do pedido completo.</p>
+
+      <div id="artFreeMessages" class="chat-stream" aria-live="polite">
+        <p class="muted" id="artFreeEmpty">Nenhum pedido ainda. Exemplo: “um bolo de chocolate com fondant brilhante sobre mesa de madeira, luz suave”.</p>
+      </div>
+
+      <label for="artFreeInput">Sua mensagem</label>
+      <textarea id="artFreeInput" rows="3" placeholder="Descreva a imagem ou peça um ajuste..."></textarea>
+
+      <div id="artFreeConfirmCard" class="credit-confirm" role="group" aria-label="Confirmação de crédito" hidden>
+        <p id="artFreeConfirmText" class="muted"></p>
+        <button class="btn" id="artFreeConfirm" type="button">Confirmar e gerar</button>
+        <button class="btn secondary" id="artFreeCancel" type="button">Cancelar</button>
+      </div>
+
+      <button class="btn" id="artFreeGenerate" type="button">Gerar imagem</button>
+      <button class="btn secondary" id="artFreeReset" type="button">Nova imagem</button>
+
+      <p id="artFreeStatus" class="muted" aria-live="polite"></p>
+
+      <img id="artFreePreview" class="free-preview" alt="Imagem gerada por IA" hidden>
+      <button class="btn secondary" id="artFreeDownload" type="button" disabled>Baixar imagem</button>
+
+      <h4 class="history-title">Histórico deste dispositivo</h4>
+      <p class="muted">Guardado no seu navegador, até 20 imagens por conta. Ainda não sincroniza entre dispositivos.</p>
+      <div id="artHistoryList" class="history-grid"></div>
+      <button class="btn secondary" id="artHistoryClear" type="button" hidden>Limpar histórico</button>
+
+      <div class="notice">Nível A: cada envio gera uma imagem nova a partir do pedido completo. Edição real de uma imagem existente (Nível B) ainda não está implementada.</div>
+    </div>
   </section>
 
   <section id="video" class="panel hidden">
@@ -1849,6 +2068,10 @@ function showOsvyraScreen(screen, { syncHash = 'push' } = {}) {
   updateBackButton();
   closeSideMenu();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (screen === 'art' && typeof artOnStudioOpened === 'function') {
+    artOnStudioOpened();
+  }
 
   return true;
 }
@@ -2169,6 +2392,569 @@ document.getElementById('shareArt').addEventListener('click', async () => {
     artStatus.textContent = 'Não foi possível compartilhar a arte. Use "Baixar PNG".';
   }
 });
+
+/* ============================================================
+   ESTÚDIO DE IMAGENS — MODO "IMAGEM LIVRE" (Etapa 1)
+   Conversacional, com confirmação de crédito antes de gerar.
+   Depende apenas da Edge Function gerar-imagem-ia.
+   ============================================================ */
+/* ART_FREE_START */
+var artStudioReady = false;
+
+const ART_FREE_PROMPT_LIMIT = 2000;
+const ART_HISTORY_LIMIT = 20;
+const ART_DB_NAME = 'osvyra-images';
+const ART_DB_STORE = 'images';
+
+const artCreditBadge = document.getElementById('artCreditBadge');
+const artCreditNote = document.getElementById('artCreditNote');
+const artModeTabs = Array.prototype.slice.call(document.querySelectorAll('[data-art-mode]'));
+const artPromoMode = document.getElementById('artPromoMode');
+const artFreeMode = document.getElementById('artFreeMode');
+const artFreeMessages = document.getElementById('artFreeMessages');
+const artFreeEmpty = document.getElementById('artFreeEmpty');
+const artFreeInput = document.getElementById('artFreeInput');
+const artFreeGenerate = document.getElementById('artFreeGenerate');
+const artFreeReset = document.getElementById('artFreeReset');
+const artFreeStatus = document.getElementById('artFreeStatus');
+const artFreePreview = document.getElementById('artFreePreview');
+const artFreeDownload = document.getElementById('artFreeDownload');
+const artFreeConfirmCard = document.getElementById('artFreeConfirmCard');
+const artFreeConfirmText = document.getElementById('artFreeConfirmText');
+const artFreeConfirm = document.getElementById('artFreeConfirm');
+const artFreeCancel = document.getElementById('artFreeCancel');
+const artHistoryList = document.getElementById('artHistoryList');
+const artHistoryClear = document.getElementById('artHistoryClear');
+
+const artState = {
+  mode: 'promo',
+  credits: null,
+  creditsSource: 'unknown',
+  userId: null,
+  description: '',
+  refinements: [],
+  messages: [],
+  pendingPrompt: '',
+  pendingBackup: null,
+  busy: false,
+  lastImage: ''
+};
+
+/* ---------- saldo de créditos ---------- */
+
+function artSetCredits(value, source) {
+  if (typeof value === 'number' && isFinite(value)) {
+    artState.credits = value;
+    artState.creditsSource = source || 'generation';
+    artCreditBadge.dataset.state = 'known';
+    artCreditBadge.textContent = 'Créditos: ' + value;
+    artCreditNote.textContent = artState.creditsSource === 'balance'
+      ? 'Saldo consultado agora na sua conta.'
+      : 'Saldo atualizado pela última geração.';
+    return;
+  }
+
+  artState.credits = null;
+  artState.creditsSource = 'unknown';
+  artCreditBadge.dataset.state = 'unknown';
+  artCreditBadge.textContent = 'Créditos: —';
+  artCreditNote.textContent = 'O saldo aparece após a primeira geração desta sessão.';
+}
+
+async function artRefreshCredits() {
+  if (!supabaseClient || typeof supabaseClient.rpc !== 'function') {
+    artSetCredits(null);
+    return false;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_image_credit_balance');
+    if (error) throw error;
+
+    let value = Array.isArray(data) ? data[0] : data;
+
+    if (value && typeof value === 'object') {
+      value = value.balance != null ? value.balance
+        : value.credits != null ? value.credits
+        : value.get_image_credit_balance != null ? value.get_image_credit_balance
+        : null;
+    }
+
+    if (typeof value !== 'number' || !isFinite(value)) {
+      throw new Error('formato inesperado no saldo');
+    }
+
+    artSetCredits(value, 'balance');
+    return true;
+  } catch (error) {
+    // RPC ainda não criada (PGRST202 / 404) ou sem permissão: degrada sem bloquear.
+    if (artState.credits === null) artSetCredits(null);
+    return false;
+  }
+}
+
+/* ---------- modos ---------- */
+
+function artSetMode(mode) {
+  artState.mode = mode === 'free' ? 'free' : 'promo';
+
+  artModeTabs.forEach(tab => {
+    const active = tab.dataset.artMode === artState.mode;
+    tab.classList.toggle('is-active', active);
+    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+
+  artPromoMode.hidden = artState.mode !== 'promo';
+  artFreeMode.hidden = artState.mode !== 'free';
+
+  if (artState.mode === 'free') {
+    artRefreshCredits();
+    artRenderHistory();
+  }
+}
+
+function artOnStudioOpened() {
+  if (!artStudioReady) return;
+  artRefreshCredits();
+  if (artState.mode === 'free') artRenderHistory();
+}
+
+/* ---------- conversa ---------- */
+
+function artRenderMessages() {
+  artFreeMessages.innerHTML = '';
+
+  if (!artState.messages.length) {
+    artFreeMessages.appendChild(artFreeEmpty);
+    return;
+  }
+
+  artState.messages.forEach(message => {
+    const bubble = document.createElement('p');
+    bubble.className = message.role === 'user' ? 'msg msg-user' : 'msg msg-assistant';
+    bubble.textContent = message.text;
+    artFreeMessages.appendChild(bubble);
+  });
+
+  artFreeMessages.scrollTop = artFreeMessages.scrollHeight;
+}
+
+function artBuildFreePrompt() {
+  const description = artState.description.trim();
+  if (!description) return '';
+
+  const refinements = artState.refinements
+    .map(item => item.trim())
+    .filter(Boolean);
+
+  let prompt = 'Crie uma imagem original e detalhada: ' + description;
+
+  if (refinements.length) {
+    prompt += '\n\nAJUSTES PEDIDOS PELO USUÁRIO (aplicar todos, na ordem):\n';
+    prompt += refinements.map((item, index) => (index + 1) + '. ' + item).join('\n');
+    prompt += '\n\nMantenha o mesmo assunto e a mesma linguagem visual da descrição original, aplicando os ajustes acima.';
+  }
+
+  prompt += '\n\nSem textos, letras, logotipos ou marcas d’água na imagem.';
+
+  if (prompt.length > ART_FREE_PROMPT_LIMIT) {
+    prompt = prompt.slice(0, ART_FREE_PROMPT_LIMIT - 3) + '...';
+  }
+
+  return prompt;
+}
+
+function artRequestFreeGeneration() {
+  if (artState.busy || !artFreeConfirmCard.hidden) return;
+
+  const text = artFreeInput.value.trim();
+
+  if (!text) {
+    artFreeStatus.textContent = 'Descreva a imagem que você quer gerar.';
+    artFreeInput.focus();
+    return;
+  }
+
+  artState.pendingBackup = {
+    description: artState.description,
+    refinements: artState.refinements.slice()
+  };
+
+  if (!artState.description) {
+    artState.description = text;
+  } else {
+    artState.refinements.push(text);
+  }
+
+  const prompt = artBuildFreePrompt();
+
+  if (!prompt) {
+    artState.pendingBackup = null;
+    artFreeStatus.textContent = 'Descreva a imagem que você quer gerar.';
+    return;
+  }
+
+  artState.pendingPrompt = prompt;
+
+  const creditsLabel = artState.credits === null
+    ? 'saldo ainda desconhecido'
+    : 'saldo atual: ' + artState.credits;
+
+  artFreeConfirmText.textContent =
+    'Esta geração custa 1 crédito (' + creditsLabel + '). ' +
+    'A imagem será criada do zero a partir de todo o pedido. Confirmar?';
+
+  artFreeConfirmCard.hidden = false;
+  artFreeGenerate.disabled = true;
+  artFreeStatus.textContent = '';
+}
+
+function artCancelFreeGeneration() {
+  if (artState.pendingBackup) {
+    artState.description = artState.pendingBackup.description;
+    artState.refinements = artState.pendingBackup.refinements;
+    artState.pendingBackup = null;
+  }
+
+  artState.pendingPrompt = '';
+  artFreeConfirmCard.hidden = true;
+  artFreeGenerate.disabled = false;
+  artFreeStatus.textContent = 'Geração cancelada. Nenhum crédito foi usado.';
+}
+
+async function artInvokeImage(prompt) {
+  const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+  const session = sessionData ? sessionData.session : null;
+
+  if (sessionError || !session) {
+    const failure = new Error('Entre na sua conta antes de gerar uma imagem.');
+    failure.code = 'NO_SESSION';
+    throw failure;
+  }
+
+  if (session.user && session.user.id) artState.userId = session.user.id;
+
+  const { data, error } = await supabaseClient.functions.invoke('gerar-imagem-ia', {
+    body: { prompt: prompt },
+    headers: { Authorization: 'Bearer ' + session.access_token }
+  });
+
+  if (error) {
+    const status = error.status || (error.context && error.context.status) || 0;
+    let message = '';
+
+    if (error.context && typeof error.context.json === 'function') {
+      try {
+        const body = await error.context.json();
+        message = (body && (body.error || body.message)) || '';
+      } catch (parseError) {
+        message = '';
+      }
+    }
+
+    if (!message && typeof error.message === 'string') message = error.message;
+
+    const failure = new Error(message || 'Falha ao gerar a imagem.');
+    failure.status = status;
+    failure.code = (status === 402 || /CR[ÉE]DITOS INSUFICIENTES/i.test(message))
+      ? 'NO_CREDITS'
+      : 'INVOKE';
+    throw failure;
+  }
+
+  if (!data || typeof data.image !== 'string' || !data.image) {
+    const failure = new Error('A função não retornou uma imagem válida.');
+    failure.code = 'BAD_PAYLOAD';
+    throw failure;
+  }
+
+  if (typeof data.creditsRemaining === 'number') {
+    artSetCredits(data.creditsRemaining, 'generation');
+  }
+
+  return data;
+}
+
+async function artConfirmFreeGeneration() {
+  const prompt = artState.pendingPrompt;
+  if (!prompt || artState.busy) return;
+
+  const backup = artState.pendingBackup;
+  const userMessage = artFreeInput.value.trim();
+
+  artFreeConfirmCard.hidden = true;
+  artState.pendingPrompt = '';
+  artState.busy = true;
+  artFreeGenerate.disabled = true;
+  artFreeGenerate.textContent = 'Gerando...';
+  artFreeStatus.textContent = 'Enviando o pedido para a inteligência artificial. Aguarde...';
+
+  try {
+    const data = await artInvokeImage(prompt);
+
+    artState.pendingBackup = null;
+    artFreeInput.value = '';
+
+    artState.messages.push({ role: 'user', text: userMessage || artState.description });
+    artState.messages.push({ role: 'assistant', text: 'Imagem gerada. Para mudar algo, descreva o ajuste.' });
+    artRenderMessages();
+
+    artState.lastImage = data.image;
+    artFreePreview.src = data.image;
+    artFreePreview.hidden = false;
+    artFreeDownload.disabled = false;
+
+    artFreeStatus.textContent = 'Imagem gerada. Para ajustar, escreva o que deve mudar — isso gera uma nova imagem e usa 1 crédito.';
+
+    await artHistorySave({
+      id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 8),
+      userId: artState.userId || 'desconhecido',
+      description: artState.description,
+      refinements: artState.refinements.slice(),
+      prompt: prompt,
+      image: data.image,
+      createdAt: Date.now()
+    });
+
+    await artRenderHistory();
+  } catch (error) {
+    if (backup) {
+      artState.description = backup.description;
+      artState.refinements = backup.refinements;
+    }
+    artState.pendingBackup = null;
+
+    if (userMessage) artFreeInput.value = userMessage;
+
+    if (error.code === 'NO_CREDITS') {
+      artFreeStatus.textContent = 'Créditos insuficientes para gerar esta imagem. Nenhum crédito foi descontado.';
+    } else if (error.code === 'NO_SESSION') {
+      artFreeStatus.textContent = 'Entre na sua conta antes de gerar uma imagem.';
+    } else {
+      artFreeStatus.textContent = 'Não foi possível gerar a imagem: ' + (error.message || 'erro desconhecido') + '.';
+    }
+  } finally {
+    artState.busy = false;
+    artFreeGenerate.disabled = false;
+    artFreeGenerate.textContent = 'Gerar imagem';
+  }
+}
+
+function artResetFreeConversation() {
+  artState.description = '';
+  artState.refinements = [];
+  artState.messages = [];
+  artState.pendingPrompt = '';
+  artState.pendingBackup = null;
+  artState.lastImage = '';
+
+  artFreeInput.value = '';
+  artFreePreview.hidden = true;
+  artFreePreview.removeAttribute('src');
+  artFreeDownload.disabled = true;
+  artFreeConfirmCard.hidden = true;
+  artFreeGenerate.disabled = false;
+  artFreeStatus.textContent = 'Nova imagem. Descreva o que você quer gerar.';
+
+  artRenderMessages();
+}
+
+/* ---------- histórico local por usuário (IndexedDB) ---------- */
+
+function artOpenDb() {
+  return new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('IndexedDB indisponível'));
+      return;
+    }
+
+    const request = indexedDB.open(ART_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(ART_DB_STORE)) {
+        const store = db.createObjectStore(ART_DB_STORE, { keyPath: 'id' });
+        store.createIndex('userId', 'userId', { unique: false });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Falha ao abrir o histórico'));
+  });
+}
+
+async function artHistoryAll() {
+  const db = await artOpenDb();
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(ART_DB_STORE, 'readonly');
+      const index = tx.objectStore(ART_DB_STORE).index('userId');
+      const request = index.getAll(artState.userId || 'desconhecido');
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function artHistoryPrune() {
+  const records = await artHistoryAll();
+  if (records.length <= ART_HISTORY_LIMIT) return;
+
+  const excess = records
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(ART_HISTORY_LIMIT);
+
+  const db = await artOpenDb();
+
+  try {
+    await new Promise(resolve => {
+      const tx = db.transaction(ART_DB_STORE, 'readwrite');
+      const store = tx.objectStore(ART_DB_STORE);
+      excess.forEach(item => store.delete(item.id));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function artHistorySave(record) {
+  const db = await artOpenDb();
+
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(ART_DB_STORE, 'readwrite');
+      tx.objectStore(ART_DB_STORE).put(record);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+
+  try {
+    await artHistoryPrune();
+  } catch (pruneError) {
+    console.warn('Não foi possível aplicar o limite do histórico:', pruneError);
+  }
+}
+
+async function artRenderHistory() {
+  if (!artState.userId) {
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      artState.userId = data && data.session && data.session.user ? data.session.user.id : null;
+    } catch (sessionError) {
+      artState.userId = null;
+    }
+  }
+
+  let records = [];
+
+  try {
+    records = await artHistoryAll();
+  } catch (historyError) {
+    records = [];
+  }
+
+  records.sort((a, b) => b.createdAt - a.createdAt);
+  artHistoryList.innerHTML = '';
+  artHistoryClear.hidden = records.length === 0;
+
+  if (!records.length) {
+    const empty = document.createElement('p');
+    empty.className = 'muted';
+    empty.id = 'artHistoryEmpty';
+    empty.textContent = 'Nenhuma imagem salva ainda neste dispositivo.';
+    artHistoryList.appendChild(empty);
+    return;
+  }
+
+  records.forEach(record => {
+    const figure = document.createElement('figure');
+    figure.className = 'history-item';
+
+    const image = document.createElement('img');
+    image.src = record.image;
+    image.alt = record.description || 'Imagem gerada';
+    image.loading = 'lazy';
+
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'history-open';
+    open.textContent = 'Abrir';
+    open.addEventListener('click', () => {
+      artState.lastImage = record.image;
+      artFreePreview.src = record.image;
+      artFreePreview.hidden = false;
+      artFreeDownload.disabled = false;
+      artFreeStatus.textContent = 'Imagem do histórico. Para mudar, descreva um ajuste.';
+    });
+
+    figure.appendChild(image);
+    figure.appendChild(open);
+    artHistoryList.appendChild(figure);
+  });
+}
+
+/* ---------- ligações de interface ---------- */
+
+artModeTabs.forEach(tab => {
+  tab.addEventListener('click', () => artSetMode(tab.dataset.artMode));
+});
+
+artFreeGenerate.addEventListener('click', artRequestFreeGeneration);
+artFreeConfirm.addEventListener('click', artConfirmFreeGeneration);
+artFreeCancel.addEventListener('click', artCancelFreeGeneration);
+artFreeReset.addEventListener('click', artResetFreeConversation);
+
+artFreeInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    artRequestFreeGeneration();
+  }
+});
+
+artFreeDownload.addEventListener('click', () => {
+  if (!artState.lastImage) return;
+  const link = document.createElement('a');
+  link.href = artState.lastImage;
+  link.download = 'osvyra-imagem-ia.png';
+  link.click();
+});
+
+artHistoryClear.addEventListener('click', async () => {
+  try {
+    const db = await artOpenDb();
+
+    await new Promise(resolve => {
+      const tx = db.transaction(ART_DB_STORE, 'readwrite');
+      const store = tx.objectStore(ART_DB_STORE);
+      const index = store.index('userId');
+      const request = index.getAllKeys(artState.userId || 'desconhecido');
+      request.onsuccess = () => {
+        (request.result || []).forEach(key => store.delete(key));
+      };
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+
+    db.close();
+  } catch (clearError) {
+    console.warn('Não foi possível limpar o histórico:', clearError);
+  }
+
+  artRenderHistory();
+});
+
+artSetMode('promo');
+artRenderMessages();
+artStudioReady = true;
+/* ART_FREE_END */
 
 /* ESTÚDIO DE VÍDEOS */
 document.getElementById('makeScript').addEventListener('click', () => {
