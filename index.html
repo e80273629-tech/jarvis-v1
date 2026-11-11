@@ -3704,6 +3704,18 @@ function videoSetProgress(percent) {
   videoEl.progressBar.style.width = safe + '%';
 }
 
+function videoIsTrustedUrl(value) {
+  try {
+    const url = new URL(String(value));
+    return url.protocol === 'https:' &&
+      url.hostname === 'lightricks-ltx-video-distilled.hf.space' &&
+      !url.username && !url.password &&
+      (!url.port || url.port === '443');
+  } catch (_error) {
+    return false;
+  }
+}
+
 function videoDataUrlToBlob(dataUrl) {
   const parts = String(dataUrl).split(',');
   const header = parts[0] || '';
@@ -4003,32 +4015,51 @@ async function videoPollUntilDone(eventId) {
 
 async function videoShowResult(result, request) {
   let blob = null;
+  let directUrl = '';
 
   if (result.video) {
     blob = videoDataUrlToBlob(result.video);
   } else if (result.videoUrl) {
-    const response = await fetch(result.videoUrl);
-
-    if (!response.ok) {
-      throw new Error('O vídeo foi gerado, mas não pôde ser baixado.');
+    if (!videoIsTrustedUrl(result.videoUrl)) {
+      throw new Error('O serviço devolveu um endereço de vídeo não confiável.');
     }
 
-    blob = await response.blob();
+    // Vídeos acima de 6 MB são reproduzidos diretamente. Não baixamos o
+    // arquivo inteiro para a memória do navegador nem duplicamos o buffer.
+    directUrl = result.videoUrl;
   }
 
-  if (!blob) {
+  if (!blob && !directUrl) {
     throw new Error('A geração terminou sem devolver um vídeo.');
   }
 
   if (videoState.currentUrl) {
     URL.revokeObjectURL(videoState.currentUrl);
+    videoState.currentUrl = '';
   }
 
-  videoState.currentUrl = URL.createObjectURL(blob);
-  videoEl.player.src = videoState.currentUrl;
-  videoEl.download.href = videoState.currentUrl;
-  videoEl.download.setAttribute('download', `osvyra-video-${Date.now()}.mp4`);
+  if (blob) {
+    videoState.currentUrl = URL.createObjectURL(blob);
+    videoEl.player.src = videoState.currentUrl;
+    videoEl.download.href = videoState.currentUrl;
+    videoEl.download.setAttribute('download', `osvyra-video-${Date.now()}.mp4`);
+    videoEl.download.removeAttribute('target');
+    videoEl.download.removeAttribute('rel');
+  } else {
+    videoEl.player.src = directUrl;
+    videoEl.download.href = directUrl;
+    videoEl.download.removeAttribute('download');
+    videoEl.download.setAttribute('target', '_blank');
+    videoEl.download.setAttribute('rel', 'noopener noreferrer');
+  }
+
   videoEl.result.hidden = false;
+
+  if (!blob) {
+    videoEl.status.textContent +=
+      ' O arquivo grande será reproduzido diretamente e não ocupará o histórico local.';
+    return;
+  }
 
   try {
     await videoHistorySave({
