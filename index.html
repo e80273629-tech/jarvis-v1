@@ -1250,6 +1250,60 @@ h1, h2, h3 {
   background: rgba(99, 231, 255, .35);
   color: white;
 }
+  /* OSVYRA - GERADOR DE VÍDEOS */
+.video-generator {
+  margin-top: 28px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(65, 120, 255, .15), transparent 40%),
+    linear-gradient(145deg, rgba(13, 28, 60, .9), rgba(6, 14, 34, .96));
+  border: 1px solid rgba(85, 205, 255, .3);
+  border-radius: 18px;
+  box-shadow: 0 0 25px rgba(55, 160, 255, .08);
+}
+
+.video-generator h3 {
+  color: #8ceeff;
+  margin-bottom: 12px;
+}
+
+.video-generator p {
+  line-height: 1.7;
+}
+
+.video-generator label {
+  display: block;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: #c8eaff;
+  font-weight: 700;
+}
+
+.video-generator input,
+.video-generator select,
+.video-generator textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  color: #f0f8ff;
+  background: rgba(4, 12, 30, .85);
+  border: 1px solid rgba(90, 185, 255, .3);
+  border-radius: 10px;
+}
+
+.video-generator textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.video-generator button {
+  margin-top: 22px;
+}
+
+#videoStatus {
+  margin-top: 15px;
+  font-size: 13px;
+}
   </style>
 </head>
 <body>
@@ -1491,6 +1545,41 @@ h1, h2, h3 {
 <textarea id="videoDetails" rows="3" placeholder="Ex.: cafeteira de 600 ml, filtro removível, jarra de vidro e sistema corta-pingos."></textarea>
 
 <button class="btn" id="makeScript" type="button">Montar estrutura de roteiro</button>
+<div id="videoGenerator" class="video-generator">
+  <h3>🎬 Gerador de vídeos com IA</h3>
+
+  <p class="muted">
+    Prepare sua cena para geração de vídeo com inteligência artificial.
+  </p>
+
+  <label for="videoPrompt">Descreva o vídeo que deseja criar</label>
+  <textarea
+    id="videoPrompt"
+    rows="4"
+    placeholder="Ex.: Uma cafeteria moderna apresentando uma xícara de café fumegante..."
+  ></textarea>
+
+  <label for="videoDuration">Duração desejada</label>
+  <select id="videoDuration">
+    <option value="5">5 segundos</option>
+    <option value="10">10 segundos</option>
+  </select>
+
+  <label for="videoFormat">Formato do vídeo</label>
+  <select id="videoFormat">
+    <option value="9:16">Vertical — 9:16</option>
+    <option value="16:9">Horizontal — 16:9</option>
+    <option value="1:1">Quadrado — 1:1</option>
+  </select>
+
+  <button class="btn" id="prepareVideo" type="button">
+    Preparar geração de vídeo
+  </button>
+
+  <p id="videoStatus" class="muted">
+    A geração real será conectada após escolhermos um serviço gratuito.
+  </p>
+</div>
 
 <div style="margin-top: 10px; padding: 10px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #bfc5d2;">
   <strong>ⓘ Aviso importante</strong><br>
@@ -2216,6 +2305,31 @@ document.getElementById('downloadScript').addEventListener('click', () => {
   document.getElementById('copyStatus').textContent = 'Roteiro baixado com sucesso!';
 });
 
+/* PREPARAÇÃO DE VÍDEO IA */
+document.getElementById('prepareVideo').addEventListener('click', () => {
+  const prompt = document.getElementById('videoPrompt').value.trim();
+  const duration = document.getElementById('videoDuration').value;
+  const format = document.getElementById('videoFormat').value;
+  const status = document.getElementById('videoStatus');
+
+  if (!prompt) {
+    status.textContent = 'Descreva o vídeo antes de continuar.';
+    return;
+  }
+
+  const videoRequest = {
+    prompt,
+    duration,
+    format,
+    language: 'pt-BR'
+  };
+
+  status.textContent =
+    'Solicitação preparada! A integração com o serviço de geração será configurada depois. Nenhum crédito foi utilizado.';
+
+  console.log('Solicitação de vídeo preparada:', videoRequest);
+});
+  
 /* UTILITÁRIOS */
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, character => ({
