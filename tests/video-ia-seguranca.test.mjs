@@ -668,6 +668,28 @@ check('O download recebe um AbortSignal', downloadCalls[0]?.init?.signal instanc
 check('Timeout do download não quebra a resposta', timedOut.data.success === true && timedOut.data.status === 'complete');
 check('Timeout do download não embute bytes', timedOut.data.video === '');
 
+/* --- 3.5d SSE encerrado sem complete: deve manter pending --- */
+installFetch({
+  stream: () => new Response(
+    "event: generating\\ndata: {\\"progress\\":0.25}\\n\\n",
+    { status: 200, headers: { 'content-type': 'text/event-stream' } }
+  ),
+  download: () => {
+    throw new Error('evento generating não pode disparar download');
+  }
+});
+const generatingOnly = await pollOnce();
+check(
+  'SSE encerrado apenas com generating devolve pending',
+  generatingOnly.status === 200 &&
+    generatingOnly.data.success === true &&
+    generatingOnly.data.status === 'pending'
+);
+check(
+  'Evento generating sem complete não dispara download',
+  downloadCalls.length === 0
+);
+
 /* --- 3.6 SSE acima de 2 MB --- */
 let ssePulled = 0;
 let sseCancelled = false;
