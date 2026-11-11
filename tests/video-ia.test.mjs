@@ -152,7 +152,7 @@ check(
   /\[functions\.gerar-video-ia\]\s*\nverify_jwt = true/.test(configSrc)
 );
 
-const healthBlock = /action === "health"[\s\S]{0,1200}?\n  \}/.exec(fnSrc)?.[0] || '';
+const healthBlock = /if \(action === "health"\) \{([\s\S]{0,800}?)\n    \}/.exec(fnSrc)?.[1] || '';
 
 check('A ação health existe', healthBlock.length > 0);
 check('health devolve hasToken booleano', /hasToken:\s*hfToken\.length > 0|hasToken:\s*Boolean\(hfToken\)/.test(healthBlock));
@@ -267,6 +267,11 @@ const MIME = {
   '.png': 'image/png'
 };
 
+const TINY_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==',
+  'base64'
+);
+
 const server = createServer((request, response) => {
   const path = decodeURIComponent(request.url.split('?')[0]);
   const filePath = join(root, path === '/' ? 'index.html' : path);
@@ -321,6 +326,12 @@ if (chromium) {
     }
 
     if (url.startsWith(baseUrl)) return route.continue();
+
+    /* Imagens decorativas da página: servidas localmente para não gerar erros
+     * de rede falsos. Não têm relação alguma com a geração de vídeo. */
+    if (/images\.unsplash\.com/.test(url)) {
+      return route.fulfill({ status: 200, contentType: 'image/png', body: TINY_PNG });
+    }
 
     /* Qualquer destino externo é bloqueado e registrado.
      * É esta lista que prova que nenhuma cota do ZeroGPU foi consumida. */
