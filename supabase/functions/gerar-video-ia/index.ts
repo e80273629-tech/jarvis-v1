@@ -643,10 +643,10 @@ Deno.serve(async (req) => {
         eventId = submitText.trim();
       }
 
-      if (!eventId) {
+      if (!/^[A-Za-z0-9_-]{4,120}$/.test(eventId)) {
         return respond({
           success: false,
-          error: "O serviço não devolveu um identificador de geração.",
+          error: "O serviço não devolveu um identificador de geração válido.",
         }, 502);
       }
 
