@@ -135,163 +135,216 @@ const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
 let chromium;
 try {
-  ({ chromium } = await import('/opt/appjet/browser/node_modules/playwright/index.js'));
+  const playwright = await import('/opt/appjet/browser/node_modules/playwright/index.js');
+  chromium = playwright.chromium || (playwright.default && playwright.default.chromium);
+
+  if (!chromium) throw new Error('export chromium não encontrado');
 } catch (error) {
   console.log(`SKIP — checagens de navegador indisponíveis: ${error.message}`);
 }
 
+const SESSION = { user: { id: 'teste', email: 'teste@osvyra.app' } };
+const allErrors = [];
+
+function visiblePanels(page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('.panel')]
+      .filter(panel => !panel.classList.contains('hidden'))
+      .map(panel => panel.id)
+  );
+}
+
+function watchErrors(page, label) {
+  const errors = [];
+
+  page.on('pageerror', error => errors.push(`${label} pageerror: ${error.message}`));
+  page.on('console', message => {
+    if (message.type() !== 'error') return;
+
+    const text = message.text();
+
+    if (/Failed to load resource|ERR_FAILED|net::/i.test(text)) return;
+
+    errors.push(`${label} console: ${text}`);
+  });
+
+  allErrors.push(...[]);
+  return errors;
+}
+
 if (chromium) {
   let browser;
+
   try {
     browser = await chromium.launch({ args: ['--no-sandbox'] });
   } catch {
     browser = await chromium.launch({
       args: ['--no-sandbox'],
-      executablePath: '/root/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome'
+      executablePath: '/opt/appjet/browser-binaries/chromium-1234/chrome-linux64/chrome'
     });
   }
 
-  async function openPage({ session }) {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+
+  await context.route('**/*', route => {
+    const url = route.request().url();
+
+    if (url.includes('supabase-js')) {
+      return route.fulfill({ contentType: 'application/javascript', body: SUPABASE_STUB });
+    }
+
+    if (url.startsWith(baseUrl)) return route.continue();
+
+    return route.abort();
+  });
+
+  async function openPage(session, label) {
     const page = await context.newPage();
-    const errors = [];
-
-    page.on('pageerror', error => errors.push(`pageerror: ${error.message}`));
-    page.on('console', message => {
-      const text = message.text();
-      if (message.type() !== 'error') return;
-      if (/Failed to load resource|ERR_FAILED|net::/i.test(text)) return;
-      errors.push(`console: ${text}`);
-    });
-
-    await page.route('**/*', route => {
-      const url = route.request().url();
-      if (url.includes('supabase-js')) {
-        return route.fulfill({ contentType: 'application/javascript', body: SUPABASE_STUB });
-      }
-      if (url.startsWith(baseUrl)) return route.continue();
-      return route.abort();
-    });
+    const errors = watchErrors(page, label);
 
     await page.addInitScript(value => {
       window.__OSVYRA_TEST_SESSION__ = value;
     }, session);
 
     await page.goto(`${baseUrl}/index.html`, { waitUntil: 'load' });
-    await page.waitForSelector('#moduleGrid, #publicLanding', { state: 'attached' });
 
-    return { page, context, errors };
+    return { page, errors };
   }
 
-  const visiblePanels = page => page.evaluate(() =>
-    [...document.querySelectorAll('.panel')]
-      .filter(panel => !panel.classList.contains('hidden'))
-      .map(panel => panel.id)
-  );
+  async function openToolPage(target, label) {
+    const { page, errors } = await openPage(SESSION, label);
 
-  const { page, context, errors } = await openPage({
-    session: { user: { id: 'teste', email: 'teste@osvyra.app' } }
-  });
+    await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
+    await page.locator(`[data-target="${target}"]`).click();
 
-  await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
-  check('Home visível após login', await page.locator('#moduleGrid').isVisible());
-  check('Nenhum painel aberto junto com a home', (await visiblePanels(page)).length === 0);
+    return { page, errors };
+  }
 
-  /* Vídeos com IA abre o gerador, não o CRM */
-  await page.locator('[data-target="video-ai"]').click();
-  await page.waitForFunction(() => !document.getElementById('video-ai').classList.contains('hidden'));
-  check('Card "Vídeos com IA" abre a tela do gerador',
-    await page.locator('#video-ai #videoGenerator').isVisible());
-  check('Tela de vídeos não mostra login/CRM',
-    !(await page.locator('#video-ai #authEmail').count()) &&
-    !(await page.locator('#video-ai #crmArea').count()));
-  check('Apenas a tela de vídeos fica visível', (await visiblePanels(page)).join() === 'video-ai');
-  check('Hash sincronizado com a tela de vídeos',
-    (await page.evaluate(() => location.hash)) === '#video-ai');
+  /* Home + Vídeos com IA + botão voltar */
+  {
+    const { page, errors } = await openPage(SESSION, 'home');
+    await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
 
-  /* Voltar retorna para a home */
-  await page.locator('#backButton').click();
-  await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
-  check('Botão voltar retorna à home', await page.locator('#moduleGrid').isVisible());
+    check('Home visível após login', await page.locator('#moduleGrid').isVisible());
+    check('Nenhum painel aberto junto com a home', (await visiblePanels(page)).length === 0);
 
-  /* Roteiro inteligente é uma tela separada */
-  await page.locator('[data-target="video"]').click();
-  await page.waitForFunction(() => !document.getElementById('video').classList.contains('hidden'));
-  check('Card "Roteiro inteligente" abre a tela de roteiro',
-    await page.locator('#video #scriptOut').isVisible());
-  check('Gerador de vídeo não aparece na tela de roteiro',
-    (await page.locator('#video #videoGenerator').count()) === 0);
-  check('Apenas a tela de roteiro fica visível', (await visiblePanels(page)).join() === 'video');
+    await page.locator('[data-target="video-ai"]').click();
+    await page.waitForFunction(() => !document.getElementById('video-ai').classList.contains('hidden'));
 
-  /* Enviar roteiro leva para Vídeos com IA */
-  await page.locator('#scriptOut').evaluate(element => {
-    element.value = 'Roteiro de teste OSVYRA';
-  });
-  await page.locator('#sendToVideo').click();
-  await page.waitForFunction(() => !document.getElementById('video-ai').classList.contains('hidden'));
-  check('"Enviar para Vídeos com IA" abre a tela do gerador',
-    await page.locator('#video-ai #videoGenerator').isVisible());
-  check('Roteiro enviado preenche a descrição do vídeo',
-    (await page.locator('#videoPrompt').inputValue()) === 'Roteiro de teste OSVYRA');
+    check('Card "Vídeos com IA" abre a tela do gerador',
+      await page.locator('#video-ai #videoGenerator').isVisible());
+    check('Tela de vídeos não mostra login/CRM',
+      (await page.locator('#video-ai #authEmail').count()) === 0 &&
+      (await page.locator('#video-ai #crmArea').count()) === 0);
+    check('Apenas a tela de vídeos fica visível', (await visiblePanels(page)).join() === 'video-ai');
+    check('Hash sincronizado com a tela de vídeos',
+      (await page.evaluate(() => location.hash)) === '#video-ai');
 
-  /* Organização de projetos abre com CRM, tarefas e clientes */
-  await page.locator('#backButton').click();
-  await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
-  await page.locator('[data-target="projects"]').click();
-  await page.waitForFunction(() => !document.getElementById('projects').classList.contains('hidden'));
-  check('Card "Organização de projetos" abre a tela de projetos',
-    await page.locator('#projects').isVisible());
-  check('Tela de projetos mantém CRM e tarefas',
-    await page.locator('#crmArea').isVisible() &&
-    await page.locator('#tasksList').count() === 1 &&
-    await page.locator('#leadList').count() === 1);
-  check('Apenas a tela de projetos fica visível', (await visiblePanels(page)).join() === 'projects');
+    await page.locator('#backButton').click();
+    await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
+    check('Botão voltar retorna à home', await page.locator('#moduleGrid').isVisible());
 
-  /* Demais telas continuam acessíveis */
-  await page.locator('#backButton').click();
-  await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
-  await page.locator('[data-target="art"]').click();
-  check('Card "Imagens com IA" abre o estúdio de imagens',
-    (await visiblePanels(page)).join() === 'art' && await page.locator('#artCanvas').isVisible());
+    check('Sem erros de JavaScript na navegação para vídeos', errors.length === 0, errors.join(' | '));
 
-  await page.locator('#backButton').click();
-  await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
-  await page.locator('.assistant-cta').click();
-  check('Card da assistente abre o chat',
-    (await visiblePanels(page)).join() === 'osvyra-chat' && await page.locator('#chatInput').isVisible());
+    const domDuplicatedIds = await page.evaluate(() => {
+      const seen = new Set();
+      const duplicates = [];
 
-  /* Voltar do navegador (celular) acompanha as telas */
-  await page.goBack();
-  await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
-  check('Voltar do navegador retorna à home', await page.locator('#moduleGrid').isVisible());
+      document.querySelectorAll('[id]').forEach(element => {
+        if (seen.has(element.id)) duplicates.push(element.id);
+        seen.add(element.id);
+      });
 
-  check('Sem erros de JavaScript na navegação', errors.length === 0, errors.join(' | '));
-
-  const domDuplicatedIds = await page.evaluate(() => {
-    const seen = new Set();
-    const duplicates = [];
-    document.querySelectorAll('[id]').forEach(element => {
-      if (seen.has(element.id)) duplicates.push(element.id);
-      seen.add(element.id);
+      return duplicates;
     });
-    return duplicates;
-  });
-  check('Nenhum id duplicado no DOM renderizado', domDuplicatedIds.length === 0, domDuplicatedIds.join(', '));
+    check('Nenhum id duplicado no DOM renderizado', domDuplicatedIds.length === 0, domDuplicatedIds.join(', '));
+
+    await page.close();
+  }
+
+  /* Roteiro inteligente separado do gerador de vídeo */
+  {
+    const { page, errors } = await openToolPage('video', 'roteiro');
+    await page.waitForFunction(() => !document.getElementById('video').classList.contains('hidden'));
+
+    check('Card "Roteiro inteligente" abre a tela de roteiro',
+      await page.locator('#video #scriptOut').isVisible());
+    check('Gerador de vídeo não aparece na tela de roteiro',
+      (await page.locator('#video #videoGenerator').count()) === 0);
+    check('Apenas a tela de roteiro fica visível', (await visiblePanels(page)).join() === 'video');
+
+    await page.locator('#scriptOut').evaluate(element => {
+      element.value = 'Roteiro de teste OSVYRA';
+    });
+    await page.locator('#sendToVideo').click();
+    await page.waitForFunction(() => !document.getElementById('video-ai').classList.contains('hidden'));
+
+    check('"Enviar para Vídeos com IA" abre a tela do gerador',
+      await page.locator('#video-ai #videoGenerator').isVisible());
+    check('Roteiro enviado preenche a descrição do vídeo',
+      (await page.locator('#videoPrompt').inputValue()) === 'Roteiro de teste OSVYRA');
+    check('Sem erros de JavaScript no fluxo de roteiro', errors.length === 0, errors.join(' | '));
+
+    await page.close();
+  }
+
+  /* Organização de projetos com CRM e tarefas */
+  {
+    const { page, errors } = await openToolPage('projects', 'projetos');
+    await page.waitForFunction(() => !document.getElementById('projects').classList.contains('hidden'));
+
+    check('Card "Organização de projetos" abre a tela de projetos',
+      await page.locator('#projects').isVisible());
+    check('Tela de projetos mantém CRM e tarefas',
+      await page.locator('#crmArea').isVisible() &&
+      (await page.locator('#tasksList').count()) === 1 &&
+      (await page.locator('#leadList').count()) === 1);
+    check('Apenas a tela de projetos fica visível', (await visiblePanels(page)).join() === 'projects');
+    check('Sem erros de JavaScript na tela de projetos', errors.length === 0, errors.join(' | '));
+
+    await page.close();
+  }
+
+  /* Estúdio de imagens, chat e voltar do navegador */
+  {
+    const { page, errors } = await openToolPage('art', 'imagens');
+    check('Card "Imagens com IA" abre o estúdio de imagens',
+      (await visiblePanels(page)).join() === 'art' && await page.locator('#artCanvas').isVisible());
+
+    await page.locator('#backButton').click();
+    await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
+    await page.locator('.assistant-cta').click();
+    await page.waitForFunction(() => !document.getElementById('osvyra-chat').classList.contains('hidden'));
+
+    check('Card da assistente abre o chat',
+      (await visiblePanels(page)).join() === 'osvyra-chat' && await page.locator('#chatInput').isVisible());
+
+    await page.goBack();
+    await page.waitForFunction(() => !document.getElementById('moduleGrid').classList.contains('hidden'));
+    check('Voltar do navegador retorna à home', await page.locator('#moduleGrid').isVisible());
+    check('Sem erros de JavaScript em imagens e chat', errors.length === 0, errors.join(' | '));
+
+    await page.close();
+  }
+
+  /* Visitante sem sessão: landing e "Entrar" levam ao acesso em projetos */
+  {
+    const { page, errors } = await openPage(null, 'visitante');
+    await page.waitForFunction(() => !document.getElementById('publicLanding').classList.contains('hidden'));
+
+    await page.locator('#landingLogin').click();
+    await page.waitForFunction(() => !document.getElementById('projects').classList.contains('hidden'));
+
+    check('"Entrar" na landing abre a tela de projetos com o formulário de acesso',
+      await page.locator('#projects #authEmail').isVisible());
+    check('Visitante não vê o CRM antes de entrar',
+      !(await page.locator('#crmArea').isVisible()));
+    check('Landing sem erros de JavaScript', errors.length === 0, errors.join(' | '));
+
+    await page.close();
+  }
 
   await context.close();
-
-  /* Visitante sem sessão: landing e botão "Entrar" levam ao acesso em projetos */
-  const anonymous = await openPage({ session: null });
-  await anonymous.page.waitForFunction(() => !document.getElementById('publicLanding').classList.contains('hidden'));
-  await anonymous.page.locator('#landingLogin').click();
-  await anonymous.page.waitForFunction(() => !document.getElementById('projects').classList.contains('hidden'));
-  check('"Entrar" na landing abre a tela de projetos com o formulário de acesso',
-    await anonymous.page.locator('#projects #authEmail').isVisible());
-  check('Visitante não vê o CRM antes de entrar',
-    !(await anonymous.page.locator('#crmArea').isVisible()));
-  check('Landing sem erros de JavaScript', anonymous.errors.length === 0, anonymous.errors.join(' | '));
-  await anonymous.context.close();
-
   await browser.close();
 }
 
