@@ -131,6 +131,7 @@ const {
   MAX_INLINE_BYTES,
   MAX_REQUEST_BYTES,
   MAX_SUBMIT_RESPONSE_BYTES,
+  MAX_PROBE_RESPONSE_BYTES,
   MAX_SSE_BYTES,
   AUTH_TIMEOUT_MS,
   PROBE_TIMEOUT_MS,
@@ -143,6 +144,7 @@ check('O handler é registrado uma única vez via Deno.serve', served.length ===
 check('As constantes de segurança estão exportadas', MAX_INLINE_BYTES === 6 * 1024 * 1024 && MAX_SSE_BYTES === 2 * 1024 * 1024);
 check('O limite do corpo da requisição é 16 KB', MAX_REQUEST_BYTES === 16 * 1024);
 check('O limite da resposta de submit é 64 KB', MAX_SUBMIT_RESPONSE_BYTES === 64 * 1024);
+check('O limite da resposta de diagnóstico é 128 KB', MAX_PROBE_RESPONSE_BYTES === 128 * 1024);
 check('Timeout de autenticação é 10s', AUTH_TIMEOUT_MS === 10000);
 check('Timeout de diagnóstico é 12s', PROBE_TIMEOUT_MS === 12000);
 check('Timeout de envio é 20s', SUBMIT_TIMEOUT_MS === 20000);
@@ -465,6 +467,26 @@ globalThis.fetch = async (input, init = {}) => {
 const probeResult = await handlerOnce(JSON.stringify({ action: 'probe' }));
 check('Diagnóstico continua respondendo sem geração', probeResult.status === 200);
 check('As duas chamadas de diagnóstico recebem AbortSignal', probeSignals.length === 2 && probeSignals.every(signal => signal instanceof AbortSignal));
+
+let probeInfoCancelled = false;
+globalThis.fetch = async (input) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  if (url === AUTH_URL) return new Response(JSON.stringify({ id: 'usuario-de-teste' }), { status: 200 });
+  if (url === 'https://huggingface.co/api/whoami-v2') return new Response('{}', { status: 200 });
+  if (url === SPACE_BASE + '/gradio_api/info') {
+    return new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new Uint8Array(MAX_PROBE_RESPONSE_BYTES + 1024));
+      },
+      cancel() { probeInfoCancelled = true; }
+    }), { status: 200 });
+  }
+  throw new Error('URL inesperada no teste de limite do probe: ' + url);
+};
+const oversizedProbe = await handlerOnce(JSON.stringify({ action: 'probe' }));
+check('Diagnóstico com resposta acima de 128 KB continua controlado', oversizedProbe.status === 200);
+check('Resposta excessiva do diagnóstico não produz endpoints', Array.isArray(oversizedProbe.data.endpoints) && oversizedProbe.data.endpoints.length === 0);
+check('Stream excessivo do diagnóstico é cancelado', probeInfoCancelled);
 globalThis.fetch = originalFetchForTimeouts;
 
 
@@ -719,6 +741,7 @@ console.log('\n--- invariantes do código ---');
 check('Não existe mais leitura sem teto (arrayBuffer)', !/\.arrayBuffer\(\)/.test(fnSrc));
 check('Autenticação tem timeout', /AbortSignal\.timeout\(AUTH_TIMEOUT_MS\)/.test(fnSrc));
 check('Diagnóstico tem timeout', (fnSrc.match(/AbortSignal\.timeout\(PROBE_TIMEOUT_MS\)/g) || []).length === 2);
+check('Diagnóstico limita a resposta do Space', /readBoundedBody\(info, MAX_PROBE_RESPONSE_BYTES\)/.test(fnSrc));
 check('Envio tem timeout', /AbortSignal\.timeout\(SUBMIT_TIMEOUT_MS\)/.test(fnSrc));
 check('O download usa redirect: "manual"', /redirect:\s*"manual"/.test(fnSrc));
 check('O download tem AbortSignal', /signal:\s*downloadController\.signal/.test(fnSrc));
