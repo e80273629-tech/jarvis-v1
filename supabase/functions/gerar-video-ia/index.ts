@@ -26,6 +26,15 @@
  * função exige usuário autenticado (verify_jwt = true em supabase/config.toml)
  * e valida o Bearer token em /auth/v1/user antes de qualquer chamada externa.
  *
+ * DOWNLOAD: o arquivo do vídeo só é baixado quando a URL é HTTPS e o host é
+ * EXATAMENTE o de `SPACE_BASE` (comparação por igualdade, nunca por sufixo).
+ * Redirecionamentos não são seguidos, endereços internos são recusados e o
+ * `HF_TOKEN` jamais acompanha uma requisição para outra origem. O corpo é lido
+ * em stream com teto de 6 MB e timeout de 30s.
+ *
+ * MEMÓRIA: o buffer SSE de `poll` também tem teto (2 MB), para que um stream
+ * anómalo não infle a função.
+
  * CRÉDITOS: esta função NÃO consome créditos de imagem. Não consulta a tabela
  * de créditos nem chama as RPCs de débito/estorno do Estúdio de Imagens.
  */
@@ -42,6 +51,9 @@ const SPACE_ID = "Lightricks/ltx-video-distilled";
 const SPACE_BASE = "https://lightricks-ltx-video-distilled.hf.space";
 const GRADIO_CALL = `${SPACE_BASE}/gradio_api/call/text_to_video`;
 const HF_WHOAMI = "https://huggingface.co/api/whoami-v2";
+
+/** Host exato aceito para download. Comparado por igualdade, nunca por sufixo. */
+const SPACE_HOST = new URL(SPACE_BASE).hostname;
 
 /**
  * Durações aprovadas. O slider do Space aceita 0.3–8.5s; oferecer "10s" na
@@ -66,12 +78,39 @@ const MAX_FRAMES = 257;
 const FRAME_STEP = 8;
 
 /** Acima deste tamanho o vídeo volta só como URL, para não inflar a resposta. */
-const MAX_INLINE_BYTES = 6 * 1024 * 1024;
+export const MAX_INLINE_BYTES = 6 * 1024 * 1024;
+
+/** Teto do buffer SSE de uma única chamada de `poll` (2 MB). */
+export const MAX_SSE_BYTES = 2 * 1024 * 1024;
 
 /** Tempo máximo segurando o SSE numa única chamada de `poll`. */
-const POLL_TIMEOUT_MS = 20000;
+export const POLL_TIMEOUT_MS = 20000;
+
+/** Tempo máximo do download do arquivo de vídeo. */
+export const DOWNLOAD_TIMEOUT_MS = 30000;
+
+/** Teto de comprimento da URL de vídeo recebida do Space. */
+const MAX_VIDEO_URL_LENGTH = 2048;
 
 const MAX_PROMPT_LENGTH = 1200;
+
+/**
+ * Hosts que nunca podem ser baixados, mesmo que a comparação de host mude no
+ * futuro: loopback, redes privadas, metadata de nuvem e nomes internos.
+ */
+const BLOCKED_HOST_PATTERNS = [
+  /^localhost$/i,
+  /^0\.0\.0\.0$/,
+  /^127\./,
+  /^10\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^\[?::1\]?$/,
+  /\.internal$/i,
+  /\.local$/i,
+  /^metadata\./i,
+];
 
 /**
  * Converte segundos em frames válidos (9..257, passo 8, como o slider exige).
@@ -121,25 +160,167 @@ function encodeBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-/** Extrai a URL do vídeo de dentro da resposta heterogênea do Gradio. */
-function extractVideoUrl(payload: unknown): string {
+/**
+ * Lê o corpo com teto de bytes, sem confiar no tamanho anunciado.
+ *
+ * Por que existe: `arrayBuffer()` materializa o arquivo inteiro na memória
+ * antes de qualquer checagem. Um arquivo inesperado derrubaria a função. Aqui
+ * o `Content-Length` é conferido primeiro (quando presente) e, mesmo sem ele,
+ * a leitura é interrompida assim que o acumulado passa do limite.
+ */
+export async function readBoundedBody(
+  response: Response,
+  maxBytes: number
+): Promise<{ bytes: Uint8Array | null; sizeBytes: number; truncated: boolean }> {
+  const declared = Number(response.headers.get("content-length") ?? "");
+
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    return { bytes: null, sizeBytes: declared, truncated: true };
+  }
+
+  if (!response.body) {
+    return { bytes: null, sizeBytes: 0, truncated: false };
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  let truncated = false;
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      total += value.byteLength;
+
+      if (total > maxBytes) {
+        truncated = true;
+        chunks.length = 0;
+        break;
+      }
+
+      chunks.push(value);
+    }
+  } finally {
+    if (truncated) {
+      try {
+        await reader.cancel();
+      } catch {
+        // cancelar um stream já encerrado não é erro relevante
+      }
+    } else {
+      try {
+        reader.releaseLock();
+      } catch {
+        // lock já liberado
+      }
+    }
+  }
+
+  if (truncated) {
+    return { bytes: null, sizeBytes: total, truncated: true };
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return { bytes, sizeBytes: total, truncated: false };
+}
+
+/**
+ * Aceita apenas HTTPS no host exato do Space.
+ *
+ * A comparação é por igualdade de `hostname`, o que já rejeita o truque
+ * `lightricks-ltx-video-distilled.hf.space.evil.com`. Credenciais embutidas,
+ * portas alternativas e hosts internos também são recusados.
+ */
+export function isSpaceUrl(candidate: unknown): boolean {
+  if (typeof candidate !== "string") return false;
+
+  const value = candidate.trim();
+
+  if (!value || value.length > MAX_VIDEO_URL_LENGTH) return false;
+
+  let parsed: URL;
+
+  try {
+    parsed = new URL(value);
+  } catch {
+    return false;
+  }
+
+  if (parsed.protocol !== "https:") return false;
+  if (parsed.username || parsed.password) return false;
+  if (parsed.port && parsed.port !== "443") return false;
+  if (parsed.hostname !== SPACE_HOST) return false;
+
+  return !BLOCKED_HOST_PATTERNS.some((pattern) => pattern.test(parsed.hostname));
+}
+
+/** Devolve a URL normalizada quando ela é do Space; string vazia caso contrário. */
+export function sanitizeVideoUrl(candidate: unknown): string {
+  if (!isSpaceUrl(candidate)) return "";
+
+  try {
+    return new URL((candidate as string).trim()).toString();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Monta a URL de arquivo do Gradio a partir do `path`.
+ *
+ * O prefixo já fixa o host; ainda assim `?`, `#`, `\` e `..` são recusados para
+ * que o caminho não consiga reescrever a URL montada.
+ */
+function spaceFilePathUrl(path: unknown): string {
+  if (typeof path !== "string") return "";
+  if (!path || /[?#\\\s]/.test(path)) return "";
+  if (path.includes("..")) return "";
+
+  return sanitizeVideoUrl(`${SPACE_BASE}/gradio_api/file=${path}`);
+}
+
+/**
+ * Extrai a URL do vídeo de dentro da resposta heterogênea do Gradio.
+ *
+ * Toda URL passa por `sanitizeVideoUrl`: uma resposta manipulada do Space não
+ * consegue apontar o download (e o `HF_TOKEN`) para outra origem.
+ */
+export function extractVideoUrl(payload: unknown): string {
   const first = Array.isArray(payload) ? payload[0] : payload;
 
-  if (typeof first === "string") return first;
+  if (typeof first === "string") return sanitizeVideoUrl(first);
 
   if (first && typeof first === "object") {
     const record = first as Record<string, unknown>;
     const video = record.video as Record<string, unknown> | undefined;
 
-    if (video && typeof video.url === "string") return video.url;
-
-    if (video && typeof video.path === "string") {
-      return `${SPACE_BASE}/gradio_api/file=${video.path}`;
+    if (video && typeof video.url === "string") {
+      const direct = sanitizeVideoUrl(video.url);
+      if (direct) return direct;
     }
 
-    if (typeof record.url === "string") return record.url;
+    if (video && typeof video.path === "string") {
+      const fromVideoPath = spaceFilePathUrl(video.path);
+      if (fromVideoPath) return fromVideoPath;
+    }
+
+    if (typeof record.url === "string") {
+      const direct = sanitizeVideoUrl(record.url);
+      if (direct) return direct;
+    }
+
     if (typeof record.path === "string") {
-      return `${SPACE_BASE}/gradio_api/file=${record.path}`;
+      return spaceFilePathUrl(record.path);
     }
   }
 
@@ -428,10 +609,14 @@ Deno.serve(async (req) => {
 
         if (reader) {
           let finished = false;
+          let received = 0;
+          let sseTruncated = false;
 
           while (!finished) {
             const { value, done } = await reader.read();
             if (done) break;
+
+            if (value) received += value.byteLength;
 
             raw += decoder.decode(value, { stream: true });
 
@@ -444,7 +629,29 @@ Deno.serve(async (req) => {
               } catch {
                 // cancelar um stream já encerrado não é erro relevante
               }
+
+              break;
             }
+
+            // Teto de memória: um stream anómalo não pode inflar a função.
+            if (received > MAX_SSE_BYTES || raw.length > MAX_SSE_BYTES) {
+              sseTruncated = true;
+
+              try {
+                await reader.cancel();
+              } catch {
+                // cancelar um stream já encerrado não é erro relevante
+              }
+
+              break;
+            }
+          }
+
+          if (sseTruncated) {
+            console.warn(
+              "Buffer SSE acima de 2 MB: leitura interrompida.",
+              received
+            );
           }
         }
       } catch (pollError) {
@@ -502,24 +709,54 @@ Deno.serve(async (req) => {
       }
 
       // Tenta embutir os bytes para evitar expiração da URL e CORS no cliente.
+      // O download só acontece no host do Space: se a URL não passar na
+      // validação, nada é baixado e o token não sai daqui.
       let video = "";
       let sizeBytes = 0;
 
-      try {
-        const fileResponse = await fetch(videoUrl, {
-          headers: { "Authorization": `Bearer ${hfToken}` },
-        });
+      if (!isSpaceUrl(videoUrl)) {
+        console.warn("URL de vídeo recusada pela validação de origem.");
+      } else {
+        const downloadController = new AbortController();
+        const downloadTimer = setTimeout(
+          () => downloadController.abort(),
+          DOWNLOAD_TIMEOUT_MS
+        );
 
-        if (fileResponse.ok) {
-          const bytes = new Uint8Array(await fileResponse.arrayBuffer());
-          sizeBytes = bytes.byteLength;
+        try {
+          const fileResponse = await fetch(videoUrl, {
+            headers: { "Authorization": `Bearer ${hfToken}` },
+            // 3xx nunca é seguido: um redirecionamento sairia do domínio.
+            redirect: "manual",
+            signal: downloadController.signal,
+          });
 
-          if (sizeBytes > 0 && sizeBytes <= MAX_INLINE_BYTES) {
-            video = `data:video/mp4;base64,${encodeBase64(bytes)}`;
+          if (fileResponse.ok && fileResponse.status < 300) {
+            const read = await readBoundedBody(fileResponse, MAX_INLINE_BYTES);
+            sizeBytes = read.sizeBytes;
+
+            if (read.bytes) {
+              video = `data:video/mp4;base64,${encodeBase64(read.bytes)}`;
+            } else if (read.truncated) {
+              console.warn(
+                "Vídeo acima de 6 MB: devolvido apenas como URL.",
+                read.sizeBytes
+              );
+            }
           }
+        } catch (downloadError) {
+          const aborted = downloadError instanceof Error &&
+            downloadError.name === "AbortError";
+
+          console.error(
+            aborted
+              ? "Download do vídeo excedeu 30s e foi interrompido."
+              : "Falha ao baixar o vídeo:",
+            downloadError
+          );
+        } finally {
+          clearTimeout(downloadTimer);
         }
-      } catch (downloadError) {
-        console.error("Falha ao baixar o vídeo:", downloadError);
       }
 
       return respond({
