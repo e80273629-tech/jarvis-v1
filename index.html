@@ -2451,6 +2451,15 @@ function escapeHtml(value) {
   }[character]));
 }
 
+/* Usuário conectado na sessão do Supabase (usado por tarefas e CRM) */
+async function getCurrentUser() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error || !data || !data.session) return null;
+
+  return data.session.user;
+}
+
 async function loadTasks() {
   const user = await getCurrentUser();
   if (!user) return;
