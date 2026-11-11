@@ -712,8 +712,26 @@ Deno.serve(async (req) => {
             const { value, done } = await reader.read();
             if (done) break;
 
-            if (value) received += value.byteLength;
+            const chunkBytes = value?.byteLength ?? 0;
 
+            // Verifica o tamanho antes de decodificar ou anexar o chunk.
+            // Assim, um único bloco enorme não entra no buffer SSE.
+            if (chunkBytes > MAX_SSE_BYTES - received) {
+              received += chunkBytes;
+              sseTruncated = true;
+
+              try {
+                await reader.cancel();
+              } catch {
+                // cancelar um stream já encerrado não é erro relevante
+              }
+
+              break;
+            }
+
+            if (!value) continue;
+
+            received += chunkBytes;
             raw += decoder.decode(value, { stream: true });
 
             // Para de ler assim que o resultado chega.
@@ -729,8 +747,8 @@ Deno.serve(async (req) => {
               break;
             }
 
-            // Teto de memória: um stream anómalo não pode inflar a função.
-            if (received > MAX_SSE_BYTES || raw.length > MAX_SSE_BYTES) {
+            // Defesa adicional para o buffer em caracteres.
+            if (raw.length > MAX_SSE_BYTES) {
               sseTruncated = true;
 
               try {
