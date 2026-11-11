@@ -2442,53 +2442,115 @@ const artState = {
 
 /* ---------- saldo de créditos ---------- */
 
-function artSetCredits(value, source) {
-  if (typeof value === 'number' && isFinite(value)) {
-    artState.credits = value;
+/* Aceita número, string numérica, array de uma linha ou objeto
+   ({ balance } / { credits } / { get_image_credit_balance }). */
+function artCoerceCredits(raw) {
+  let value = Array.isArray(raw) ? raw[0] : raw;
+
+  if (value && typeof value === 'object') {
+    value = value.balance != null ? value.balance
+      : value.credits != null ? value.credits
+      : value.saldo != null ? value.saldo
+      : value.get_image_credit_balance != null ? value.get_image_credit_balance
+      : null;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '' && isFinite(Number(value))) {
+    value = Number(value);
+  }
+
+  return (typeof value === 'number' && isFinite(value)) ? value : null;
+}
+
+function artSetCredits(value, source, detail) {
+  const credits = artCoerceCredits(value);
+
+  if (credits !== null) {
+    artState.credits = credits;
     artState.creditsSource = source || 'generation';
     artCreditBadge.dataset.state = 'known';
-    artCreditBadge.textContent = 'Créditos: ' + value;
-    artCreditNote.textContent = artState.creditsSource === 'balance'
-      ? 'Saldo consultado agora na sua conta.'
-      : 'Saldo atualizado pela última geração.';
-    return;
+    artCreditBadge.textContent = 'Créditos: ' + credits;
+    artCreditBadge.setAttribute('title', 'Saldo de créditos de imagem da sua conta');
+    artCreditNote.textContent = artState.creditsSource === 'generation'
+      ? 'Saldo atualizado pela última geração.'
+      : 'Saldo consultado agora na sua conta.';
+    return true;
   }
 
   artState.credits = null;
   artState.creditsSource = 'unknown';
   artCreditBadge.dataset.state = 'unknown';
   artCreditBadge.textContent = 'Créditos: —';
-  artCreditNote.textContent = 'O saldo aparece após a primeira geração desta sessão.';
+  artCreditNote.textContent = detail
+    || 'Não foi possível consultar o saldo agora. Você pode gerar normalmente; o saldo aparece após a primeira geração.';
+  return false;
+}
+
+/* Segundo caminho de leitura: a própria linha em public.user_credits.
+   É somente leitura e usa a RLS que já existe — não cria policy nem RPC. */
+async function artReadCreditsFromTable(userId) {
+  if (!userId || !supabaseClient || typeof supabaseClient.from !== 'function') return null;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_credits')
+      .select('balance')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) return null;
+    return artCoerceCredits(data);
+  } catch (error) {
+    return null;
+  }
 }
 
 async function artRefreshCredits() {
-  if (!supabaseClient || typeof supabaseClient.rpc !== 'function') {
-    artSetCredits(null);
+  if (!supabaseClient) {
+    artSetCredits(null, 'unknown', 'Não foi possível conectar à sua conta agora.');
     return false;
   }
 
+  let userId = artState.userId;
+
   try {
-    const { data, error } = await supabaseClient.rpc('get_image_credit_balance');
-    if (error) throw error;
+    // 1) Sempre com a sessão autenticada do usuário.
+    if (typeof supabaseClient.auth.getSession === 'function') {
+      const { data } = await supabaseClient.auth.getSession();
+      const session = data && data.session;
 
-    let value = Array.isArray(data) ? data[0] : data;
+      if (!session) {
+        artSetCredits(null, 'unknown', 'Entre na sua conta para ver o saldo de créditos.');
+        return false;
+      }
 
-    if (value && typeof value === 'object') {
-      value = value.balance != null ? value.balance
-        : value.credits != null ? value.credits
-        : value.get_image_credit_balance != null ? value.get_image_credit_balance
-        : null;
+      if (session.user && session.user.id) {
+        userId = session.user.id;
+        artState.userId = userId;
+      }
     }
 
-    if (typeof value !== 'number' || !isFinite(value)) {
-      throw new Error('formato inesperado no saldo');
+    // 2) Caminho preferido: RPC somente leitura (quando existir no banco).
+    if (typeof supabaseClient.rpc === 'function') {
+      try {
+        const { data, error } = await supabaseClient.rpc('get_image_credit_balance');
+        if (!error) {
+          const viaRpc = artCoerceCredits(data);
+          if (viaRpc !== null) return artSetCredits(viaRpc, 'balance');
+        }
+      } catch (rpcError) {
+        // RPC ausente (PGRST202) ou sem permissão: segue para o caminho 3.
+      }
     }
 
-    artSetCredits(value, 'balance');
-    return true;
+    // 3) Reserva: leitura direta da própria linha, com a RLS existente.
+    const viaTable = await artReadCreditsFromTable(userId);
+    if (viaTable !== null) return artSetCredits(viaTable, 'balance');
+
+    artSetCredits(null, 'unknown');
+    return false;
   } catch (error) {
-    // RPC ainda não criada (PGRST202 / 404) ou sem permissão: degrada sem bloquear.
-    if (artState.credits === null) artSetCredits(null);
+    if (artState.credits === null) artSetCredits(null, 'unknown');
     return false;
   }
 }
@@ -2668,8 +2730,13 @@ async function artInvokeImage(prompt) {
     throw failure;
   }
 
-  if (typeof data.creditsRemaining === 'number') {
-    artSetCredits(data.creditsRemaining, 'generation');
+  const remaining = artCoerceCredits(data.creditsRemaining);
+
+  if (remaining !== null) {
+    artSetCredits(remaining, 'generation');
+  } else {
+    // Sem creditsRemaining no payload: reconsulta para não deixar o saldo velho.
+    artRefreshCredits();
   }
 
   return data;
