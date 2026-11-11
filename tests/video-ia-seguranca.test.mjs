@@ -807,6 +807,7 @@ check('O limite inline continua em 6 MB', /MAX_INLINE_BYTES = 6 \* 1024 \* 1024/
 check('Nenhum token do Hugging Face está hardcoded', !/hf_[A-Za-z0-9]{20,}/.test(fnSrc));
 check('A função continua sem tocar em créditos de imagem', !/consume_image_credit|refund_image_credit|user_credits/.test(fnSrc));
 check('A função continua sem Cloudflare paga', !/cloudflare\.com|CLOUDFLARE_/i.test(fnSrc));
+check('O catch geral não expõe mensagens internas ao cliente', /error: "Erro interno ao processar a solicitação\. Tente novamente\."/ .test(fnSrc) && !/error: error instanceof Error/.test(fnSrc));
 check('health continua devolvendo apenas booleano', /hasToken:\s*hfToken\.length > 0/.test(fnSrc));
 
 /* ================================================================== */
