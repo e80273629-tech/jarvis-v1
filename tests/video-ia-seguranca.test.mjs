@@ -129,6 +129,7 @@ const {
   extractVideoUrl,
   readBoundedBody,
   MAX_INLINE_BYTES,
+  MAX_REQUEST_BYTES,
   MAX_SSE_BYTES,
   DOWNLOAD_TIMEOUT_MS,
   SPACE_BASE
@@ -136,6 +137,7 @@ const {
 
 check('O handler é registrado uma única vez via Deno.serve', served.length === 1);
 check('As constantes de segurança estão exportadas', MAX_INLINE_BYTES === 6 * 1024 * 1024 && MAX_SSE_BYTES === 2 * 1024 * 1024);
+check('O limite do corpo da requisição é 16 KB', MAX_REQUEST_BYTES === 16 * 1024);
 check('O teto do SSE é 2 MB', MAX_SSE_BYTES === 2097152);
 check('O teto do download é 6 MB', MAX_INLINE_BYTES === 6291456);
 check('O timeout do download é de aproximadamente 30s', DOWNLOAD_TIMEOUT_MS >= 25000 && DOWNLOAD_TIMEOUT_MS <= 35000);
@@ -400,7 +402,7 @@ function completeEvent(payload) {
   return sseResponse([{ event: 'complete', data: JSON.stringify(payload) }]);
 }
 
-async function pollOnce() {
+async function handlerOnce(body) {
   const response = await handler(
     new Request('https://projeto-de-teste.functions.supabase.co/gerar-video-ia', {
       method: 'POST',
@@ -408,12 +410,34 @@ async function pollOnce() {
         'Authorization': 'Bearer token-de-teste-local',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ action: 'poll', eventId: 'evt-teste-0001' })
+      body
     })
   );
 
   return { status: response.status, data: await response.json() };
 }
+
+async function pollOnce() {
+  return handlerOnce(JSON.stringify({ action: 'poll', eventId: 'evt-teste-0001' }));
+}
+
+/* --- 3.0 Corpo da requisição limitado antes do JSON.parse --- */
+installFetch({
+  stream: () => completeEvent([]),
+  download: () => { throw new Error('não deveria baixar nada'); }
+});
+
+const oversizedBody = JSON.stringify({
+  action: 'health',
+  padding: 'x'.repeat(MAX_REQUEST_BYTES + 100)
+});
+const oversizedRequest = await handlerOnce(oversizedBody);
+
+check('Corpo acima de 16 KB é recusado com HTTP 413', oversizedRequest.status === 413);
+check('Corpo excessivo não chama serviços externos além da autenticação', calls.length === 1 && calls[0].url === AUTH_URL);
+
+const malformedRequest = await handlerOnce('{json-invalido');
+check('JSON malformado recebe HTTP 400, não erro interno 500', malformedRequest.status === 400);
 
 /* --- 3.1 URL maliciosa: nada é baixado, token não sai --- */
 installFetch({
