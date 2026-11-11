@@ -3878,8 +3878,21 @@ async function videoEnsureSession() {
 }
 
 async function videoInvoke(payload) {
+  // Recupera a sessão atual em cada chamada, inclusive durante o polling.
+  // Assim, o Bearer enviado à Edge Function acompanha renovações de sessão.
+  const { data: sessionData, error: sessionError } =
+    await supabaseClient.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  if (sessionError || !accessToken) {
+    throw new Error('Sua sessão expirou. Entre novamente para continuar.');
+  }
+
   const { data, error } = await supabaseClient.functions.invoke('gerar-video-ia', {
-    body: payload
+    body: payload,
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
   });
 
   if (error) {
