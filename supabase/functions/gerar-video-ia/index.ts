@@ -80,6 +80,11 @@ const FRAME_STEP = 8;
 /** Limite do JSON recebido pela função (16 KB). */
 export const MAX_REQUEST_BYTES = 16 * 1024;
 
+/** Timeouts para serviços externos que não podem prender a Edge Function. */
+export const AUTH_TIMEOUT_MS = 10000;
+export const PROBE_TIMEOUT_MS = 12000;
+export const SUBMIT_TIMEOUT_MS = 20000;
+
 /** Teto da resposta JSON recebida ao enviar um vídeo ao Space (64 KB). */
 export const MAX_SUBMIT_RESPONSE_BYTES = 64 * 1024;
 
@@ -378,12 +383,19 @@ Deno.serve(async (req) => {
       throw new Error("Configuração do Supabase incompleta.");
     }
 
-    const authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: {
-        "Authorization": authorization,
-        "apikey": publishableKey,
-      },
-    });
+    let authResponse: Response;
+    try {
+      authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: {
+          "Authorization": authorization,
+          "apikey": publishableKey,
+        },
+        signal: AbortSignal.timeout(AUTH_TIMEOUT_MS),
+      });
+    } catch (authError) {
+      console.error("Timeout ou falha ao validar sessão:", authError);
+      return respond({ error: "Não foi possível validar sua sessão agora. Tente novamente." }, 504);
+    }
 
     if (!authResponse.ok) {
       return respond({ error: "Sessão inválida. Entre novamente." }, 401);
@@ -445,6 +457,7 @@ Deno.serve(async (req) => {
       try {
         const whoami = await fetch(HF_WHOAMI, {
           headers: { "Authorization": `Bearer ${hfToken}` },
+          signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
         });
         tokenValid = whoami.ok;
       } catch (probeError) {
@@ -458,6 +471,7 @@ Deno.serve(async (req) => {
       try {
         const info = await fetch(`${SPACE_BASE}/gradio_api/info`, {
           headers: { "Authorization": `Bearer ${hfToken}` },
+          signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
         });
 
         spaceStatus = info.status;
@@ -548,14 +562,24 @@ Deno.serve(async (req) => {
         ],
       };
 
-      const submitResponse = await fetch(GRADIO_CALL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${hfToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      let submitResponse: Response;
+      try {
+        submitResponse = await fetch(GRADIO_CALL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${hfToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(SUBMIT_TIMEOUT_MS),
+        });
+      } catch (submitError) {
+        console.error("Timeout ou falha ao enviar solicitação ao Space:", submitError);
+        return respond({
+          success: false,
+          error: "O serviço de vídeo demorou para responder. Tente novamente.",
+        }, 504);
+      }
 
       const submitBody = await readBoundedBody(
         submitResponse,
