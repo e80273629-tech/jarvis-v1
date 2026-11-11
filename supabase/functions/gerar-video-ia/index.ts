@@ -888,9 +888,7 @@ Deno.serve(async (req) => {
 
     return respond({
       success: false,
-      error: error instanceof Error
-        ? error.message
-        : "Erro inesperado ao gerar vídeo.",
+      error: "Erro interno ao processar a solicitação. Tente novamente.",
     }, 500);
   }
 });
