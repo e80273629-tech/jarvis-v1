@@ -92,16 +92,20 @@ async function loadFunctionModule() {
       [fnPath, '--target', 'es2022', '--module', 'esnext', '--skipLibCheck', '--outDir', dir],
       { stdio: 'ignore' }
     );
-  } catch {
-    /* tsc reclama do global Deno e ainda assim emite o JS */
+  } catch (error) {
+    var tscError = error;
+    /* tsc pode reclamar do global Deno e ainda assim emitir o JS */
   }
 
   const emitted = join(dir, 'index.js');
 
-  if (!existsSync(emitted)) {
-    throw new Error(
-      `não foi possível carregar a Edge Function: ${nativeError ? nativeError.message : 'sem saída do tsc'}`
-    );
+   if (!existsSync(emitted)) {
+    const details = [
+      nativeError ? `import nativo: ${nativeError.message}` : null,
+      tscError ? `tsc: ${tscError.message}` : 'tsc: sem erro capturado'
+    ].filter(Boolean).join(' | ');
+
+    throw new Error(`não foi possível carregar a Edge Function (${details})`);
   }
 
   const asMjs = join(dir, 'index.mjs');
