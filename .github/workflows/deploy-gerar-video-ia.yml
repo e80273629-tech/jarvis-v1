@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: osvyra-v1-rebuild
+          fetch-depth: 0
 
       - name: Fixar e conferir o commit autorizado
         run: |
