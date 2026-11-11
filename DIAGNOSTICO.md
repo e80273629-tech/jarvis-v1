@@ -5,7 +5,7 @@ Branch analisada: `osvyra-v1-rebuild`. Nenhuma alteração de código foi feita 
 ## Arquitetura encontrada
 
 - `index.html` — aplicação PWA completa (HTML + CSS + JS inline, ~2.900 linhas). Tela única com troca de `<section class="panel">` por JavaScript.
-- `index.ts` — Edge Function `osvyra-chat` (Supabase), usada pelo chat da página.
+- `supabase/functions/osvyra-chat/index.ts` — Edge Function `osvyra-chat` (Supabase), usada pelo chat da página.
 - `sw.js` — service worker com cache `osvyra-v3-cache`.
 - `manifest.webmanifest`, `icon.svg` — instalação PWA.
 - Supabase: `createClient` no navegador com chave *publishable*; tabelas `osvyra_leads`, `osvyra_customers`, `osvyra_tasks` e função `osvyra-chat`.
