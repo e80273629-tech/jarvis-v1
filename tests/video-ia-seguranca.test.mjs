@@ -524,6 +524,28 @@ const oversizedSubmit = await handlerOnce(JSON.stringify({
 check('Resposta de submit acima de 64 KB recebe HTTP 502 controlado', oversizedSubmit.status === 502);
 check('Resposta excessiva de submit não é processada como eventId', oversizedSubmit.data.success === false);
 check('Stream excessivo do submit é cancelado', submitResponseCancelled);
+
+globalThis.fetch = async (input) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  if (url === AUTH_URL) return new Response(JSON.stringify({ id: 'usuario-de-teste' }), { status: 200 });
+  if (url === CALL_PREFIX) return new Response(JSON.stringify({ event_id: 'evt-valid-123' }), { status: 200 });
+  throw new Error('URL inesperada no teste de eventId válido: ' + url);
+};
+const validEventId = await handlerOnce(JSON.stringify({
+  action: 'submit', prompt: 'Vídeo de teste', duration: 2, format: '16:9'
+}));
+check('Submit aceita eventId válido do Space', validEventId.status === 200 && validEventId.data.eventId === 'evt-valid-123');
+
+globalThis.fetch = async (input) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  if (url === AUTH_URL) return new Response(JSON.stringify({ id: 'usuario-de-teste' }), { status: 200 });
+  if (url === CALL_PREFIX) return new Response('event_id inválido com espaços e caracteres!', { status: 200 });
+  throw new Error('URL inesperada no teste de eventId inválido: ' + url);
+};
+const invalidEventId = await handlerOnce(JSON.stringify({
+  action: 'submit', prompt: 'Vídeo de teste', duration: 2, format: '16:9'
+}));
+check('Submit recusa eventId malformado com HTTP 502', invalidEventId.status === 502 && invalidEventId.data.success === false);
 globalThis.fetch = originalFetchForSubmit;
 
 
@@ -743,6 +765,7 @@ check('Autenticação tem timeout', /AbortSignal\.timeout\(AUTH_TIMEOUT_MS\)/.te
 check('Diagnóstico tem timeout', (fnSrc.match(/AbortSignal\.timeout\(PROBE_TIMEOUT_MS\)/g) || []).length === 2);
 check('Diagnóstico limita a resposta do Space', /readBoundedBody\(info, MAX_PROBE_RESPONSE_BYTES\)/.test(fnSrc));
 check('Envio tem timeout', /AbortSignal\.timeout\(SUBMIT_TIMEOUT_MS\)/.test(fnSrc));
+check('Submit valida o formato do eventId', /!\\/\\^\\[A-Za-z0-9_\\-\\]\\{4,120\\}\\$\\/.test\(eventId\)/.test(fnSrc));
 check('O download usa redirect: "manual"', /redirect:\s*"manual"/.test(fnSrc));
 check('O download tem AbortSignal', /signal:\s*downloadController\.signal/.test(fnSrc));
 check('O download checa Content-Length', /content-length/.test(fnSrc));
