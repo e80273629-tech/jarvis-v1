@@ -141,7 +141,11 @@ function framesFor(duration: number): number {
 function parseSse(raw: string): Array<{ event: string; data: string }> {
   const events: Array<{ event: string; data: string }> = [];
 
-  for (const block of raw.split("\n\n")) {
+  // O protocolo SSE aceita LF e CRLF. Normaliza antes de separar eventos,
+  // pois "\r\n\r\n" não contém a sequência literal "\n\n".
+  const normalized = raw.replace(/\\r\\n/g, "\\n").replace(/\\r/g, "\\n");
+
+  for (const block of normalized.split("\n\n")) {
     let event = "message";
     const dataLines: string[] = [];
 
