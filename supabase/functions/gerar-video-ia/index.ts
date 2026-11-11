@@ -170,12 +170,6 @@ function encodeBase64(bytes: Uint8Array): string {
  */
 
 
-  if (truncated) {
-    return { bytes: null, sizeBytes: total, truncated: true };
-  }
-
-  const bytes = new Uint8Array(total);
-  let offset = 0;
 export async function readBoundedBody(
   response: Response,
   maxBytes: number
