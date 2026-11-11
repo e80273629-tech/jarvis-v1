@@ -130,6 +130,7 @@ const {
   readBoundedBody,
   MAX_INLINE_BYTES,
   MAX_REQUEST_BYTES,
+  MAX_SUBMIT_RESPONSE_BYTES,
   MAX_SSE_BYTES,
   DOWNLOAD_TIMEOUT_MS,
   SPACE_BASE
@@ -138,6 +139,7 @@ const {
 check('O handler é registrado uma única vez via Deno.serve', served.length === 1);
 check('As constantes de segurança estão exportadas', MAX_INLINE_BYTES === 6 * 1024 * 1024 && MAX_SSE_BYTES === 2 * 1024 * 1024);
 check('O limite do corpo da requisição é 16 KB', MAX_REQUEST_BYTES === 16 * 1024);
+check('O limite da resposta de submit é 64 KB', MAX_SUBMIT_RESPONSE_BYTES === 64 * 1024);
 check('O teto do SSE é 2 MB', MAX_SSE_BYTES === 2097152);
 check('O teto do download é 6 MB', MAX_INLINE_BYTES === 6291456);
 check('O timeout do download é de aproximadamente 30s', DOWNLOAD_TIMEOUT_MS >= 25000 && DOWNLOAD_TIMEOUT_MS <= 35000);
@@ -420,6 +422,43 @@ async function handlerOnce(body) {
 async function pollOnce() {
   return handlerOnce(JSON.stringify({ action: 'poll', eventId: 'evt-teste-0001' }));
 }
+
+/* --- 3.0b Resposta do submit limitada sem gerar vídeo real --- */
+const originalFetchForSubmit = globalThis.fetch;
+let submitResponseCancelled = false;
+globalThis.fetch = async (input) => {
+  const url = typeof input === 'string' ? input : String(input && input.url);
+  if (url === AUTH_URL) {
+    return new Response(JSON.stringify({ id: 'usuario-de-teste' }), { status: 200 });
+  }
+  if (url === CALL_PREFIX) {
+    return new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array(MAX_SUBMIT_RESPONSE_BYTES + 1024));
+        },
+        cancel() {
+          submitResponseCancelled = true;
+        }
+      }),
+      { status: 200 }
+    );
+  }
+  throw new Error('URL inesperada no teste de submit: ' + url);
+};
+
+const oversizedSubmit = await handlerOnce(JSON.stringify({
+  action: 'submit',
+  prompt: 'Vídeo de teste',
+  duration: 2,
+  format: '16:9'
+}));
+
+check('Resposta de submit acima de 64 KB recebe HTTP 502 controlado', oversizedSubmit.status === 502);
+check('Resposta excessiva de submit não é processada como eventId', oversizedSubmit.data.success === false);
+check('Stream excessivo do submit é cancelado', submitResponseCancelled);
+globalThis.fetch = originalFetchForSubmit;
+
 
 /* --- 3.0 Corpo da requisição limitado antes do JSON.parse --- */
 installFetch({
