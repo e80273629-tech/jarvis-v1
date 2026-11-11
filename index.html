@@ -1588,16 +1588,19 @@ h1, h2, h3 {
 
 <textarea id="scriptOut" placeholder="O roteiro aparecerá aqui." readonly></textarea>
 
+<button class="btn" id="sendToVideo" type="button">
+  🎬 Enviar para Vídeos com IA
+</button>
+
 <button class="btn" id="copyScript" type="button">
   📋 Copiar roteiro
 </button>
+
 <button class="btn" id="downloadScript" type="button">
   📥 Baixar roteiro
 </button>
 
 <p id="copyStatus" class="muted"></p>
-  </section>
-
  <section id="clients" class="panel">
     <div class="notice"><strong>ACESSO À OSVYRA</strong><p>Entre na sua conta para acessar seus dados comerciais na nuvem.</p></div>
     <label for="authEmail">E-mail</label><input id="authEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
@@ -2328,6 +2331,31 @@ document.getElementById('prepareVideo').addEventListener('click', () => {
     'Solicitação preparada! A integração com o serviço de geração será configurada depois. Nenhum crédito foi utilizado.';
 
   console.log('Solicitação de vídeo preparada:', videoRequest);
+});
+/* ENVIAR ROTEIRO PARA VÍDEOS COM IA */
+document.getElementById('sendToVideo').addEventListener('click', () => {
+  const script = document.getElementById('scriptOut').value.trim();
+  const prompt = document.getElementById('videoPrompt');
+  const status = document.getElementById('copyStatus');
+
+  if (!script) {
+    status.textContent = 'Gere um roteiro antes de enviar.';
+    return;
+  }
+
+  prompt.value = script;
+
+  showOsvyraScreen('video');
+
+  document.getElementById('videoGenerator').scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+
+  document.getElementById('videoStatus').textContent =
+    'Roteiro recebido! Revise a descrição e prepare a geração do vídeo. Nenhum crédito foi utilizado.';
+
+  status.textContent = 'Roteiro enviado para Vídeos com IA!';
 });
   
 /* UTILITÁRIOS */
