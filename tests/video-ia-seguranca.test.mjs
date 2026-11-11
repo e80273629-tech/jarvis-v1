@@ -671,7 +671,7 @@ check('Timeout do download não embute bytes', timedOut.data.video === '');
 /* --- 3.5d SSE encerrado sem complete: deve manter pending --- */
 installFetch({
   stream: () => new Response(
-    "event: generating\\ndata: {\\"progress\\":0.25}\\n\\n",
+    "event: generating\ndata: {\"progress\":0.25}\n\n",
     { status: 200, headers: { 'content-type': 'text/event-stream' } }
   ),
   download: () => {
