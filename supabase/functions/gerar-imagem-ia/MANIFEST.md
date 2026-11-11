@@ -11,6 +11,11 @@ Esse arquivo recebido foi copiado para `supabase/functions/gerar-imagem-ia/index
 **sem qualquer alteração de conteúdo** — não houve reformatação, reindentação,
 correção de lógica nem "melhoria" de nenhum trecho.
 
+O `.txt` recebido não foi mantido como segundo arquivo no repositório: como a cópia
+versionada é byte a byte idêntica a ele, guardar os dois criaria duplicata. A
+integridade fica garantida pelo SHA-256 abaixo, que pode ser reconferido a
+qualquer momento.
+
 | Item | Valor |
 | --- | --- |
 | Arquivo recebido | `gerar-imagem-ia.txt` (anexo da conversa) |
