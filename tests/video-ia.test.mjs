@@ -236,7 +236,7 @@ const SUPABASE_STUB = `
         functions: {
           invoke: async function (name, options) {
             const payload = (options && options.body) || {};
-            window.__OSVYRA_TEST_CALLS__.push({ name: name, payload: payload });
+            window.__OSVYRA_TEST_CALLS__.push({ name: name, payload: payload, headers: (options && options.headers) || {} });
 
             if (name !== 'gerar-video-ia') {
               return { data: { answer: 'ok' }, error: null };
@@ -320,7 +320,7 @@ try {
   throw new Error(`Playwright/Chromium é obrigatório no CI: ${error.message}`);
 }
 
-const SESSION = { user: { id: 'usuario-video', email: 'video@osvyra.app' } };
+const SESSION = { access_token: 'osvyra-test-access-token', user: { id: 'usuario-video', email: 'video@osvyra.app' } };
 const TEST_VIDEO_B64 = Buffer.from('osvyra-stub-video-bytes').toString('base64');
 const externalRequests = [];
 
@@ -507,6 +507,11 @@ if (chromium) {
   );
   check('health é chamada sem parâmetros extras', healthCall && Object.keys(healthCall.payload).length === 1);
   check('probe é chamada sem parâmetros extras', probeCall && Object.keys(probeCall.payload).length === 1);
+  check(
+    'A chamada da Edge Function inclui o Bearer da sessão Supabase',
+    healthCall?.headers?.Authorization === 'Bearer osvyra-test-access-token' &&
+      probeCall?.headers?.Authorization === 'Bearer osvyra-test-access-token'
+  );
   check(
     'Nenhum payload de verificação contém token',
     probeCalls.every(call => !JSON.stringify(call.payload).toLowerCase().includes('hf_'))
