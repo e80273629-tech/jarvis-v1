@@ -311,12 +311,13 @@ const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
 let chromium;
 try {
-  const playwright = await import('/opt/appjet/browser/node_modules/playwright/index.js');
+  const playwright = await import('playwright');
   chromium = playwright.chromium || (playwright.default && playwright.default.chromium);
 
   if (!chromium) throw new Error('export chromium não encontrado');
 } catch (error) {
-  console.log(`\nSKIP — checagens de navegador indisponíveis: ${error.message}`);
+  server.close();
+  throw new Error(`Playwright/Chromium é obrigatório no CI: ${error.message}`);
 }
 
 const SESSION = { user: { id: 'usuario-video', email: 'video@osvyra.app' } };
