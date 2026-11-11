@@ -138,6 +138,25 @@ check(
   'O progresso usa o estado real do poll, não animação falsa',
   /async function videoPollUntilDone[\s\S]{0,900}data\.status === 'complete'/.test(videoJs)
 );
+check(
+  'URL remota de vídeo é validada antes de ser usada',
+  /function videoIsTrustedUrl[\s\S]{0,500}url\.hostname === 'lightricks-ltx-video-distilled\.hf\.space'/.test(videoJs)
+);
+check(
+  'URL remota exige HTTPS e recusa credenciais embutidas',
+  /url\.protocol === 'https:'[\s\S]{0,180}!url\.username && !url\.password/.test(videoJs)
+);
+check(
+  'Vídeo grande é reproduzido diretamente sem fetch/blob integral',
+  /directUrl = result\.videoUrl[\s\S]{0,900}videoEl\.player\.src = directUrl/.test(videoJs) &&
+    !/fetch\(result\.videoUrl\)/.test(videoJs) &&
+    !/response\.blob\(\)/.test(videoJs)
+);
+check(
+  'Vídeo remoto grande não é salvo no histórico local como Blob',
+  /if \(!blob\) \{[\s\S]{0,250}return;[\s\S]{0,500}videoHistorySave/.test(videoJs)
+);
+
 
 console.log('\n--- Edge Function gerar-video-ia ---');
 
