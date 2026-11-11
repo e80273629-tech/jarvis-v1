@@ -17,3 +17,8 @@ verify_jwt = true
 # A pasta desta função entra no passo D (aguardando o código atual do painel).
 [functions.gerar-imagem-ia]
 verify_jwt = true
+
+# Geração experimental de vídeo (Hugging Face ZeroGPU / LTX-Video).
+# Exige usuário autenticado. NÃO consome créditos de imagem.
+[functions.gerar-video-ia]
+verify_jwt = true
