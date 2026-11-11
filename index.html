@@ -7,6 +7,9 @@
   <meta name="description" content="OSVYRA — inteligência artificial para criação, produtividade e gestão.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>OSVYRA — Inteligência Artificial</title>
   <style>
     :root{color-scheme:dark;--bg:#07101d;--panel:#101d30;--panel2:#14243a;--line:#263b55;--cyan:#62d9f5;--muted:#9fb2c8;--white:#f3f8ff}
@@ -1550,6 +1553,7 @@ h1, h2, h3 {
     <label for="palette">Paleta</label>
     <select id="palette"><option value="berry">Framboesa e creme</option><option value="cocoa">Cacau e dourado</option><option value="pink">Rosa delicado</option></select>
     <button class="btn" id="makeArt" type="button">Gerar arte</button><button class="btn secondary" id="downloadArt" type="button" disabled>Baixar PNG</button>
+    <button class="btn secondary" id="shareArt" type="button">📤 Compartilhar arte</button>
     <p id="artStatus" class="muted" aria-live="polite">Preencha o produto e escolha uma paleta para começar.</p>
     <canvas id="artCanvas" class="preview" width="1080" height="1350" aria-label="Prévia da arte"></canvas>
     <div class="notice">A imagem do produto é gerada por IA. Os textos da divulgação são aplicados separadamente pela OSVYRA para manter o português correto.</div>
@@ -1593,6 +1597,10 @@ h1, h2, h3 {
 
 <button class="btn" id="downloadScript" type="button">
   📥 Baixar roteiro
+</button>
+
+<button class="btn" id="shareScript" type="button">
+  📤 Compartilhar roteiro
 </button>
 
 <p id="copyStatus" class="muted"></p>
@@ -1705,6 +1713,34 @@ h1, h2, h3 {
     <p class="muted">O navegador não pode controlar livremente outros aplicativos. Acesso ao celular exigirá ferramentas Android específicas, permissões explícitas e testes.</p>
     <div class="notice">Nesta versão, o módulo serve como painel de planejamento. Não lê mensagens, não toca em outros aplicativos e não envia nada.</div>
     <p class="muted">Próxima integração a avaliar: automações locais por rotinas Android, com confirmação antes de ações externas.</p>
+  </section>
+
+  <section id="share-in" class="panel hidden">
+    <h3>📥 Conteúdo compartilhado</h3>
+    <p class="muted">A OSVYRA recebeu este conteúdo de outro aplicativo do celular. Nada é salvo sem a sua confirmação.</p>
+    <p id="shareInSource" class="muted" aria-live="polite"></p>
+
+    <label for="shareInTitle">Título</label>
+    <input id="shareInTitle" type="text" placeholder="Resumo do conteúdo recebido">
+
+    <label for="shareInText">Conteúdo</label>
+    <textarea id="shareInText" placeholder="Texto compartilhado"></textarea>
+
+    <label for="shareInUrl">Link (opcional)</label>
+    <input id="shareInUrl" type="url" placeholder="https://...">
+
+    <label for="shareInSchedule">Data e horário do lembrete</label>
+    <input id="shareInSchedule" type="datetime-local">
+
+    <div class="row">
+      <button class="btn" id="shareCreateTask" type="button">🔔 Criar lembrete</button>
+      <button class="btn secondary" id="shareSaveLead" type="button">💼 Salvar oportunidade</button>
+    </div>
+
+    <button class="btn secondary" id="shareDiscard" type="button">Descartar</button>
+
+    <p id="shareInStatus" class="muted" aria-live="polite"></p>
+    <div class="notice">A OSVYRA só grava este conteúdo depois que você toca em uma das opções acima. Ele é salvo em Lembretes e tarefas ou na Central comercial, com o mesmo login e as mesmas permissões da sua conta.</div>
   </section>
 
   <section id="profile" class="panel hidden">
@@ -2089,6 +2125,51 @@ downloadArtButton.addEventListener('click', () => {
   }
 });
 
+/* Compartilhar a arte com outros aplicativos (Web Share API, sem custo) */
+document.getElementById('shareArt').addEventListener('click', async () => {
+  if (!artReady) {
+    artStatus.textContent = 'Gere a arte antes de compartilhar.';
+    return;
+  }
+
+  if (!navigator.share) {
+    artStatus.textContent = 'Este navegador não oferece compartilhamento. Use "Baixar PNG" e envie manualmente.';
+    return;
+  }
+
+  try {
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(item => (item ? resolve(item) : reject(new Error('PNG indisponível'))), 'image/png');
+    });
+
+    const file = new File([blob], 'osvyra-arte.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Arte OSVYRA',
+        text: 'Arte criada na OSVYRA.'
+      });
+      artStatus.textContent = 'Arte compartilhada.';
+      return;
+    }
+
+    await navigator.share({
+      title: 'Arte OSVYRA',
+      text: 'Arte criada na OSVYRA. Baixe o PNG no Estúdio de imagens.'
+    });
+    artStatus.textContent = 'Convite de compartilhamento enviado.';
+  } catch (error) {
+    if (error && error.name === 'AbortError') {
+      artStatus.textContent = 'Compartilhamento cancelado.';
+      return;
+    }
+
+    console.error('Erro ao compartilhar arte:', error);
+    artStatus.textContent = 'Não foi possível compartilhar a arte. Use "Baixar PNG".';
+  }
+});
+
 /* ESTÚDIO DE VÍDEOS */
 document.getElementById('makeScript').addEventListener('click', () => {
   const topic = document.getElementById('videoTopic').value.trim() || 'apresentação de produto';
@@ -2397,6 +2478,225 @@ document.getElementById('downloadScript').addEventListener('click', () => {
   URL.revokeObjectURL(url);
   document.getElementById('copyStatus').textContent = 'Roteiro baixado com sucesso!';
 });
+
+/* Compartilhar o roteiro com outros aplicativos (Web Share API, sem custo) */
+document.getElementById('shareScript').addEventListener('click', async () => {
+  const script = document.getElementById('scriptOut').value;
+  const status = document.getElementById('copyStatus');
+
+  if (!script.trim()) {
+    status.textContent = 'Gere um roteiro primeiro.';
+    return;
+  }
+
+  if (!navigator.share) {
+    status.textContent = 'Este navegador não oferece compartilhamento. Use "Copiar roteiro" ou "Baixar roteiro".';
+    return;
+  }
+
+  try {
+    await navigator.share({
+      title: 'Roteiro OSVYRA',
+      text: script
+    });
+    status.textContent = 'Roteiro compartilhado.';
+  } catch (error) {
+    if (error && error.name === 'AbortError') {
+      status.textContent = 'Compartilhamento cancelado.';
+      return;
+    }
+
+    console.error('Erro ao compartilhar roteiro:', error);
+    status.textContent = 'Não foi possível compartilhar. Use "Copiar roteiro".';
+  }
+});
+
+/* ===== CONTEÚDO RECEBIDO DO CELULAR (Web Share Target) =====
+   O Android entrega o conteúdo pela URL (?share-target=1&title=&text=&url=).
+   Nada é gravado sem confirmação: a tela #share-in mostra o conteúdo e o
+   usuário escolhe criar lembrete, salvar oportunidade ou descartar.
+   Ao confirmar, a OSVYRA reaproveita os mesmos formulários e handlers já
+   existentes (saveTask e saveLead), sem duplicar chamadas ao Supabase. */
+
+const SHARE_PARAM = 'share-target';
+
+const shareInTitle = document.getElementById('shareInTitle');
+const shareInText = document.getElementById('shareInText');
+const shareInUrl = document.getElementById('shareInUrl');
+const shareInSchedule = document.getElementById('shareInSchedule');
+const shareInSource = document.getElementById('shareInSource');
+const shareInStatus = document.getElementById('shareInStatus');
+const shareCreateTaskButton = document.getElementById('shareCreateTask');
+const shareSaveLeadButton = document.getElementById('shareSaveLead');
+const shareDiscardButton = document.getElementById('shareDiscard');
+
+function readSharedPayload(search) {
+  const params = new URLSearchParams(search || '');
+
+  if (!params.has(SHARE_PARAM)) return null;
+
+  const singleLine = value => (value || '').replace(/\s+/g, ' ').trim();
+
+  return {
+    title: singleLine(params.get('title')),
+    text: (params.get('text') || '').trim(),
+    url: singleLine(params.get('url'))
+  };
+}
+
+function sharedIsEmpty(payload) {
+  return !payload || (!payload.title && !payload.text && !payload.url);
+}
+
+function sharedMessage(payload) {
+  return [payload.title, payload.text]
+    .map(part => (part || '').trim())
+    .filter(Boolean)
+    .filter((part, index, list) => list.indexOf(part) === index)
+    .join('\n')
+    .trim();
+}
+
+function sharedFirstLine(payload) {
+  const base = payload.title || payload.text || payload.url || '';
+
+  return base.split('\n').map(part => part.trim()).filter(Boolean)[0] || '';
+}
+
+function sharedTaskTitle(payload) {
+  const line = sharedFirstLine(payload) || 'Conteúdo compartilhado';
+
+  return line.length > 80 ? line.slice(0, 77).trimEnd() + '...' : line;
+}
+
+function sharedLeadName(payload) {
+  if (payload.title) return payload.title.slice(0, 120);
+
+  if (payload.url) {
+    try {
+      return new URL(payload.url).hostname.replace(/^www\./, '').slice(0, 120);
+    } catch (error) {
+      /* link inválido: usa o texto recebido */
+    }
+  }
+
+  return sharedTaskTitle(payload).slice(0, 120);
+}
+
+function sharedOriginLabel(payload) {
+  if (payload.url) {
+    try {
+      return 'Link recebido de ' + new URL(payload.url).hostname.replace(/^www\./, '') + '.';
+    } catch (error) {
+      return 'Link recebido de outro aplicativo.';
+    }
+  }
+
+  return 'Texto recebido de outro aplicativo do celular.';
+}
+
+/* Sugestão de horário: amanhã às 09:00, sempre editável pelo usuário */
+function defaultScheduleValue() {
+  const date = new Date();
+
+  date.setDate(date.getDate() + 1);
+  date.setHours(9, 0, 0, 0);
+
+  const pad = value => String(value).padStart(2, '0');
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function clearSharedParams() {
+  const url = new URL(window.location.href);
+
+  if (!url.search) return;
+
+  url.search = '';
+  history.replaceState({ osvyraScreen: currentOsvyraScreen }, '', url.pathname + url.hash);
+}
+
+function applySharedPayload(payload) {
+  shareInTitle.value = sharedTaskTitle(payload);
+  shareInText.value = sharedMessage(payload);
+  shareInUrl.value = payload.url || '';
+
+  if (!shareInSchedule.value) {
+    shareInSchedule.value = defaultScheduleValue();
+  }
+
+  shareInSource.textContent = sharedOriginLabel(payload);
+  shareInStatus.textContent = sharedIsEmpty(payload)
+    ? 'Nada foi recebido. Compartilhe um texto ou link pelo Android.'
+    : '';
+
+  navigate('share-in', { remember: false });
+}
+
+/* Criar lembrete: preenche o formulário existente e aciona o mesmo handler,
+   mantendo validação, login e políticas RLS já testados. */
+shareCreateTaskButton.addEventListener('click', () => {
+  const title = shareInTitle.value.trim();
+
+  if (!title) {
+    shareInStatus.textContent = 'Informe um título para o lembrete.';
+    return;
+  }
+
+  if (!shareInSchedule.value) {
+    shareInStatus.textContent = 'Informe a data e o horário do lembrete.';
+    return;
+  }
+
+  document.getElementById('taskTitle').value = title;
+  document.getElementById('taskDescription').value = [shareInText.value.trim(), shareInUrl.value.trim()]
+    .filter(Boolean)
+    .join('\n\n');
+  document.getElementById('taskSchedule').value = shareInSchedule.value;
+
+  document.getElementById('saveTask').click();
+
+  clearSharedParams();
+  navigate('projects');
+});
+
+/* Salvar oportunidade: reaproveita o formulário da Central comercial.
+   O status da oportunidade é mantido como está, para o usuário decidir. */
+shareSaveLeadButton.addEventListener('click', () => {
+  const name = sharedLeadName({ title: shareInTitle.value.trim(), text: shareInText.value.trim(), url: shareInUrl.value.trim() });
+
+  if (!name) {
+    shareInStatus.textContent = 'Informe o nome do negócio ou um título para a oportunidade.';
+    return;
+  }
+
+  document.getElementById('leadName').value = name;
+  document.getElementById('leadNeed').value = [shareInText.value.trim(), shareInUrl.value.trim()]
+    .filter(Boolean)
+    .join('\n\n')
+    .slice(0, 400);
+
+  document.getElementById('saveLead').click();
+
+  clearSharedParams();
+  navigate('projects');
+});
+
+shareDiscardButton.addEventListener('click', () => {
+  shareInTitle.value = '';
+  shareInText.value = '';
+  shareInUrl.value = '';
+  shareInStatus.textContent = 'Conteúdo descartado. Nada foi salvo.';
+
+  clearSharedParams();
+  navigate('home');
+});
+
+const sharedOnLoad = readSharedPayload(window.location.search);
+
+if (sharedOnLoad) {
+  applySharedPayload(sharedOnLoad);
+}
 
 /* PREPARAÇÃO DE VÍDEO IA */
 document.getElementById('prepareVideo').addEventListener('click', () => {
