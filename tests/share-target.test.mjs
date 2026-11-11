@@ -280,13 +280,13 @@ if (chromium) {
     return route.abort();
   });
 
-  async function openPage(query, label) {
+  async function openPage(query, label, session = SESSION) {
     const page = await context.newPage();
     const errors = watchErrors(page, label);
 
     await page.addInitScript(value => {
       window.__OSVYRA_TEST_SESSION__ = value;
-    }, SESSION);
+    }, session);
 
     await page.goto(`${baseUrl}/index.html${query ? `?${query}` : ''}`, { waitUntil: 'load' });
 
@@ -386,6 +386,34 @@ if (chromium) {
     check('Descartar limpa os parâmetros da URL',
       (await page.evaluate(() => location.search)) === '');
     check('Sem erros de JavaScript ao descartar', errors.length === 0, errors.join(' | '));
+
+    await page.close();
+  }
+
+  /* Visitante sem login compartilha: confirmação sem a landing por cima */
+  {
+    const { page, errors } = await openPage(SHARED_QUERY, 'share-sem-login', null);
+
+    await page.waitForFunction(() =>
+      document.getElementById('shareInStatus').textContent.includes('Entre na sua conta'));
+
+    check('Visitante vê a confirmação sem a landing por cima',
+      await page.locator('#publicLanding').isHidden());
+    check('Visitante vê o conteúdo compartilhado', await page.locator('#share-in').isVisible());
+    check('Visitante é orientado a entrar na conta',
+      (await page.locator('#shareInStatus').textContent()).includes('Entre na sua conta'));
+
+    await page.locator('#shareCreateTask').click();
+    await page.waitForFunction(() => !document.getElementById('projects').classList.contains('hidden'));
+
+    const calls = await page.evaluate(() => window.__OSVYRA_TEST_CALLS__);
+    const writes = calls.filter(call => ['insert', 'update', 'upsert', 'delete'].includes(call.op));
+
+    check('Sem login, criar lembrete não grava nada', writes.length === 0,
+      writes.map(call => `${call.table}.${call.op}`).join(', '));
+    check('Sem login, a confirmação leva ao acesso da conta',
+      await page.locator('#authEmail').isVisible());
+    check('Sem erros de JavaScript no fluxo de visitante', errors.length === 0, errors.join(' | '));
 
     await page.close();
   }

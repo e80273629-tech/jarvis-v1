@@ -3276,7 +3276,21 @@ async function updateAuthUI() {
 
   const session = data.session;
 const publicLanding = document.getElementById('publicLanding');
-publicLanding.classList.toggle('hidden', !!session || loginPanelRequested);
+
+// Compartilhamento pendente tem prioridade sobre a landing: o conteúdo
+// recebido precisa ser confirmado sem outra tela por cima.
+const shareScreen = document.getElementById('share-in');
+const sharePending = !!shareScreen && !shareScreen.classList.contains('hidden');
+
+publicLanding.classList.toggle('hidden', !!session || loginPanelRequested || sharePending);
+
+if (sharePending && !session) {
+  const shareStatus = document.getElementById('shareInStatus');
+
+  if (shareStatus) {
+    shareStatus.textContent = 'Entre na sua conta para salvar este conteúdo em Lembretes e tarefas ou na Central comercial.';
+  }
+}
   signUpButton.classList.toggle('hidden', !!session);
   signInButton.classList.toggle('hidden', !!session);
   signOutButton.classList.toggle('hidden', !session);
