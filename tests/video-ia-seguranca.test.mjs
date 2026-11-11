@@ -713,6 +713,36 @@ check(
 );
 check('SSE truncado não dispara download', downloadCalls.length === 0);
 
+/* --- 3.6b Um único chunk SSE acima do teto --- */
+let singleChunkPulled = 0;
+let singleChunkCancelled = false;
+installFetch({
+  stream: () => new Response(
+    new ReadableStream({
+      start(controller) {
+        singleChunkPulled += 1;
+        controller.enqueue(new Uint8Array(MAX_SSE_BYTES + 1024).fill(0x20));
+      },
+      cancel() {
+        singleChunkCancelled = true;
+      }
+    }),
+    { status: 200, headers: { 'content-type': 'text/event-stream' } }
+  ),
+  download: () => {
+    throw new Error('chunk excessivo não pode disparar download');
+  }
+});
+
+const singleChunkOverflow = await pollOnce();
+check('Um único chunk SSE acima de 2 MB é interrompido', singleChunkCancelled === true);
+check('O chunk excessivo é lido apenas uma vez', singleChunkPulled === 1);
+check(
+  'Chunk SSE único excessivo devolve pending',
+  singleChunkOverflow.data.success === true && singleChunkOverflow.data.status === 'pending'
+);
+check('Chunk SSE único excessivo não dispara download', downloadCalls.length === 0);
+
 /* --- 3.7 Caminho feliz continua funcionando --- */
 const videoBytes = new TextEncoder().encode('osvyra-video-stub-bytes');
 
