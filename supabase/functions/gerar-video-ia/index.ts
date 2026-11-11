@@ -168,6 +168,14 @@ function encodeBase64(bytes: Uint8Array): string {
  * o `Content-Length` é conferido primeiro (quando presente) e, mesmo sem ele,
  * a leitura é interrompida assim que o acumulado passa do limite.
  */
+
+
+  if (truncated) {
+    return { bytes: null, sizeBytes: total, truncated: true };
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
 export async function readBoundedBody(
   response: Response,
   maxBytes: number
@@ -175,6 +183,11 @@ export async function readBoundedBody(
   const declared = Number(response.headers.get("content-length") ?? "");
 
   if (Number.isFinite(declared) && declared > maxBytes) {
+    try {
+      await response.body?.cancel();
+    } catch {
+      // Corpo já encerrado.
+    }
     return { bytes: null, sizeBytes: declared, truncated: true };
   }
 
@@ -193,14 +206,14 @@ export async function readBoundedBody(
       if (done) break;
       if (!value) continue;
 
-      total += value.byteLength;
-
-      if (total > maxBytes) {
+      if (value.byteLength > maxBytes - total) {
+        total += value.byteLength;
         truncated = true;
         chunks.length = 0;
         break;
       }
 
+      total += value.byteLength;
       chunks.push(value);
     }
   } finally {
@@ -208,14 +221,14 @@ export async function readBoundedBody(
       try {
         await reader.cancel();
       } catch {
-        // cancelar um stream já encerrado não é erro relevante
+        // Stream já encerrado.
       }
-    } else {
-      try {
-        reader.releaseLock();
-      } catch {
-        // lock já liberado
-      }
+    }
+
+    try {
+      reader.releaseLock();
+    } catch {
+      // Lock já liberado.
     }
   }
 
