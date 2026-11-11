@@ -1321,6 +1321,36 @@ h1, h2, h3 {
     <span>INTELIGÊNCIA ARTIFICIAL</span>
   </div>
 
+  <button class="menu-item" data-screen="home">
+    🏠 Início
+  </button>
+
+  <button class="menu-item" data-screen="video-ai">
+    🎬 Vídeos com IA
+  </button>
+
+  <button class="menu-item" data-screen="art">
+    🎨 Imagens com IA
+  </button>
+
+  <button class="menu-item" data-screen="video">
+    📝 Roteiro inteligente
+  </button>
+
+  <button class="menu-item" data-screen="projects">
+    📁 Organização de projetos
+  </button>
+
+  <button class="menu-item" data-screen="osvyra-chat">
+    ✦ Assistente OSVYRA
+  </button>
+
+  <button class="menu-item" data-screen="phone">
+    📱 Automação Android
+  </button>
+
+  <div class="menu-divider"></div>
+
   <button class="menu-item" data-screen="profile">
     👤 Meu perfil
   </button>
@@ -1413,7 +1443,7 @@ h1, h2, h3 {
   </div>
 </section>
 
-  <section class="panel" id="osvyra-chat">
+  <section class="panel hidden" id="osvyra-chat">
   <h3>OSVYRA · Central de inteligência</h3>
   <p class="muted">Converse com sua assistente e organize suas ideias.</p>
 
@@ -1477,7 +1507,7 @@ h1, h2, h3 {
       </div>
     </button>
 
-    <button class="tool-card" data-target="clients" type="button">
+    <button class="tool-card" data-target="projects" type="button">
       <img
         src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900"
         alt="Demonstração de organização de projetos"
@@ -1526,8 +1556,8 @@ h1, h2, h3 {
   </section>
 
   <section id="video" class="panel hidden">
-    <h3>Estúdio de vídeos</h3>
-    <p class="muted">Organizador inicial de roteiro. A geração e renderização de vídeos ainda não estão conectadas.</p>
+    <h3>📝 Roteiro inteligente</h3>
+    <p class="muted">Monte a estrutura do roteiro, revise as cenas e envie o texto para a ferramenta Vídeos com IA.</p>
 <label for="videoStyle">Modelo de roteiro</label>
 <select id="videoStyle">
   <option value="propaganda">Propaganda</option>
@@ -1545,41 +1575,6 @@ h1, h2, h3 {
 <textarea id="videoDetails" rows="3" placeholder="Ex.: cafeteira de 600 ml, filtro removível, jarra de vidro e sistema corta-pingos."></textarea>
 
 <button class="btn" id="makeScript" type="button">Montar estrutura de roteiro</button>
-<div id="videoGenerator" class="video-generator">
-  <h3>🎬 Gerador de vídeos com IA</h3>
-
-  <p class="muted">
-    Prepare sua cena para geração de vídeo com inteligência artificial.
-  </p>
-
-  <label for="videoPrompt">Descreva o vídeo que deseja criar</label>
-  <textarea
-    id="videoPrompt"
-    rows="4"
-    placeholder="Ex.: Uma cafeteria moderna apresentando uma xícara de café fumegante..."
-  ></textarea>
-
-  <label for="videoDuration">Duração desejada</label>
-  <select id="videoDuration">
-    <option value="5">5 segundos</option>
-    <option value="10">10 segundos</option>
-  </select>
-
-  <label for="videoFormat">Formato do vídeo</label>
-  <select id="videoFormat">
-    <option value="9:16">Vertical — 9:16</option>
-    <option value="16:9">Horizontal — 16:9</option>
-    <option value="1:1">Quadrado — 1:1</option>
-  </select>
-
-  <button class="btn" id="prepareVideo" type="button">
-    Preparar geração de vídeo
-  </button>
-
-  <p id="videoStatus" class="muted">
-    A geração real será conectada após escolhermos um serviço gratuito.
-  </p>
-</div>
 
 <div style="margin-top: 10px; padding: 10px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #bfc5d2;">
   <strong>ⓘ Aviso importante</strong><br>
@@ -1604,6 +1599,52 @@ h1, h2, h3 {
 </section>
 
 <section id="video-ai" class="panel hidden">
+    <h3>🎬 Vídeos com IA</h3>
+    <p class="muted">Descreva a cena, escolha duração e formato e prepare a geração do vídeo com inteligência artificial.</p>
+
+    <div id="videoGenerator" class="video-generator">
+      <h3>🎬 Gerador de vídeos com IA</h3>
+
+      <p class="muted">
+        Prepare sua cena para geração de vídeo com inteligência artificial.
+      </p>
+
+      <label for="videoPrompt">Descreva o vídeo que deseja criar</label>
+      <textarea
+        id="videoPrompt"
+        rows="4"
+        placeholder="Ex.: Uma cafeteria moderna apresentando uma xícara de café fumegante..."
+      ></textarea>
+
+      <label for="videoDuration">Duração desejada</label>
+      <select id="videoDuration">
+        <option value="5">5 segundos</option>
+        <option value="10">10 segundos</option>
+      </select>
+
+      <label for="videoFormat">Formato do vídeo</label>
+      <select id="videoFormat">
+        <option value="9:16">Vertical — 9:16</option>
+        <option value="16:9">Horizontal — 16:9</option>
+        <option value="1:1">Quadrado — 1:1</option>
+      </select>
+
+      <button class="btn" id="prepareVideo" type="button">
+        Preparar geração de vídeo
+      </button>
+
+      <p id="videoStatus" class="muted">
+        A geração real será conectada após escolhermos um serviço gratuito.
+      </p>
+    </div>
+
+    <button class="btn secondary" id="goToScript" type="button">📝 Abrir Roteiro inteligente</button>
+  </section>
+
+  <section id="projects" class="panel hidden">
+    <h3>📁 Organização de projetos</h3>
+    <p class="muted">Seus projetos, oportunidades, clientes e lembretes ficam organizados e associados à sua conta.</p>
+
     <div class="notice"><strong>ACESSO À OSVYRA</strong><p>Entre na sua conta para acessar seus dados comerciais na nuvem.</p></div>
     <label for="authEmail">E-mail</label><input id="authEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
     <label for="authPassword">Senha</label><input id="authPassword" type="password" placeholder="Sua senha" autocomplete="current-password">
