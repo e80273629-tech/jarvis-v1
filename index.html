@@ -1749,46 +1749,49 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* NAVEGAÇÃO */
 const panels = [...document.querySelectorAll('.panel')];
-
-
-document.querySelectorAll('.tile, .tool-card').forEach(button => {
-  button.addEventListener('click', () => {
-    const targetId = button.dataset.target;
-    const target = document.getElementById(targetId);
-
-    if (!target) {
-      console.warn('Ferramenta não encontrada:', targetId);
-      return;
-    }
-
-    if (targetId !== currentOsvyraScreen) {
-      osvyraScreenHistory.push(currentOsvyraScreen);
-    }
-
-    showOsvyraScreen(targetId);
-  });
-});
-
-/* ESTÚDIO DE IMAGENS */
-
-/* NAVEGAÇÃO DO MENU LATERAL */
 const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
-const menuItems = document.querySelectorAll('.menu-item');
+const menuItems = [...document.querySelectorAll('.menu-item')];
 const homeScreen = document.getElementById('moduleGrid');
 const backButton = document.getElementById('backButton');
 
+const OSVYRA_SCREENS = ['home', ...panels.map(panel => panel.id)];
 let currentOsvyraScreen = 'home';
 let osvyraScreenHistory = [];
 
-function showOsvyraScreen(screen) {
-  const target = screen === 'home'
-    ? homeScreen
-    : document.getElementById(screen);
+function screenElement(screen) {
+  return screen === 'home' ? homeScreen : document.getElementById(screen);
+}
+
+function screenFromHash() {
+  const raw = (window.location.hash || '').replace(/^#/, '');
+  return OSVYRA_SCREENS.includes(raw) ? raw : null;
+}
+
+function closeSideMenu() {
+  sideMenu.classList.remove('open');
+  menuToggle.setAttribute('aria-expanded', 'false');
+}
+
+function updateBackButton() {
+  backButton.classList.toggle(
+    'hidden',
+    currentOsvyraScreen === 'home' || osvyraScreenHistory.length === 0
+  );
+}
+
+function updateActiveMenu(screen) {
+  menuItems.forEach(item => {
+    item.classList.toggle('active', item.dataset.screen === screen);
+  });
+}
+
+function showOsvyraScreen(screen, { syncHash = 'push' } = {}) {
+  const target = screenElement(screen);
 
   if (!target) {
     console.warn('Tela não encontrada:', screen);
-    return;
+    return false;
   }
 
   panels.forEach(panel => panel.classList.add('hidden'));
@@ -1797,20 +1800,64 @@ function showOsvyraScreen(screen) {
 
   currentOsvyraScreen = screen;
 
-  menuItems.forEach(item => {
-    item.classList.toggle(
-      'active',
-      item.dataset.screen === screen
-    );
-  });
+  if (syncHash !== 'none') {
+    const method = syncHash === 'replace' ? 'replaceState' : 'pushState';
+    const hash = '#' + screen;
 
-  backButton.classList.toggle(
-  'hidden',
-  screen === 'home' || osvyraScreenHistory.length === 0
-);
+    if (window.location.hash !== hash) {
+      history[method]({ osvyraScreen: screen }, '', hash);
+    }
+  }
 
+  updateActiveMenu(screen);
+  updateBackButton();
+  closeSideMenu();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  return true;
 }
+
+function navigate(screen, { remember = true, syncHash = 'push' } = {}) {
+  if (!screenElement(screen)) {
+    console.warn('Tela não encontrada:', screen);
+    return false;
+  }
+
+  if (screen === currentOsvyraScreen) {
+    closeSideMenu();
+    return true;
+  }
+
+  if (remember) {
+    osvyraScreenHistory.push(currentOsvyraScreen);
+  }
+
+  return showOsvyraScreen(screen, { syncHash });
+}
+
+function goBack() {
+  if (osvyraScreenHistory.length === 0) {
+    showOsvyraScreen('home', { syncHash: 'replace' });
+    return;
+  }
+
+  const previousScreen = osvyraScreenHistory.pop();
+  showOsvyraScreen(previousScreen, { syncHash: 'replace' });
+}
+
+/* Um único ponto de clique para cards e menu: evita handlers duplicados */
+document.addEventListener('click', event => {
+  const trigger = event.target.closest('[data-target], [data-screen]');
+
+  if (!trigger) return;
+
+  const screen = trigger.dataset.target || trigger.dataset.screen;
+
+  if (!screen) return;
+
+  event.preventDefault();
+  navigate(screen);
+});
 
 menuToggle.addEventListener('click', () => {
   sideMenu.classList.toggle('open');
@@ -1821,26 +1868,26 @@ menuToggle.addEventListener('click', () => {
   );
 });
 
-menuItems.forEach(item => {
-  item.addEventListener('click', () => {
-    const screen = item.dataset.screen;
+backButton.addEventListener('click', goBack);
 
-    if (screen !== currentOsvyraScreen) {
-      osvyraScreenHistory.push(currentOsvyraScreen);
-      showOsvyraScreen(screen);
-    }
+/* Botão voltar do celular/navegador acompanha as telas da OSVYRA */
+window.addEventListener('popstate', () => {
+  const screen = screenFromHash() || 'home';
 
-    sideMenu.classList.remove('open');
-    menuToggle.setAttribute('aria-expanded', 'false');
-  });
+  if (screen === currentOsvyraScreen) return;
+
+  const previous = osvyraScreenHistory[osvyraScreenHistory.length - 1];
+
+  if (previous === screen) {
+    osvyraScreenHistory.pop();
+  } else {
+    osvyraScreenHistory.push(currentOsvyraScreen);
+  }
+
+  showOsvyraScreen(screen, { syncHash: 'none' });
 });
 
-backButton.addEventListener('click', () => {
-  if (osvyraScreenHistory.length === 0) return;
-
-  const previousScreen = osvyraScreenHistory.pop();
-  showOsvyraScreen(previousScreen);
-});
+/* ESTÚDIO DE IMAGENS */
 
 const canvas = document.getElementById('artCanvas');
 const ctx = canvas.getContext('2d');
@@ -2378,7 +2425,6 @@ document.getElementById('prepareVideo').addEventListener('click', () => {
 /* ENVIAR ROTEIRO PARA VÍDEOS COM IA */
 document.getElementById('sendToVideo').addEventListener('click', () => {
   const script = document.getElementById('scriptOut').value.trim();
-  const prompt = document.getElementById('videoPrompt');
   const status = document.getElementById('copyStatus');
 
   if (!script) {
@@ -2386,19 +2432,16 @@ document.getElementById('sendToVideo').addEventListener('click', () => {
     return;
   }
 
-  prompt.value = script;
-
-  showOsvyraScreen('video');
-
-  document.getElementById('videoGenerator').scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-  });
-
+  document.getElementById('videoPrompt').value = script;
   document.getElementById('videoStatus').textContent =
     'Roteiro recebido! Revise a descrição e prepare a geração do vídeo. Nenhum crédito foi utilizado.';
 
   status.textContent = 'Roteiro enviado para Vídeos com IA!';
+  navigate('video-ai');
+});
+
+document.getElementById('goToScript').addEventListener('click', () => {
+  navigate('video');
 });
   
 /* UTILITÁRIOS */
@@ -2777,14 +2820,23 @@ const signUpButton = document.getElementById('signUp');
 const signInButton = document.getElementById('signIn');
 const signOutButton = document.getElementById('signOut');
 let loginPanelRequested = false;
+
 function showLandingLogin() {
   loginPanelRequested = true;
 
   document.getElementById('publicLanding').classList.add('hidden');
-  document.getElementById('clients').classList.remove('hidden');
-  document.getElementById('moduleGrid').classList.add('hidden');
+  navigate('projects', { remember: false });
+}
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function resetToLanding() {
+  osvyraScreenHistory = [];
+  currentOsvyraScreen = 'home';
+  panels.forEach(panel => panel.classList.add('hidden'));
+  homeScreen.classList.add('hidden');
+  document.getElementById('publicLanding').classList.remove('hidden');
+  updateActiveMenu('');
+  updateBackButton();
+  closeSideMenu();
 }
 
 [
@@ -2812,17 +2864,22 @@ publicLanding.classList.toggle('hidden', !!session || loginPanelRequested);
   authPassword.classList.toggle('hidden', !!session);
 
   document.getElementById('crmArea').classList.toggle('hidden', !session);
-  document.getElementById('clients').classList.toggle('hidden', !!session || !loginPanelRequested);
 
   // MENU: somente para usuários conectados
   document.getElementById('sideMenu').classList.toggle('hidden', !session);
   document.getElementById('menuToggle').classList.toggle('hidden', !session);
 
   // Página inicial: aparece após o login
-document.getElementById('moduleGrid').classList.toggle('hidden', !session);
+  homeScreen.classList.toggle('hidden', !session || currentOsvyraScreen !== 'home');
 
-// Chat: abre somente quando o usuário escolher conversar
-document.getElementById('osvyra-chat').classList.add('hidden');
+  // Perfil: mostra o e-mail da conta conectada
+  const profileEmail = document.getElementById('profileEmail');
+
+  if (profileEmail) {
+    profileEmail.textContent = session
+      ? session.user.email
+      : 'Você ainda não entrou.';
+  }
 
   // Fecha o menu ao sair da conta
   if (!session) {
@@ -2848,6 +2905,8 @@ document.getElementById('osvyra-chat').classList.add('hidden');
     document.getElementById('leadCount').textContent = '0';
     document.getElementById('customerCount').textContent = '0';
   }
+
+  return !!session;
 }
 
 signUpButton.addEventListener('click', async () => {
@@ -2879,6 +2938,7 @@ signInButton.addEventListener('click', async () => {
     return;
   }
   await updateAuthUI();
+  navigate('home', { remember: false, syncHash: 'replace' });
 });
 
 signOutButton.addEventListener('click', async () => {
@@ -2891,11 +2951,19 @@ signOutButton.addEventListener('click', async () => {
 
   loginPanelRequested = false;
   await updateAuthUI();
+  resetToLanding();
 });
 
 /* INICIALIZAÇÃO */
 window.addEventListener('load', async () => {
-  await updateAuthUI();
+  const hasSession = await updateAuthUI();
+
+  if (hasSession) {
+    const initialScreen = screenFromHash();
+
+    showOsvyraScreen(initialScreen || 'home', { syncHash: 'none' });
+  }
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(error => console.warn('Service worker:', error));
   }
