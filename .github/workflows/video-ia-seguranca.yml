@@ -1,0 +1,31 @@
+name: Teste de segurança do vídeo IA
+
+on:
+  push:
+    branches:
+      - osvyra-v1-rebuild
+    paths:
+      - 'tests/video-ia-seguranca.test.mjs'
+      - 'supabase/functions/gerar-video-ia/index.ts'
+      - '.github/workflows/video-ia-seguranca.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  teste-seguranca:
+    name: Regressão de segurança (sem gerar vídeos)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Baixar o código da branch
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Executar teste isolado
+        run: node --experimental-strip-types tests/video-ia-seguranca.test.mjs
