@@ -491,6 +491,35 @@ body {
   -webkit-backdrop-filter: blur(18px);
   border-radius: 20px;
 }
+/* OSVYRA - ACABAMENTO DOS PAINÉIS */
+.panel {
+  position: relative;
+  padding: 28px;
+  overflow: hidden;
+  border-color: rgba(99, 190, 255, .25);
+  box-shadow:
+    0 15px 45px rgba(0, 0, 0, .25),
+    0 0 25px rgba(55, 145, 255, .06),
+    inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+
+.panel h3 {
+  color: #e5f8ff;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.panel .muted {
+  color: #aebfdd;
+  line-height: 1.7;
+}
+
+.panel input,
+.panel select,
+.panel textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
 .tool-card, .tile {
   transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
@@ -502,23 +531,6 @@ body {
   box-shadow: 0 12px 35px rgba(0, 170, 255, .13);
 }
 
-button, .btn {
-  transition: .2s ease;
-}
-
-button:hover, .btn:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 0 22px rgba(99, 231, 255, .18);
-}
-
-h1, h2, h3 {
-  letter-spacing: .02em;
-}
-
-::selection {
-  background: rgba(99, 231, 255, .35);
-  color: white;
-}
  /* OSVYRA — FUNDO LIMPO */
 body {
   background:
@@ -1220,7 +1232,24 @@ body {
     width: 100%;
   }
 }
+/* OSVYRA - EFEITOS GERAIS */
+button, .btn {
+  transition: .2s ease;
+}
 
+button:hover, .btn:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 22px rgba(99, 231, 255, .18);
+}
+
+h1, h2, h3 {
+  letter-spacing: .02em;
+}
+
+::selection {
+  background: rgba(99, 231, 255, .35);
+  color: white;
+}
   </style>
 </head>
 <body>
