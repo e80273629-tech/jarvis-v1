@@ -243,13 +243,18 @@ check(
 console.log('\n--- ALTO-2: readBoundedBody ---');
 
 function streamOf(chunks, tracker) {
+  let index = 0;
+
   return new ReadableStream({
-    start(controller) {
-      for (const chunk of chunks) {
-        if (tracker) tracker.pulled += chunk.byteLength;
-        controller.enqueue(chunk);
+    pull(controller) {
+      if (index >= chunks.length) {
+        controller.close();
+        return;
       }
-      controller.close();
+
+      const chunk = chunks[index++];
+      if (tracker) tracker.pulled += chunk.byteLength;
+      controller.enqueue(chunk);
     },
     cancel() {
       if (tracker) tracker.cancelled = true;
