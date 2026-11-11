@@ -2460,12 +2460,49 @@ async function getCurrentUser() {
   return data.session.user;
 }
 
+/* Diagnóstico de erros do Supabase: mostra código e mensagem reais, sem esconder a causa */
+function describeSupabaseError(error) {
+  if (!error) return "erro desconhecido";
+  return [error.message, error.code ? `código ${error.code}` : "", error.details || ""]
+    .filter(Boolean)
+    .join(" — ");
+}
+
+const TASKS_POLICY_HINT = "Se a mensagem indicar \"permission denied\" (código 42501), aplique o arquivo supabase/osvyra_tasks_rls.sql no SQL Editor do Supabase: ele mantém o RLS ativo e cria as políticas de SELECT, INSERT e UPDATE por usuário.";
+
+function reportTaskError(action, error) {
+  const message = document.getElementById("taskMessage");
+  message.textContent = `Erro ao ${action}: ${describeSupabaseError(error)}. ${TASKS_POLICY_HINT}`;
+  console.error(`OSVYRA: erro ao ${action} na tabela osvyra_tasks`, {
+    code: error && error.code,
+    message: error && error.message,
+    details: error && error.details,
+    hint: error && error.hint
+  });
+}
+
+/* Converte o valor de <input type="datetime-local"> em Date sem lançar RangeError */
+function parseScheduleValue(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatSchedule(value) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "Sem horário";
+  return date.toLocaleString("pt-BR");
+}
+
+let currentTasks = [];
+
 async function loadTasks() {
   const user = await getCurrentUser();
   if (!user) return;
 
   const list = document.getElementById("tasksList");
   const message = document.getElementById("taskMessage");
+  message.textContent = "Carregando lembretes...";
 
   const { data, error } = await supabaseClient
     .from("osvyra_tasks")
@@ -2474,41 +2511,96 @@ async function loadTasks() {
     .order("scheduled_at", { ascending: true });
 
   if (error) {
-    message.textContent = "Erro ao carregar lembretes.";
+    currentTasks = [];
+    list.textContent = "";
+    reportTaskError("carregar lembretes", error);
     return;
   }
 
-  if (!data || data.length === 0) {
-    list.textContent = "Nenhum lembrete cadastrado.";
+  currentTasks = Array.isArray(data) ? data : [];
+
+  if (currentTasks.length === 0) {
+    message.textContent = "Nenhum lembrete cadastrado.";
+    list.textContent = "";
     return;
   }
 
-  list.innerHTML = data.map(task => `
-    <div class="card">
+  message.textContent = "";
+  list.innerHTML = currentTasks.map(task => `
+    <div class="card" data-task-id="${escapeHtml(task.id || "")}">
       <strong>${escapeHtml(task.title || "")}</strong>
       <p>${escapeHtml(task.description || "")}</p>
-      <small>Status: ${escapeHtml(task.status || "")}</small>
-      <p>${task.scheduled_at ? new Date(task.scheduled_at).toLocaleString("pt-BR") : "Sem horário"}</p>
+      <small>Status: ${task.status === "done" ? "Concluída" : "Pendente"}</small>
+      <p>${escapeHtml(formatSchedule(task.scheduled_at))}</p>
+      ${task.status === "done" ? "" : `<button class="btn secondary" type="button" data-complete-task="${escapeHtml(task.id || "")}">Concluir</button>`}
     </div>
   `).join("");
 }
-document.getElementById("saveTask").addEventListener("click", async () => {
-  const user = await getCurrentUser();
 
-  const title = document.getElementById("taskTitle").value.trim();
-  const description = document.getElementById("taskDescription").value.trim();
-  const schedule = document.getElementById("taskSchedule").value;
+/* UPDATE: conclui o lembrete confirmando que a linha foi realmente alterada */
+document.getElementById("tasksList").addEventListener("click", async event => {
+  const button = event.target.closest("[data-complete-task]");
+  if (!button) return;
+
   const message = document.getElementById("taskMessage");
+  const user = await getCurrentUser();
 
   if (!user) {
     message.textContent = "Faça login primeiro.";
     return;
   }
 
-  if (!title || !schedule) {
-    message.textContent = "Preencha o título e a data.";
+  const taskId = button.getAttribute("data-complete-task");
+  const { data, error } = await supabaseClient
+    .from("osvyra_tasks")
+    .update({ status: "done" })
+    .eq("id", taskId)
+    .eq("user_id", user.id)
+    .select("id");
+
+  if (error) {
+    reportTaskError("concluir lembrete", error);
     return;
   }
+
+  if (!data || data.length === 0) {
+    message.textContent = "Nenhum lembrete foi atualizado. Verifique a política de UPDATE da tabela osvyra_tasks.";
+    return;
+  }
+
+  await loadTasks();
+  message.textContent = "Lembrete concluído.";
+});
+document.getElementById("saveTask").addEventListener("click", async () => {
+  const message = document.getElementById("taskMessage");
+  const user = await getCurrentUser();
+
+  const title = document.getElementById("taskTitle").value.trim();
+  const description = document.getElementById("taskDescription").value.trim();
+  const scheduleValue = document.getElementById("taskSchedule").value;
+
+  if (!user) {
+    message.textContent = "Faça login primeiro.";
+    return;
+  }
+
+  if (!title) {
+    message.textContent = "Informe o título do lembrete.";
+    return;
+  }
+
+  if (!scheduleValue) {
+    message.textContent = "Informe a data e o horário do lembrete.";
+    return;
+  }
+
+  const scheduledDate = parseScheduleValue(scheduleValue);
+  if (!scheduledDate) {
+    message.textContent = "Data ou horário inválido. Selecione novamente no campo de data e horário.";
+    return;
+  }
+
+  message.textContent = "Salvando lembrete...";
 
   const { error } = await supabaseClient
     .from("osvyra_tasks")
@@ -2516,22 +2608,21 @@ document.getElementById("saveTask").addEventListener("click", async () => {
       user_id: user.id,
       title: title,
       description: description,
-      scheduled_at: new Date(schedule).toISOString(),
+      scheduled_at: scheduledDate.toISOString(),
       status: "pending"
     });
 
   if (error) {
-    message.textContent = "Erro ao salvar lembrete.";
-    console.error(error);
+    reportTaskError("salvar lembrete", error);
     return;
   }
 
-  message.textContent = "Lembrete salvo com sucesso!";
   document.getElementById("taskTitle").value = "";
   document.getElementById("taskDescription").value = "";
   document.getElementById("taskSchedule").value = "";
 
   await loadTasks();
+  message.textContent = "Lembrete salvo com sucesso!";
 });
   
 const validStatuses = ['Para analisar', 'Contato autorizado', 'Mensagem enviada manualmente', 'Não interessado'];
