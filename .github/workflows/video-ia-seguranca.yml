@@ -6,6 +6,8 @@ on:
       - osvyra-v1-rebuild
     paths:
       - 'tests/video-ia-seguranca.test.mjs'
+      - 'tests/video-ia.test.mjs'
+      - 'index.html'
       - 'supabase/functions/gerar-video-ia/index.ts'
       - '.github/workflows/video-ia-seguranca.yml'
   workflow_dispatch:
@@ -27,5 +29,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Executar teste isolado
+      - name: Executar regressão de segurança do backend
         run: node --experimental-strip-types tests/video-ia-seguranca.test.mjs
+
+      - name: Executar regressão da interface de vídeo
+        run: node tests/video-ia.test.mjs
