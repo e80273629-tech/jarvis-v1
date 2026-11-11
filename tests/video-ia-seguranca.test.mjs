@@ -743,6 +743,24 @@ check(
 );
 check('Chunk SSE único excessivo não dispara download', downloadCalls.length === 0);
 
+/* --- 3.6c SSE com CRLF (formato válido do protocolo) --- */
+const crlfPayload = JSON.stringify([{ video: { url: `${SPACE_BASE}/gradio_api/file=/tmp/crlf.mp4` } }]);
+installFetch({
+  stream: () => new Response(
+    `event: complete\\r\\ndata: ${crlfPayload}\\r\\n\\r\\n`,
+    { status: 200, headers: { 'content-type': 'text/event-stream' } }
+  ),
+  download: () => ({
+    ok: true,
+    status: 200,
+    headers: new Headers({ 'content-length': '0' }),
+    body: null
+  })
+});
+const crlfComplete = await pollOnce();
+check('SSE com CRLF reconhece o evento complete', crlfComplete.data.status === 'complete');
+check('SSE com CRLF preserva a URL de vídeo', crlfComplete.data.videoUrl === `${SPACE_BASE}/gradio_api/file=/tmp/crlf.mp4`);
+
 /* --- 3.7 Caminho feliz continua funcionando --- */
 const videoBytes = new TextEncoder().encode('osvyra-video-stub-bytes');
 
