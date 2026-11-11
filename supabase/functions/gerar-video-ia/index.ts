@@ -26,8 +26,8 @@
  * função exige usuário autenticado (verify_jwt = true em supabase/config.toml)
  * e valida o Bearer token em /auth/v1/user antes de qualquer chamada externa.
  *
- * CRÉDITOS: esta função NÃO consome créditos de imagem. Não referencia
- * user_credits, consume_image_credit nem refund_image_credit.
+ * CRÉDITOS: esta função NÃO consome créditos de imagem. Não consulta a tabela
+ * de créditos nem chama as RPCs de débito/estorno do Estúdio de Imagens.
  */
 
 const corsHeaders = {
