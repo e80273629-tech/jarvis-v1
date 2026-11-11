@@ -45,3 +45,21 @@ Consequência: mesmo com login válido a home e o menu podem nunca aparecer, e o
 5. **Blindagem da autenticação**: trocar ascessos diretos a `#clients` por helpers tolerantes a nulo; `updateAuthUI()` deixa de esconder a seção de projetos (a visibilidade fica só com o roteador) e passa a preencher o e-mail do perfil.
 6. **Remover duplicações**: `#osvyra-chat` inicia oculto; binding único e delegado de `[data-target]`; remover seletor morto; eliminar a escrita dupla de status em `sendToVideo`; adicionar itens de ferramentas ao menu lateral para navegação em celular.
 7. **Teste de regressão** (`tests/navegacao.test.mjs`): valida que todo `data-target` tem seção correspondente, que não há IDs duplicados, e (com navegador) que cada card abre a tela correta, que só um painel fica visível, que o chat não aparece na home, que "Enviar para Vídeos com IA" leva ao gerador e que o botão voltar retorna à tela anterior, sem erros de console.
+
+## Causa raiz adicional encontrada pelo teste de regressão
+
+`getCurrentUser()` era chamado em **8 pontos** (carregar/salvar lembretes, carregar/salvar oportunidades, salvar/excluir clientes e contadores do CRM) e **nunca havia sido definido**. Toda chamada lançava `ReferenceError: getCurrentUser is not defined`, o que abortava `loadTasks()`, `loadLeads()` e `loadCustomers()` dentro de `updateAuthUI()` — ou seja, a tela de projetos abria sem tarefas, sem CRM e com o contador vazio. A função foi definida com `supabaseClient.auth.getSession()`, preservando a sessão e a tabela original.
+
+## Correções aplicadas (branch `osvyra-v1-rebuild`)
+
+- `#video-ai` agora é a tela **Vídeos com IA**, com o gerador (`#videoGenerator`, `#videoPrompt`, `#videoDuration`, `#videoFormat`, `#prepareVideo`, `#videoStatus`).
+- `#video` agora é a tela **Roteiro inteligente** (montagem, cópia, download e envio).
+- Nova tela **`#projects`** concentra acesso (login/cadastro), lembretes/tarefas e Central comercial (oportunidades e clientes). O card "Organização de projetos" abre essa tela.
+- Roteador único `navigate()` com histórico interno, `location.hash`, `popstate`/`hashchange` e botão "Voltar" funcional no celular.
+- `#osvyra-chat` inicia oculto; binding único e delegado de `[data-target]`/`[data-screen]`; removido o seletor morto `.tile`; `sendToVideo` com uma única mensagem de status; menu lateral ganhou atalhos para todas as ferramentas.
+- Removidas as referências a `#clients` (id inexistente) em `showLandingLogin()` e `updateAuthUI()`.
+- Supabase, autenticação, banco, CRM, tarefas, chat, perfil, configurações e estúdio de imagens preservados.
+
+## Verificação
+
+`node tests/navegacao.test.mjs` — **39/39 verificações aprovadas**, incluindo navegador em viewport de celular (390×844) com sessão Supabase simulada: cada card abre somente a sua tela, Roteiro e Vídeos com IA separados, envio de roteiro abre o gerador, voltar do navegador retorna à home e nenhum erro de JavaScript.
