@@ -1,0 +1,17 @@
+# Dependências
+node_modules/
+.pnpm-store/
+
+# Segredos e estado local do Supabase (NUNCA versionar)
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+supabase/.temp/
+supabase/.branches/
+
+# Logs e temporários
+*.log
+.DS_Store
+tmp/

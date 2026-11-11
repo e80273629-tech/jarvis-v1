@@ -1,0 +1,19 @@
+# OSVYRA — configuração mínima do Supabase CLI.
+# Este arquivo NÃO publica nada: `supabase start` e `supabase functions deploy`
+# são comandos manuais. Não existe CI/CD neste repositório.
+project_id = "osvyra"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+# As funções exigem usuário autenticado (o frontend envia o Bearer token).
+[functions.osvyra-chat]
+verify_jwt = true
+
+# A pasta desta função entra no passo D (aguardando o código atual do painel).
+[functions.gerar-imagem-ia]
+verify_jwt = true
