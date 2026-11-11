@@ -747,7 +747,7 @@ check('Chunk SSE único excessivo não dispara download', downloadCalls.length =
 const crlfPayload = JSON.stringify([{ video: { url: `${SPACE_BASE}/gradio_api/file=/tmp/crlf.mp4` } }]);
 installFetch({
   stream: () => new Response(
-    `event: complete\\r\\ndata: ${crlfPayload}\\r\\n\\r\\n`,
+    `event: complete\r\ndata: ${crlfPayload}\r\n\r\n`,
     { status: 200, headers: { 'content-type': 'text/event-stream' } }
   ),
   download: () => ({
