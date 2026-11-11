@@ -99,6 +99,11 @@ check('Histórico usa IndexedDB', /indexedDB\.open\(ART_DB_NAME/.test(freeScript
 check('Índice por usuário é criado', /createIndex\('userId'/.test(freeScript));
 check('Saldo usa a RPC get_image_credit_balance', /rpc\('get_image_credit_balance'\)/.test(freeScript));
 check('Saldo usa creditsRemaining da geração', /data\.creditsRemaining/.test(freeScript));
+check('Saldo consulta com a sessão autenticada',
+  /auth\.getSession\(\)/.test(freeScript) && /artRefreshCredits/.test(freeScript));
+check('Saldo tem reserva somente leitura em user_credits',
+  /from\('user_credits'\)/.test(freeScript) && /select\('balance'\)/.test(freeScript));
+check('Saldo normaliza número, string e objeto', /function artCoerceCredits/.test(freeScript));
 check('Nenhuma tabela inventada de créditos',
   !/osvyra_image_credits/.test(html) && !/osvyra_image_credits/.test(sql));
 
@@ -206,6 +211,10 @@ function stubSupabase(config) {
     },
     from(table) {
       log({ kind: 'from', table });
+      // Leitura de reserva do saldo: simula a própria linha em public.user_credits.
+      if (table === 'user_credits' && window.__ART_STUB__.tableBalance != null) {
+        return makeQuery({ data: { balance: window.__ART_STUB__.tableBalance }, error: null });
+      }
       return makeQuery({ data: [], error: null });
     },
     rpc(name) {
@@ -262,6 +271,7 @@ async function openStudio(config = {}) {
     credits: 8,
     balance: 9,
     balanceMode: 'ok',
+    tableBalance: null,
     generateError: null,
     image: TINY_PNG
   }, config);
@@ -498,6 +508,43 @@ try {
     await page.waitForFunction(() => /Créditos: 8/.test(
       document.getElementById('artCreditBadge').textContent || ''));
     check('Sem RPC a geração continua funcionando', (await imageCalls(page)).length === 1);
+
+    await context.close();
+  }
+
+  /* 5.7b RPC ausente, mas a leitura da própria linha em user_credits responde */
+  {
+    const { context, page } = await openStudio({ balanceMode: 'missing', tableBalance: 7 });
+    await page.click('[data-art-mode="free"]');
+    await page.waitForFunction(() => /Créditos: 7/.test(
+      document.getElementById('artCreditBadge').textContent || ''));
+
+    const badge = await page.textContent('#artCreditBadge');
+    check('Sem RPC o saldo vem da tabela user_credits', /Créditos: 7/.test(badge || ''), badge || '');
+
+    const calls = await page.evaluate(() => window.__OSVYRA_TEST_CALLS__);
+    check('A reserva lê user_credits do próprio usuário',
+      calls.some(call => call.kind === 'from' && call.table === 'user_credits'),
+      JSON.stringify(calls.filter(call => call.kind === 'from')));
+
+    check('Nota informa que o saldo foi consultado na conta',
+      /Saldo consultado agora na sua conta/.test(await page.textContent('#artCreditNote') || ''));
+
+    await context.close();
+  }
+
+  /* 5.7c creditsRemaining em texto numérico ainda atualiza o badge */
+  {
+    const { context, page } = await openStudio({ balanceMode: 'missing', credits: '6' });
+    await page.click('[data-art-mode="free"]');
+    await askAndConfirm(page, 'uma ponte de madeira sobre o rio');
+    await page.waitForFunction(() => /Créditos: 6/.test(
+      document.getElementById('artCreditBadge').textContent || ''));
+
+    const badge = await page.textContent('#artCreditBadge');
+    check('creditsRemaining em string atualiza o saldo', /Créditos: 6/.test(badge || ''), badge || '');
+    check('Nota informa saldo vindo da geração',
+      /última geração/.test(await page.textContent('#artCreditNote') || ''));
 
     await context.close();
   }
